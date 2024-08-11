@@ -1,3 +1,9 @@
+<!--
+ * @Author: LetMeFly
+ * @Date: 2024-08-11 17:24:10
+ * @LastEditors: LetMeFly
+ * @LastEditTime: 2024-08-11 18:29:11
+-->
 # Tip-Adapter: Training-free Adaption of CLIP for Few-shot Classification
 Official implementation of ['Tip-Adapter: Training-free Adaption of CLIP for Few-shot Classification'](https://arxiv.org/pdf/2207.09519.pdf).
 
@@ -11,7 +17,7 @@ The paper has been accepted by **ECCV 2022**.
 Tip-Adapter is a training-free adaption method for CLIP to conduct few-shot classification, which not only inherits the training-free advantage of zero-shot CLIP but also performs comparably to those training-required approaches. Tip-Adapter constructs the adapter via a key-value cache model from the few-shot training set, and updates the prior knowledge encoded in CLIP by feature retrieval. On top of that, the performance of Tip-Adapter can be further boosted to be state-of-the-art by fine-tuning the cache model for only 10x fewer epochs than existing approaches, which is both effective and efficient.  
 
 <div align="center">
-  <img width=900 src="cache_model.png"/>
+  <img width=900 src="https://github.com/gaopengcuhk/Tip-Adapter/blob/main/cache_model.png?raw=true"/>
 </div>
 
 ## Requirements
