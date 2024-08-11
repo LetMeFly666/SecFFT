@@ -1,3 +1,5 @@
 data
 clip/bpe_simple_vocab_16e6.txt.gz
 cache_model.png
+__pycache__/
+caches/
