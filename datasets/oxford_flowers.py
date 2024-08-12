@@ -1,3 +1,9 @@
+'''
+Author: LetMeFly
+Date: 2024-08-11 17:24:10
+LastEditors: LetMeFly
+LastEditTime: 2024-08-12 17:57:35
+'''
 import os
 import random
 from scipy.io import loadmat
@@ -21,12 +27,11 @@ class OxfordFlowers(DatasetBase):
         self.lab2cname_file = os.path.join(self.dataset_dir, 'cat_to_name.json')
         self.split_path = os.path.join(self.dataset_dir, 'split_zhou_OxfordFlowers.json')
 
-        self.template = template
-
         train, val, test = OxfordPets.read_split(self.split_path, self.image_dir)
         train = self.generate_fewshot_dataset(train, num_shots=num_shots)
         
         super().__init__(train_x=train, val=val, test=test)
+        self.template = template
     
     def read_data(self):
         tracker = defaultdict(list)

@@ -201,7 +201,7 @@ def main():
 
     # ------------------------------------------ Tip-Adapter-F ------------------------------------------
     run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F)
-           
+
 
 if __name__ == '__main__':
     main()

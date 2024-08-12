@@ -1,3 +1,9 @@
+'''
+Author: LetMeFly
+Date: 2024-08-11 17:24:10
+LastEditors: LetMeFly
+LastEditTime: 2024-08-12 17:23:51
+'''
 from .oxford_pets import OxfordPets
 from .eurosat import EuroSAT
 from .ucf101 import UCF101
@@ -8,21 +14,23 @@ from .fgvc import FGVCAircraft
 from .food101 import Food101
 from .oxford_flowers import OxfordFlowers
 from .stanford_cars import StanfordCars
+from .utils import DatasetBase
+from typing import Dict
 
 
-dataset_list = {
-                "oxford_pets": OxfordPets,
-                "eurosat": EuroSAT,
-                "ucf101": UCF101,
-                "sun397": SUN397,
-                "caltech101": Caltech101,
-                "dtd": DescribableTextures,
-                "fgvc": FGVCAircraft,
-                "food101": Food101,
-                "oxford_flowers": OxfordFlowers,
-                "stanford_cars": StanfordCars,
-                }
+dataset_list: Dict[str, DatasetBase] = {
+    "oxford_pets": OxfordPets,
+    "eurosat": EuroSAT,
+    "ucf101": UCF101,
+    "sun397": SUN397,
+    "caltech101": Caltech101,
+    "dtd": DescribableTextures,
+    "fgvc": FGVCAircraft,
+    "food101": Food101,
+    "oxford_flowers": OxfordFlowers,
+    "stanford_cars": StanfordCars,
+}
 
 
-def build_dataset(dataset, root_path, shots):
+def build_dataset(dataset, root_path, shots) -> DatasetBase:
     return dataset_list[dataset](root_path, shots)

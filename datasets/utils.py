@@ -8,8 +8,10 @@ import gdown
 import json
 import torch
 from torch.utils.data import Dataset as TorchDataset
+from torch.utils.data import DataLoader
 import torchvision.transforms as T
 from PIL import Image
+from typing import Tuple, List, Dict
 
 
 def read_json(fpath):
@@ -110,11 +112,12 @@ class DatasetBase:
     dataset_dir = '' # the directory where the dataset is stored
     domains = [] # string names of all domains
 
-    def __init__(self, train_x=None, train_u=None, val=None, test=None):
+    def __init__(self, train_x: list=None, train_u=None, val=None, test=None):
         self._train_x = train_x # labeled training data
         self._train_u = train_u # unlabeled training data (optional)
         self._val = val # validation data (optional)
         self._test = test # test data
+        self.template: List[str] = []
 
         self._num_classes = self.get_num_classes(train_x)
         self._lab2cname, self._classnames = self.get_lab2cname(train_x)
@@ -158,7 +161,7 @@ class DatasetBase:
             label_set.add(item.label)
         return max(label_set) + 1
 
-    def get_lab2cname(self, data_source):
+    def get_lab2cname(self, data_source: list) -> Tuple[Dict[str, str], List[str]]:
         """Get a label-to-classname mapping (dict).
 
         Args:
@@ -359,13 +362,13 @@ def build_data_loader(
     is_train=True,
     shuffle=False,
     dataset_wrapper=None
-):
+) -> DataLoader:
 
     if dataset_wrapper is None:
         dataset_wrapper = DatasetWrapper
 
     # Build data loader
-    data_loader = torch.utils.data.DataLoader(
+    data_loader = DataLoader(
         dataset_wrapper(data_source, input_size=input_size, transform=tfm, is_train=is_train),
         batch_size=batch_size,
         num_workers=8,
