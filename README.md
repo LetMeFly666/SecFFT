@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-08-12 19:18:30
+ * @LastEditTime: 2024-08-13 18:04:46
 -->
 # SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
 
@@ -18,7 +18,8 @@ LLM的FL安全性相关实验。
 
 CLIP-Adapter需要先跑起来[CoOp](https://github.com/KaiyangZhou/Dassl.pytorch)，
 
-<summary><details>然后就</details>
+<summary>
+<details>然后就</details>
 
 ```
 conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
@@ -339,4 +340,37 @@ Note that strict channel priority may have removed packages required for satisfi
 
 结果：先读了一下源码，明确了一下数据类型（[6f08b1..](https://github.com/LetMeFly666/SecFFT/commit/6f08b1cc63cffba4cb91aec910a0c04adf5d965d)）
 
-### Log002 - 2024.8.12_18:56-
+### Log002 - 2024.8.12_18:56-12:51
+
+加上联邦学习框架。
+
+运行结果
+
+```
+round 1's acc: 94.11
+round 2's acc: 94.92
+round 3's acc: 94.88
+round 4's acc: 95.90
+round 5's acc: 95.25
+round 6's acc: 95.45
+round 7's acc: 95.66
+round 8's acc: 95.66
+round 9's acc: 95.49
+round 10's acc: 95.25
+```
+
+融入成功：[de604d..](https://github.com/LetMeFly666/SecFFT/commit/de604d63f39300ff0131f8cf1f546a2c0c3472ce)
+
+### Log003 - 2024.8.13_17:02-2024.8.15_晚
+
+刚开完60min会，周老师准备之后2天开一次会。44GZ44Gn44G/5LyR44GK44Gv6L+R5pyACg==。
+
+把related work写完
+
+场景 - IoT，机器人 具身智能，聚焦大模型微调
+
+针对这些的攻击与防御（最新的攻击、防御:跟Fine-tuning,VLM相关的）
+
+攻击找10来篇，防御找20来篇。
+
+在overleaf里建个表，找到参考文献就引用上，例如(GlobalCome2023 引用, 简介)
