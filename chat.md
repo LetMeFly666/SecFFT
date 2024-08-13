@@ -1,96 +1,151 @@
-<!--
- * @Author: LetMeFly
- * @Date: 2024-08-11 11:38:52
- * @LastEditors: LetMeFly
- * @LastEditTime: 2024-08-12 19:12:22
--->
-我有一个数据集在`~/ltf/dataset/oxford_flowers`，如何将其链接到`~/ltf/Codes/LLM/Tip-Adapter/data/oxford_flowers`
-
-
-
-如何将一些文件作为一个新分支添加到一个已有的github仓库中
+请返回完整的main.py的代码，或者告诉我在之前的基础上，哪里需要修改。
 
 
 
 
-因为这个仓库可能很大，我有没有办法不git clone直接设置为这个仓库的一个分支g
+`cache_keys, cache_values, aggregated_adapter = federated_aggregation(client_cache_keys, client_cache_values, client_adapters)`
+这里返回的`aggregated_adapter`在后续代码中并没有被使用。
+请告诉我哪里需要修改，这次只需要返回需要修改部分的代码，
 
 
 
 
 
-
-CUDA_VISIBLE_DEVICES=0 python main.py --config configs/oxford_flowers.yaml  
-其中CUDA_VISIBLE_DEVICES是什么意思
-
-
-
-
-
-shell脚本，不断运行一个指令
-
-
-
-
-model = torch.jit.load(model_path, map_location=device if jit else "cpu").eval()
-这个torch.jit是什么意思
-
-
-
-
-
-python class中的`@property`是什么意思
-
-
-
-
-
-为什么我VsCode中`torch.utils`不能高亮显示？
-
-
-
-
-
-解释nn.Module.eval()
-
-
-
-
-
-这两段代码的效果是否相同？
+每个客户端训练好后，报错
 ```
-return model.eval()
-```
-```
-model.eval()
-return model
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 66.10. ****
+
+**** Tip-Adapter's test accuracy: 90.38. ****
+
+Train Epoch: 0 / 5
+  0%|                                                                                                                                   | 0/7 [00:00<?, ?it/s]
+ ** On entry to GEMM_EX  parameter number 12 had an illegal value
+  0%|                                                                                                                                   | 0/7 [00:02<?, ?it/s]
+Traceback (most recent call last):
+  File "main.py", line 281, in <module>
+    if __name__ == '__main__':
+  File "main.py", line 277, in main
+    # ------------------------------------------ Tip-Adapter-F ------------------------------------------
+  File "main.py", line 95, in run_tip_adapter_F
+    cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+RuntimeError: CUDA error: CUBLAS_STATUS_INVALID_VALUE when calling `cublasGemmEx( handle, opa, opb, m, n, k, &falpha, a, CUDA_R_16F, lda, b, CUDA_R_16F, ldb, &fbeta, c, CUDA_R_16F, ldc, CUDA_R_32F, CUBLAS_GEMM_DFALT_TENSOR_OP)`
 ```
 
 
 
 
 
-解释这段代码：
-
+打印信息为
 ```
-def clip_classifier(classnames, template, clip_model):
-    with torch.no_grad():
-        clip_weights = []
+Affinity shape: torch.Size([256, 102])
+Cache values shape: torch.Size([1632, 102])
+Affinity shape: torch.Size([256, 102])
+Adapter weight shape: torch.Size([102, 1024])
+Adapter weight dtype: torch.float16
+```
+报错信息为：
+```
+ ** On entry to GEMM_EX  parameter number 12 had an illegal value
+  0%|                                                                                                                                                   | 0/7 [00:02<?, ?it/s]
+Traceback (most recent call last):
+  File "main.py", line 290, in <module>
+    main()
+  File "main.py", line 286, in main
+    run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F, adapter=aggregated_adapter)
+  File "main.py", line 103, in run_tip_adapter_F
+    cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+RuntimeError: CUDA error: CUBLAS_STATUS_INVALID_VALUE when calling `cublasGemmEx( handle, opa, opb, m, n, k, &falpha, a, CUDA_R_16F, lda, b, CUDA_R_16F, ldb, &fbeta, c, CUDA_R_16F, ldc, CUDA_R_32F, CUBLAS_GEMM_DFALT_TENSOR_OP)`
+```
+函数源码为：
+```
+def run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F, adapter=None):
+    # 如果传入了 `adapter`，使用聚合后的适配器；否则创建新的适配器
+    if adapter is None:
+        adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(clip_model.dtype).cuda()
+        adapter.weight = nn.Parameter(cache_keys.t())
+    else:
+        adapter = adapter.to(clip_model.dtype).cuda()
 
-        for classname in classnames:
-            # Tokenize the prompts
-            classname = classname.replace('_', ' ')
-            texts = [t.format(classname) for t in template]
-            texts = clip.tokenize(texts).cuda()
-            # prompt ensemble for ImageNet
-            class_embeddings = clip_model.encode_text(texts)
-            class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
-            class_embedding = class_embeddings.mean(dim=0)
-            class_embedding /= class_embedding.norm()
-            clip_weights.append(class_embedding)
+    optimizer = torch.optim.AdamW(adapter.parameters(), lr=cfg['lr'], eps=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, cfg['train_epoch'] * len(train_loader_F))
 
-        clip_weights = torch.stack(clip_weights, dim=1).cuda()
-    return clip_weights
+    beta, alpha = cfg['init_beta'], cfg['init_alpha']
+    best_acc, best_epoch = 0.0, 0
+
+    for train_idx in range(cfg['train_epoch']):
+        # Train
+        adapter.train()
+        correct_samples, all_samples = 0, 0
+        loss_list = []
+        print('Train Epoch: {:} / {:}'.format(train_idx, cfg['train_epoch']))
+
+        for i, (images, target) in enumerate(tqdm(train_loader_F)):
+            images, target = images.cuda(), target.cuda()
+            with torch.no_grad():
+                image_features = clip_model.encode_image(images)
+                image_features /= image_features.norm(dim=-1, keepdim=True)
+
+            affinity = adapter(image_features)
+            print("Affinity shape:", affinity.shape)  # TODO:
+            print("Cache values shape:", cache_values.shape)  # TODO:
+            affinity = affinity.to(cache_values.dtype)  # TODO:
+            print("Affinity shape:", affinity.shape)  # TODO:
+            print("Adapter weight shape:", adapter.weight.shape)  # TODO:
+            print("Adapter weight dtype:", adapter.weight.dtype)  # TODO:
+
+
+            cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+            clip_logits = 100. * image_features @ clip_weights
+            tip_logits = clip_logits + cache_logits * alpha
+
+            loss = F.cross_entropy(tip_logits, target)
+
+            acc = cls_acc(tip_logits, target)
+            correct_samples += acc / 100 * len(tip_logits)
+            all_samples += len(tip_logits)
+            loss_list.append(loss.item())
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+
+        current_lr = scheduler.get_last_lr()[0]
+        print('LR: {:.6f}, Acc: {:.4f} ({:}/{:}), Loss: {:.4f}'.format(current_lr, correct_samples / all_samples, correct_samples, all_samples, sum(loss_list)/len(loss_list)))
+
+        # Eval
+        adapter.eval()
+
+        affinity = adapter(test_features)
+        cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+        clip_logits = 100. * test_features @ clip_weights
+        tip_logits = clip_logits + cache_logits * alpha
+        acc = cls_acc(tip_logits, test_labels)
+
+        print("**** Tip-Adapter-F's test accuracy: {:.2f}. ****\n".format(acc))
+        if acc > best_acc:
+            best_acc = acc
+            best_epoch = train_idx
+            torch.save(adapter.weight, cfg['cache_dir'] + "/best_F_" + str(cfg['shots']) + "shots.pt")
+    
+    adapter.weight = torch.load(cfg['cache_dir'] + "/best_F_" + str(cfg['shots']) + "shots.pt")
+    print(f"**** After fine-tuning, Tip-Adapter-F's best test accuracy: {best_acc:.2f}, at epoch: {best_epoch}. ****\n")
+
+    print("\n-------- Searching hyperparameters on the val set. --------")
+
+    # Search Hyperparameters
+    best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
+
+    print("\n-------- Evaluating on the test set. --------")
+   
+    affinity = adapter(test_features)
+    cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
+    
+    tip_logits = clip_logits + cache_logits * best_alpha
+    acc = cls_acc(tip_logits, test_labels)
+    print("**** Tip-Adapter-F's test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
 ```
 
 
@@ -98,7 +153,14 @@ def clip_classifier(classnames, template, clip_model):
 
 
 
-python函数返回类型为`VisionTransformer`或`ModifiedResNet`应该如何表示
+beta, alpha = cfg['init_beta'], cfg['init_alpha']
+其中beta和alpha的类型都是int，应该如何标注
+
+
+
+
+
+不能像之前那样写成一行吗
 
 
 
@@ -106,141 +168,21 @@ python函数返回类型为`VisionTransformer`或`ModifiedResNet`应该如何表
 
 
 
-静态类型检查工具（如 mypy）是什么
+解释这行代码`cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values`
 
 
 
 
 
 
-解释这行代码
-```
-cache_values = F.one_hot(torch.cat(cache_values, dim=0)).half()
-```
+`Tip-Adapter`和`Tip-Adapter-F`是什么区别
+
 
 
 
 
 
 解释这段代码
-```
-def build_cache_model(cfg, clip_model: CLIP, train_loader_cache: DataLoader) -> Tuple[torch.Tensor, torch.Tensor]:
-
-    if cfg['load_cache'] == False:    
-        cache_keys = []
-        cache_values = []
-
-        with torch.no_grad():
-            # Data augmentation for the cache model
-            for augment_idx in range(cfg['augment_epoch']):
-                train_features = []
-
-                print('Augment Epoch: {:} / {:}'.format(augment_idx, cfg['augment_epoch']))
-                for i, (images, target) in enumerate(tqdm(train_loader_cache)):
-                    images = images.cuda()
-                    image_features = clip_model.encode_image(images)
-                    train_features.append(image_features)
-                    if augment_idx == 0:
-                        target = target.cuda()
-                        cache_values.append(target)
-                cache_keys.append(torch.cat(train_features, dim=0).unsqueeze(0))
-            
-        cache_keys = torch.cat(cache_keys, dim=0).mean(dim=0)
-        cache_keys /= cache_keys.norm(dim=-1, keepdim=True)
-        cache_keys = cache_keys.permute(1, 0)
-        cache_values = F.one_hot(torch.cat(cache_values, dim=0)).half()
-
-        torch.save(cache_keys, cfg['cache_dir'] + '/keys_' + str(cfg['shots']) + "shots.pt")
-        torch.save(cache_values, cfg['cache_dir'] + '/values_' + str(cfg['shots']) + "shots.pt")
-
-    else:
-        cache_keys: torch.Tensor = torch.load(cfg['cache_dir'] + '/keys_' + str(cfg['shots']) + "shots.pt")
-        cache_values: torch.Tensor = torch.load(cfg['cache_dir'] + '/values_' + str(cfg['shots']) + "shots.pt")
-
-    return cache_keys, cache_values
-```
-
-
-
-
-
-
-将这段代码转成联邦学习的代码，聚合方式为简单的权重聚合求平均即可
-```
-def main():
-
-    # Load config file
-    args = get_arguments()
-    assert (os.path.exists(args.config))
-    
-    cfg = yaml.load(open(args.config, 'r'), Loader=yaml.Loader)
-
-    cache_dir = os.path.join('./caches', cfg['dataset'])
-    os.makedirs(cache_dir, exist_ok=True)
-    cfg['cache_dir'] = cache_dir
-
-    print("\nRunning configs.")
-    print(cfg, "\n")
-
-    # CLIP
-    clip_model, preprocess = clip.load(cfg['backbone'])
-    clip_model.eval()
-
-    # Prepare dataset
-    random.seed(1)
-    torch.manual_seed(1)
-    
-    print("Preparing dataset.")
-    dataset = build_dataset(cfg['dataset'], cfg['root_path'], cfg['shots'])
-
-    val_loader = build_data_loader(data_source=dataset.val, batch_size=64, is_train=False, tfm=preprocess, shuffle=False)
-    test_loader = build_data_loader(data_source=dataset.test, batch_size=64, is_train=False, tfm=preprocess, shuffle=False)
-
-    train_tranform = transforms.Compose([
-        transforms.RandomResizedCrop(size=224, scale=(0.5, 1), interpolation=transforms.InterpolationMode.BICUBIC),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
-    ])
-
-    train_loader_cache = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=False)
-    train_loader_F = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=True)
-
-    # Textual features
-    print("\nGetting textual features as CLIP's classifier.")
-    clip_weights = clip_classifier(dataset.classnames, dataset.template, clip_model)
-
-    # Construct the cache model by few-shot training set
-    print("\nConstructing cache model by few-shot visual features and labels.")
-    cache_keys, cache_values = build_cache_model(cfg, clip_model, train_loader_cache)
-
-    # Pre-load val features
-    print("\nLoading visual features and labels from val set.")
-    val_features, val_labels = pre_load_features(cfg, "val", clip_model, val_loader)
-
-    # Pre-load test features
-    print("\nLoading visual features and labels from test set.")
-    test_features, test_labels = pre_load_features(cfg, "test", clip_model, test_loader)
-
-    # ------------------------------------------ Tip-Adapter ------------------------------------------
-    run_tip_adapter(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights)
-
-    # ------------------------------------------ Tip-Adapter-F ------------------------------------------
-    run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F)
-           
-
-if __name__ == '__main__':
-    main()
-```
-
-
-
-
-
-
-
-现在代码是：
-
 ```
 import os
 import random
@@ -385,51 +327,13 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, t
     print("**** Tip-Adapter-F's test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
 
 
-def client_training(client_id: int, cfg: dict, clip_model: nn.Module) -> Tuple[torch.Tensor, torch.Tensor]:
-    """
-    在客户端执行的训练和缓存构建。
-    """
-    random.seed(client_id + 1)
-    torch.manual_seed(client_id + 1)
-
-    # 加载并准备数据
-    dataset = build_dataset(cfg['dataset'], cfg['root_path'], cfg['shots'])
-
-    train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(size=224, scale=(0.5, 1), interpolation=transforms.InterpolationMode.BICUBIC),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
-    ])
-
-    train_loader_cache = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_transform, is_train=True, shuffle=False)
-
-    # 构建本地缓存模型
-    cache_keys, cache_values = build_cache_model(cfg, clip_model, train_loader_cache)
-    
-    return cache_keys, cache_values
-
-
-def federated_aggregation(client_cache_keys: List[torch.Tensor], client_cache_values: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
-    """
-    聚合客户端生成的缓存。
-    """
-    # 聚合 cache_keys
-    aggregated_keys = torch.stack(client_cache_keys).mean(dim=0)
-    
-    # 聚合 cache_values
-    aggregated_values = torch.stack(client_cache_values).mean(dim=0)
-    
-    return aggregated_keys, aggregated_values
-
-
 def main():
 
     # Load config file
     args = get_arguments()
     assert (os.path.exists(args.config))
     
-    cfg: dict = yaml.load(open(args.config, 'r'), Loader=yaml.Loader)
+    cfg = yaml.load(open(args.config, 'r'), Loader=yaml.Loader)
 
     cache_dir = os.path.join('./caches', cfg['dataset'])
     os.makedirs(cache_dir, exist_ok=True)
@@ -442,26 +346,11 @@ def main():
     clip_model, preprocess = clip.load(cfg['backbone'])
     clip_model.eval()
 
-    # 每个客户端的训练
-    num_clients = cfg.get('num_clients', 5)
-    client_cache_keys = []
-    client_cache_values = []
-
-    for client_id in range(num_clients):
-        print(f"\nTraining on client {client_id + 1}/{num_clients}")
-        cache_keys, cache_values = client_training(client_id, cfg, clip_model)
-        client_cache_keys.append(cache_keys)
-        client_cache_values.append(cache_values)
-    
-     # 聚合客户端的缓存
-    print("\nAggregating client models.")
-    cache_keys, cache_values = federated_aggregation(client_cache_keys, client_cache_values)
-
     # Prepare dataset
-    random.seed(0)  # 客户端的随机种子是从1开始的
-    torch.manual_seed(0)
+    random.seed(1)
+    torch.manual_seed(1)
     
-    print("Preparing dataset. - global")
+    print("Preparing dataset.")
     dataset = build_dataset(cfg['dataset'], cfg['root_path'], cfg['shots'])
 
     val_loader = build_data_loader(data_source=dataset.val, batch_size=64, is_train=False, tfm=preprocess, shuffle=False)
@@ -474,16 +363,16 @@ def main():
         transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
     ])
 
-    # train_loader_cache = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=False)
+    train_loader_cache = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=False)
     train_loader_F = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=True)
 
     # Textual features
     print("\nGetting textual features as CLIP's classifier.")
     clip_weights = clip_classifier(dataset.classnames, dataset.template, clip_model)
 
-    # # Construct the cache model by few-shot training set
-    # print("\nConstructing cache model by few-shot visual features and labels.")
-    # cache_keys, cache_values = build_cache_model(cfg, clip_model, train_loader_cache)
+    # Construct the cache model by few-shot training set
+    print("\nConstructing cache model by few-shot visual features and labels.")
+    cache_keys, cache_values = build_cache_model(cfg, clip_model, train_loader_cache)
 
     # Pre-load val features
     print("\nLoading visual features and labels from val set.")
@@ -503,48 +392,29 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+这是融入联邦学习之前的代码，请告诉我详细的细节流程。
 
-运行结果是：
 
-```
-Training on client 1/5
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
 
-Training on client 2/5
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
 
-Training on client 3/5
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
 
-Training on client 4/5
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
 
-Training on client 5/5
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
 
-Aggregating client models.
-Preparing dataset. - global
-Reading split from data/oxford_flowers/split_zhou_OxfordFlowers.json
-Creating a 16-shot dataset
+解释“搜索超参数”
 
-Getting textual features as CLIP's classifier.
 
-Loading visual features and labels from val set.
 
-Loading visual features and labels from test set.
 
--------- Searching hyperparameters on the val set. --------
 
-**** Zero-shot CLIP's val accuracy: 66.69. ****
 
-**** Tip-Adapter's val accuracy: 84.75. ****
 
-......
-```
 
-也就是说，`client_training`似乎并没有真正的训练，似乎只是创建了一个数据集，而后面的`run_tip_adapter`和`run_tip_adapter_F`才是真正的训练
+现在请你忘掉你之前写的联邦学习的框架，从最原始的代码客观公正地开始评价，在针对大模型进行adapter的微调训练时，我是否应该让每个客户端只训练adapter的部分？
+
+
+
+
+
+
+
+好的，我决定放弃之前写的联邦学习框架的代码，从最原始的地方开始，每个客户端只针对adapter进行训练。明白了吗？如果明白了，请回复Yes, sir，等待我的进一步指令并在后续辅助我。

@@ -101,7 +101,7 @@ def pre_load_features(cfg: dict, split: str, clip_model: CLIP, loader: DataLoade
 
 def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, adapter=None):
 
-    if cfg['search_hp'] == True:
+    if cfg['search_hp'] == True:  # 这要是False那不是直接报错了
     
         beta_list = [i * (cfg['search_scale'][0] - 0.1) / cfg['search_step'][0] + 0.1 for i in range(cfg['search_step'][0])]
         alpha_list = [i * (cfg['search_scale'][1] - 0.1) / cfg['search_step'][1] + 0.1 for i in range(cfg['search_step'][1])]
