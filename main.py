@@ -13,6 +13,7 @@ from datasets import build_dataset
 from datasets.utils import build_data_loader
 import clip
 from utils import *
+from typing import List
 
 
 def get_arguments():
@@ -63,11 +64,27 @@ def run_tip_adapter(cfg, cache_keys, cache_values, val_features, val_labels, tes
     print("**** Tip-Adapter's test accuracy: {:.2f}. ****\n".format(acc))
 
 
-def run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F):
+def run_tip_adapter_F_eval_acc(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, adapter, clip_logits, best_acc=0.0) -> float:
+    print("\n-------- Searching hyperparameters on the val set. --------")
+
+    # Search Hyperparameters
+    best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
+
+    print("\n-------- Evaluating on the test set. --------")
+   
+    affinity = adapter(test_features)
+    cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
+    
+    tip_logits = clip_logits + cache_logits * best_alpha
+    acc = cls_acc(tip_logits, test_labels)
+    return max(best_acc, acc)
+
+
+def run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F, adapter_weight: torch.Tensor) -> torch.Tensor:
     
     # Enable the cached keys to be learnable
     adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(clip_model.dtype).cuda()
-    adapter.weight = nn.Parameter(cache_keys.t())
+    adapter.weight = nn.Parameter(adapter_weight)
     
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=cfg['lr'], eps=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, cfg['train_epoch'] * len(train_loader_F))
@@ -126,19 +143,24 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, t
     adapter.weight = torch.load(cfg['cache_dir'] + "/best_F_" + str(cfg['shots']) + "shots.pt")
     print(f"**** After fine-tuning, Tip-Adapter-F's best test accuracy: {best_acc:.2f}, at epoch: {best_epoch}. ****\n")
 
-    print("\n-------- Searching hyperparameters on the val set. --------")
+    best_acc = run_tip_adapter_F_eval_acc(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, adapter, clip_logits, best_acc)
+    print("**** Tip-Adapter-F's test accuracy: {:.2f}. ****\n".format(best_acc))
+    return adapter.weight
 
-    # Search Hyperparameters
-    best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
 
-    print("\n-------- Evaluating on the test set. --------")
-   
-    affinity = adapter(test_features)
-    cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
+"""
+    计算来自多个客户端的权重的平均值。
     
-    tip_logits = clip_logits + cache_logits * best_alpha
-    acc = cls_acc(tip_logits, test_labels)
-    print("**** Tip-Adapter-F's test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
+    Args:
+        client_weights (List[torch.Tensor]): 每个客户端的权重张量列表。
+    
+    Returns:
+        torch.Tensor: 聚合后的全局权重张量。
+"""
+def aggregate_weights(client_weights: List[torch.Tensor]) -> torch.Tensor:
+    # 将所有客户端的权重相加后求平均值并返回
+    summed_weights = torch.stack(client_weights).mean(dim=0)
+    return summed_weights
 
 
 def main():
@@ -178,7 +200,6 @@ def main():
     ])
 
     train_loader_cache = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=False)
-    train_loader_F = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=True)
 
     # Textual features
     print("\nGetting textual features as CLIP's classifier.")
@@ -200,7 +221,29 @@ def main():
     run_tip_adapter(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights)
 
     # ------------------------------------------ Tip-Adapter-F ------------------------------------------
-    run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F)
+    # # input('卡住')  # GPU: 1961MiB / 24268MiB
+    # run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F)
+    # # input('卡住2')  # GPU: 6233MiB / 24268MiB
+    global_weight = cache_keys.t()
+    for round in range(cfg['main_rounds']):
+        client_weights: List[torch.Tensor] = []
+        for client_id in range(cfg['num_clients']):
+            print(f'round {round + 1}/{cfg["main_rounds"]}, client {client_id + 1}/{cfg["num_clients"]}')
+            train_loader_F = build_data_loader(data_source=dataset.train_x, batch_size=256, tfm=train_tranform, is_train=True, shuffle=True)
+            this_weight = run_tip_adapter_F(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, clip_model, train_loader_F, global_weight)
+            client_weights.append(this_weight)
+        global_weight = aggregate_weights(client_weights)
+        adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(clip_model.dtype).cuda()
+        adapter.weight = nn.Parameter(global_weight)
+        clip_logits = 100. * test_features @ clip_weights
+        this_round_acc = run_tip_adapter_F_eval_acc(cfg, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, adapter, clip_logits)
+        acc_str = f'round {round + 1}\'s acc: {this_round_acc:.2f}'
+        print(acc_str)
+        if not round:
+            with open('serverACC.log', 'w', encoding='utf-8') as f:
+                pass
+        with open('serverACC.log', 'a', encoding='utf-8') as f:
+            f.write(acc_str + '\n')
 
 
 if __name__ == '__main__':

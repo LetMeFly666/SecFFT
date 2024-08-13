@@ -29,5 +29,6 @@ backbone: 'RN50'
 lr: 0.001
 augment_epoch: 10
 # train_epoch: 20
-train_epoch: 2
-num_clients: 2
+train_epoch: 2   # 每个客户端训练轮次
+num_clients: 10  # 客户端数量
+main_rounds: 10  # 训练总轮次
