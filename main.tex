@@ -2,6 +2,7 @@
 \usepackage{amsmath,amsfonts}
 %\usepackage{algorithmic}
 %\usepackage{algorithm}
+\usepackage[UTF8]{ctex}
 \usepackage{array}
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{textcomp}
@@ -158,6 +159,23 @@ The remainder of this paper is organized as follows: The related works are revie
 
 
 \section{Related work}
+
+
+% \begin{tabular}{|p{0.4\textwidth}|p{0.5\textwidth}|}
+% \hline
+% \textbf{论文的期刊名、年份、引用} & \textbf{简介} \\
+% \hline
+% 期刊名1, 2024, 引用1 & 这篇论文讨论了...... \\
+% \hline
+% 期刊名2, 2023, 引用2 & 本研究着重于...... \\
+% \hline
+% 期刊名3, 2022, 引用3 & 本文提出了...... \\
+% \hline
+% \end{tabular}
+
+
+
+
 According to the three basic tenets of information security \cite{zhou2021augmented-globecom}, in this section, we systematically review the most crucial hindrances of existing FFL solutions in UAV networks: \textit{availability}, \textit{confidentiality}, and \textit{in tegrity} problems, which we settled in following sections, respectively. 
 \subsection{FFL in heterogeneous environments (availability)}
 To accomplish learning tasks and ensure the availability of FFL in heterogeneous environments, existing solutions can adopt debiasing on the client or server side.
@@ -1092,8 +1110,25 @@ Currently, he is a Professor with the State Key Laboratory of Networking and Swi
 
 
 
-
 \vfill
+
+\newpage
+\begin{table*}[]
+    \centering
+    \renewcommand\arraystretch{1.5}
+    \begin{tabular}{|c|p{3cm}|c|p{12cm}|} \hline
+    Title & Conference & Year & Main Content \\ \hline
+   \cite{jha2023label} & neurips & 2023 &  本文提出了一种新颖的标签投毒攻击方法，称为FLIP。与传统的后门攻击不同，FLIP仅通过修改训练数据的标签即可实现对模型的控制，而无需更改图像本身。这种方法特别适用于当训练标签可能来自潜在恶意的第三方（如众包标注或知识蒸馏）的场景。本文通过实验展示了FLIP在多个数据集和模型架构上的高效性，证明了在仅污染少量标签的情况下，FLIP能够显著影响模型的预测结果。 \\ \hline
+   \cite{yang2023data} & International Conference on Machine Learning & 2023 & 本文首次研究了针对多模态模型的投毒攻击，包括视觉和语言两种模态。研究的主要问题是：（1）语言模态是否也容易受到投毒攻击？（2）哪种模态更易受攻击？本文提出了三种针对多模态模型的投毒攻击，并通过在不同数据集和模型架构上的广泛评估，表明这些攻击可以在保持模型实用性的同时实现显著的攻击效果。为缓解这些攻击，本文还提出了预训练和后训练的防御措施，并证明这些防御措施能够显著降低攻击效果，同时保持模型的效用。\\ \hline
+   \cite{dai2023chameleon} & International Conference on Machine Learning & 2023 & 这篇文章的主要贡献在于提出了Chameleon攻击方法，这是一种通过利用正常图像与被污染图像之间的关系，来增强后门在联邦学习（FL）系统中持久性的策略。通过对比学习调整图像嵌入距离，Chameleon成功延长了后门的存续时间，使其在多种数据集、后门类型和模型架构下的耐久性提高了1.2至4倍，显著优于现有方法。 \\ \hline
+   \cite{zhang2024a3fl} & neurips & 2024 & 这篇文章的主要贡献是提出了一种新的后门攻击方法A3FL，它通过对抗性自适应策略优化后门触发器，使其在联邦学习的全局训练动态中更持久、更难被检测到。与现有方法相比，A3FL显著提高了攻击的成功率和隐蔽性，并在多种防御机制下展现了出色的效果，揭示了现有防御方法的不足，强调了开发新防御策略的必要性。\\ \hline
+   \cite{xu2024shadowcast} & arxiv  & 2024 & 这篇文章主要介绍了一种针对视觉语言模型（VLMs）的隐蔽数据投毒攻击方法，称为Shadowcast。该方法通过向模型的训练数据中注入视觉上与正常图像几乎无法区分的投毒样本，从而误导模型在推理时生成错误或误导性的信息。文章探讨了两种攻击类型：标签攻击（Label Attack）和说服攻击（Persuasion Attack），前者旨在让模型错误识别图像类别，而后者通过生成具有说服力但错误的文本，改变用户对图像的认知。实验结果表明，Shadowcast攻击在多种VLM架构下都非常有效，且在不同的提示词和数据增强条件下依然保持攻击效果。\\ \hline
+   \cite{liang2024badclip} & CVPR & 2024 & 这篇文章提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，称为BadCLIP。BadCLIP通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。此外，该方法通过对抗性训练，增强了中毒样本的视觉特征，使得后门在模型经过清洁数据微调后仍能保持有效。实验结果显示，BadCLIP在多种防御机制下都表现出显著的攻击成功率，展示了其对现有防御方法的强大威胁。\\ \hline
+    \end{tabular}
+    \caption{Attack}
+    \label{tab:my_label}
+\end{table*}
+
 
 \end{document}
 
