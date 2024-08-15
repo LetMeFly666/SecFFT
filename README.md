@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-08-13 18:04:46
+ * @LastEditTime: 2024-08-16 00:32:31
 -->
 # SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
 
@@ -18,8 +18,8 @@ LLM的FL安全性相关实验。
 
 CLIP-Adapter需要先跑起来[CoOp](https://github.com/KaiyangZhou/Dassl.pytorch)，
 
-<summary>
-<details>然后就</details>
+<details>
+<summary>然后就</summary>
 
 ```
 conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
@@ -324,7 +324,7 @@ Your installed version is: 2.31
 Note that strict channel priority may have removed packages required for satisfiability.
 ```
 
-</summary>
+</details>
 
 然后准备跑`New version of CLIP-Adapter`：[Tip-Adapter: Training-free CLIP-Adapter](https://github.com/gaopengcuhk/Tip-Adapter)
 
@@ -361,7 +361,7 @@ round 10's acc: 95.25
 
 融入成功：[de604d..](https://github.com/LetMeFly666/SecFFT/commit/de604d63f39300ff0131f8cf1f546a2c0c3472ce)
 
-### Log003 - 2024.8.13_17:02-2024.8.15_晚
+### Log003 - 2024.8.13_17:02-2024.8.15_21:32
 
 刚开完60min会，周老师准备之后2天开一次会。44GZ44Gn44G/5LyR44GK44Gv6L+R5pyACg==。
 
@@ -374,3 +374,68 @@ round 10's acc: 95.25
 攻击找10来篇，防御找20来篇。
 
 在overleaf里建个表，找到参考文献就引用上，例如(GlobalCome2023 引用, 简介)
+
+最终把搜索关键词由`("federated learning" OR "distributed learning") AND "vision models" AND "fine-tuning attacks" AND (IoT OR robotics OR "embodied intelligence")`简化为了`"vision models" AND "fine-tuning attacks"`，还一共只搜索出来了5篇。
+
+<details><summary>忘记限制“视觉大模型的结果”：</summary>
+
+```bibtex
+@article{attack01,
+    title   = {Emerging Safety Attack and Defense in Federated Instruction Tuning of Large Language Models},
+    author  = {Ye, Rui and Chai, Jingyi and Liu, Xiangrui and Yang, Yaodong and Wang, Yanfeng and Chen, Siheng},
+    journal = {arXiv preprint arXiv:2406.10630},
+    year    = {2024}
+}
+
+@inproceedings{attack02,
+    title        = {Adversarial attacks and defenses in large language models: Old and new threats},
+    author       = {Schwinn, Leo and Dobre, David and G{\"u}nnemann, Stephan and Gidel, Gauthier},
+    booktitle    = {Proceedings on},
+    pages        = {103--117},
+    year         = {2023},
+    organization = {PMLR}
+}
+
+@article{attack03,
+    title   = {SoK: Reducing the Vulnerability of Fine-tuned Language Models to Membership Inference Attacks},
+    author  = {Amit, Guy and Goldsteen, Abigail and Farkash, Ariel},
+    journal = {arXiv preprint arXiv:2403.08481},
+    year    = {2024}
+}
+
+@inproceedings{attack04,
+    title        = {HackMentor: Fine-Tuning Large Language Models for Cybersecurity},
+    author       = {Zhang, Jie and Wen, Hui and Deng, Liting and Xin, Mingfeng and Li, Zhi and Li, Lun and Zhu, Hongsong and Sun, Limin},
+    booktitle    = {2023 IEEE 22nd International Conference on Trust, Security and Privacy in Computing and Communications (TrustCom)},
+    pages        = {452--461},
+    year         = {2023},
+    organization = {IEEE}
+}
+
+@article{attack05,
+    title   = {Learning to poison large language models during instruction tuning},
+    author  = {Qiang, Yao and Zhou, Xiangyu and Zade, Saleh Zare and Roshani, Mohammad Amin and Zytko, Douglas and Zhu, Dongxiao},
+    journal = {arXiv preprint arXiv:2402.13459},
+    year    = {2024}
+}
+
+@inproceedings{attack06,
+    title        = {Scaling federated learning for fine-tuning of large language models},
+    author       = {Hilmkil, Agrin and Callh, Sebastian and Barbieri, Matteo and S{\"u}tfeld, Leon Ren{\'e} and Zec, Edvin Listo and Mogren, Olof},
+    booktitle    = {International Conference on Applications of Natural Language to Information Systems},
+    pages        = {15--23},
+    year         = {2021},
+    organization = {Springer}
+}
+```
+
+</details>
+
+### Log003 - 2024.8.15_21:36-2024.8.17_23:16
+
+刚开完100min会，下次预计开会时间是周六。
+
+周老师的进度安排：今晚把攻击的综述写好。今晚一定要把这个搞定。完成后在群里发个消息，这样周老师明早八九点起床就能看我们的调研结果了。44CC44Gt44GZ44Gn44Kr44OQ44Gr5b2T5pysCg==
+
++ 攻击综述分类：时间隐蔽、空间隐蔽。
++ 防御分类：3-4类。
