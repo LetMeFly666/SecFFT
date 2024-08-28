@@ -22,7 +22,6 @@ class Worker:
         rounds,
         round_to_start_attack,
         epochs,
-        # trigger,
         attack_type="",
         attack_params={},
         batch_size=256,
@@ -68,6 +67,12 @@ class Worker:
         )
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
+
+        # TODO
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=1e-3, momentum=0.9)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=self.rounds, gamma=0.1
+        )
 
     # def label_flip(self):
     #     original_targets = np.array(self.data_set.dataset.targets)
@@ -118,11 +123,6 @@ class Worker:
     def train(self):
         target_model_params = self.get_trainable_params()
 
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=1e-3, momentum=0.9)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=self.epochs, gamma=0.1
-        )
-
         self.model.train()
         text_descriptions = [
             f"This is a photo of a {label}" for label in self.class_names
@@ -167,7 +167,6 @@ class Worker:
 
             loss_value.backward()
             self.optimizer.step()
-            self.scheduler.step()
 
             self.train_summaries.append(
                 {
@@ -181,7 +180,7 @@ class Worker:
                     "batch_size": images.size(0),
                 }
             )
-
+        self.scheduler.step()  # 是否是这个影响了准确率
         self.round += 1
 
         # compute the gradient
@@ -209,4 +208,5 @@ class Worker:
     def set_trainable_params(self, target_model_params):
         for name, param in self.model.named_parameters():
             if param.requires_grad:
-                param.data = target_model_params[name].clone().detach()
+                with torch.no_grad():
+                    param.copy_(target_model_params[name])

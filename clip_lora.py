@@ -15,6 +15,17 @@ from peft import get_peft_model
 import logging
 import pandas as pd
 import warnings
+import argparse
+
+# command line arguments
+parser = argparse.ArgumentParser(description="Run PEFT on CIFAR-100 dataset")
+parser.add_argument("-n", "--num_workers", type=int, help="Number of workers")
+parser.add_argument("-r", "--rounds", type=int, help="Number of rounds")
+parser.add_argument(
+    "-a", "--round_to_start_attack", type=int, help="Round to start attack"
+)
+parser.add_argument("-o", "--output_dir", type=str, help="Output directory")
+args = parser.parse_args()
 
 warnings.filterwarnings(
     "ignore", message=".*Torch was not compiled with flash attention.*"
@@ -30,7 +41,7 @@ torch.manual_seed(200)
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 cache_dir = os.path.expanduser("~/Desktop/clip_lora/.cache/models")
 
-output_dir = "test"
+output_dir = args.output_dir
 os.makedirs(output_dir, exist_ok=True)
 
 # load the processor
@@ -73,14 +84,16 @@ test_size = len(cifar100_test)
 test_loader = DataLoader(cifar100_test, batch_size=128, shuffle=False)
 
 # config for federated learning
-num_workers = 100
-rounds = 20
-round_to_start_attack = 5
+num_workers = args.num_workers
+rounds = args.rounds
+round_to_start_attack = args.round_to_start_attack
 local_epochs = 5
 batch_size = 64
+logger.info(
+    f"Number of workers: {num_workers}, Number of rounds: {rounds}, Round to start attack: {round_to_start_attack}"
+)
 
 attackers = [i for i in range(20)]
-
 attack_type = "backdoor"
 attack_params = {
     "trigger_position": (0, 0),
@@ -112,9 +125,7 @@ for i in range(len(cifar100_backdoor_test)):
 data_backdoor_loader = DataLoader(cifar100_backdoor_test, batch_size=128, shuffle=False)
 
 # get the models
-target_modules = (
-    []
-)  # ["k_proj", "v_proj", "q_proj", "out_proj", "fc1", "fc2", "visual_projection", "text_projection"]
+target_modules = []
 layers = [f"vision_model.encoder.layers.{i}" for i in range(12)]
 modules = [
     "self_attn.q_proj",
@@ -126,7 +137,7 @@ modules = [
 ]
 target_modules.extend([f"{layer}.{module}" for layer in layers for module in modules])
 target_modules.append("visual_projection")
-# Define the LoraConfig
+logger.info(f"Target modules: {target_modules}")
 config = LoraConfig(
     r=16,
     lora_alpha=16,
@@ -196,7 +207,6 @@ aggregator = Aggregator(
 csv_file = os.path.join(output_dir, "aggregator_summary.csv")
 aggregator_summary = []
 target_model_params = aggregator.get_trainable_params()
-
 for round in range(rounds):
     gradients = {}
     for idx, worker in enumerate(workers):
@@ -209,6 +219,7 @@ for round in range(rounds):
         flattend_gradients.append(
             torch.cat([params.flatten() for params in gradient.values()])
         )
+    logger.info(f"gradient shape: {flattend_gradients[0].shape}")
 
     gradients_tensor = torch.stack(flattend_gradients)
     # gradients_tensor = torch.stack(gradients)
@@ -288,6 +299,7 @@ for round in range(rounds):
     assert start == mean_gradients.numel(), "The number of parameters does not match"
 
     aggregator.set_trainable_params(target_model_params)
+
     normal_accuracy, normal_loss = aggregator.eval(test_loader)
     print(
         f"Round {round + 1} -Normal Accuracy: {normal_accuracy:.4f}, Loss: {normal_loss:.4f}"
