@@ -1,0 +1,15 @@
+/saved_models
+/.cache
+/.ipynb_checkpoints
+/Cerp
+/Chameleon-durable-backdoor
+/cosine_similarity_*
+/Federated-Learning-Backdoor
+/Narcissus
+20240828-114256/
+clip_lora.ipynb
+clip_lora_cosine_similarity.ipynb
+clip_lora_cosine_similarity_backdoor.ipynb
+clip_lora_cosine_similarity_backdoor_evaluate.ipynb
+test/
+/src/__pycache__
