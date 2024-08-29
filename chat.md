@@ -2,167 +2,141 @@
  * @Author: LetMeFly
  * @Date: 2024-08-18 10:06:39
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-08-29 11:09:07
+ * @LastEditTime: 2024-08-29 17:23:10
 -->
-cp命令显示拷贝进度
-
-
-
-深度学习 有哪些比较隐蔽的后门攻击？最好是联邦学习相关的。
-
-
-
-
-有没有不连续的攻击？或者说攻击者不直接向目标诱导模型梯度，而是潜在迂回地诱导模型梯度，最终到达目标地点。
-
-
-
-
-有无`迂回后门攻击（Roundabout Backdoor Attack）`相关的论文
+git push Let wb.001.lora 
+error: src refspec wb.001.lora does not match any
+error: failed to push some refs to 'github.com:LetMeFly666/SecFFT.git'
 
 
 
 
 
-详细解释`持久性后门攻击（Persistent Backdoor Attack）`
+
+
+我当前处于一个叫main的分支，我想将其作为Let的wb.001.lora分支
 
 
 
 
 
-解释文章`Beyond Traditional Threats: A Persistent Backdoor Attack on Federated Learning`的摘要：
-
-```
-Backdoors on federated learning will be diluted by subsequent benign updates. This is reflected in the significant reduction of attack success rate as iterations increase, ultimately failing. We use a new metric to quantify the degree of this weakened backdoor effect, called attack persistence. Given that research to improve this performance has not been widely noted, we propose a Full Combination Backdoor Attack (FCBA) method. It aggregates more combined trigger information for a more complete backdoor pattern in the global model. Trained backdoored global model is more resilient to benign updates, leading to a higher attack success rate on the test set. We test on three datasets and evaluate with two models across various settings. FCBA's persistence outperforms SOTA federated learning backdoor attacks. On GTSRB, post-attack 120 rounds, our attack success rate rose over 50% from baseline. The core code of our method is available at https://github.com/PhD-TaoLiu/FCBA.
-```
+如何免密登录到Windows的ssh服务器？
 
 
 
 
-解释文章`Efficient and persistent backdoor attack by boundary trigger set constructing against federated learning`
+
+有没有net restart命令？net stop后连接可能就断开了
+
+
+
+
+
+
+配置文件的最后两行是什么意思？
 
 ```
-Federated learning systems encounter various security risks, including backdoor, inference and adversarial attacks. Backdoor attacks within this context generally require careful trigger sample design involving candidate selection and automated optimization. Previous methods randomly selected trigger candidates from training dataset, disrupting sample distribution and blurring boundaries among them, which adversely affected the main task accuracy. Moreover, these methods employed non-optimized handcrafted triggers, resulting in a weakened backdoor mapping relationship and lower attack success rates. In this work, we propose a flexible backdoor attack approach, Trigger Sample Selection and Optimization (TSSO), motivated by neural network classification patterns. TSSO employs autoencoders and locality-sensitive hashing to select trigger candidates at class boundaries for precise injection. Furthermore, it iteratively refines trigger representations via the global model and historical outcomes, establishing a robust mapping relationship. TSSO is evaluated on four classical datasets with non-IID settings, outperforming state-of-the-art methods by achieving higher attack success rate in fewer rounds, prolonging the backdoor effect. In scalability tests, even with the defense deployed, TSSO achieved the attack success rate of over 80% with only 4% malicious clients (a poisoning rate of 1/640).
+Match Group administrators
+       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys
 ```
 
 
 
 
-仔细阅读这个PDF，详细介绍`Beyond Traditional Threats: A Persistent Backdoor Attack on Federated Learning`这篇文章的具体细节。
+
+为何我配置好了sshd_config，重启了sshd服务，添加了.ssh/authorized_keys，登录的时候还是需要输入密码？
+
+
+
+
+$ icacls %USERPROFILE%\.ssh /inheritance:r
+%USERPROFILE%.ssh: 系统找不到指定的文件。
+已成功处理 0 个文件; 处理 1 个文件时失败
 
 
 
 
 
 
-Windows如何开启SSH
+Get-Process -Name sshd确实发现有多个sshed进程在运行
 
 
 
 
 
-解释`Input-Aware Dynamic Backdoor Attack`
+仔细阅读PDF，解释文章`Model Poisoning Attacks to Federated Learning via Multi-Round Consistency`
 
+
+
+
+
+
+我的台式机只有一个机械硬盘，为了提升体验，我想购置一块固态硬盘，并将系统装入固态硬盘中，可行吗？
+
+
+
+
+
+
+解释这篇文章的`Figure 2: Illustration of the global-model evolution in three training rounds under existing attacks and PoisonedFL. The attack effect self-cancels in existing attacks, while PoisonedFL consistently moves the global model along the same direction.`
+
+
+
+
+
+我可以选择使用移动固态硬盘吗
+
+
+
+
+外接SSD可以直接安装Windows系统吗？这样我将这个SSD连接到另一台电脑上时，能直接通过设置BIOS而直接启动吗
+
+
+
+
+
+
+
+
+
+
+
+这样直奔目标不加掩饰会不会很容易被检测？
+
+
+
+
+
+
+解释这篇文章`Defending against Backdoor Attacks in Natural Language Generation`
 ```
-In recent years, neural backdoor attack has been considered to be a potential security threat to deep learning systems. Such systems, while achieving the state-of-the-art performance on clean data, perform abnormally on inputs with predefined triggers. Current backdoor techniques, however, rely on uniform trigger patterns, which are easily detected and mitigated by current defense methods. In this work, we propose a novel backdoor attack technique in which the triggers vary from input to input. To achieve this goal, we implement an input-aware trigger generator driven by diversity loss. A novel cross-trigger test is applied to enforce trigger nonreusablity, making backdoor verification impossible. Experiments show that our method is efficient in various attack scenarios as well as multiple datasets. We further demonstrate that our backdoor can bypass the state of the art defense methods. An analysis with a famous neural network inspector again proves the stealthiness of the proposed attack. Our code is publicly available.
+The frustratingly fragile nature of neural network models make current natural language generation (NLG) systems prone to backdoor attacks and generate malicious sequences that could be sexist or offensive. Unfortunately, little effort has been invested to how backdoor attacks can affect current NLG models and how to defend against these attacks. In this work, by giving a formal definition of backdoor attack and defense, we investigate this problem on two important NLG tasks, machine translation and dialog generation. Tailored to the inherent nature of NLG models (e.g., producing a sequence of coherent words given contexts), we design defending strategies against attacks. We find that testing the backward probability of generating sources given targets yields effective defense performance against all different types of attacks, and is able to handle the one-to-many issue in many NLG tasks such as dialog generation. We hope that this work can raise the awareness of backdoor risks concealed in deep NLG systems and inspire more future work (both attack and defense) towards this direction.
 ```
 
 
 
 
-可以远程在linux上执行命令吗
 
+再次详细解释这篇文章
+```
+*Efficient and persistent backdoor attack by boundary trigger set constructing against federated learning*  之前的backdoor方法通常从训练数据集中随机选择触发候选样本，这种做法容易扰乱样本分布，并模糊它们之间的边界，导致主要任务的准确性下降。此外，这些方法使用的触发器通常是手工制作且未经过优化，导致后门映射关系较弱，攻击成功率较低。  为了解决这些问题，本文提出了一种灵活的后门攻击方法，称为触发样本选择与优化（Trigger Sample Selection and Optimization, TSSO）。这一方法受到神经网络分类模式的启发，利用自编码器（Autoencoders）和局部敏感哈希（Locality-Sensitive Hashing）来选择在类边界处的触发候选样本，从而实现精确注入。此外，TSSO通过全局模型和历史结果迭代优化触发器的表示，从而建立一个稳健的映射关系。 文章在四个经典数据集上评估了TSSO方法，特别是在非独立同分布（non-IID）的设置下，TSSO在更少的训练轮次中取得了更高的攻击成功率，并延长了后门攻击的效果。即使在扩展性测试中，部署防御措施的情况下，TSSO仍然能够在只有4%恶意客户端（中毒率为1/640）的情况下达到超过80%的攻击成功率。这展示了TSSO在后门攻击中的高效性和持久性。
+```
 
 
 
 
+再次详细解释这篇文章
+```
+*Beyond Traditional Threats: A Persistent Backdoor Attack on Federated Learning* CCFA，研究指出，在联邦学习中，由于后续的正常更新，后门攻击的效果会逐渐减弱，这表现为攻击成功率在多轮迭代中显著下降，最终可能完全失效。为了量化这种现象，文章引入了一个新的指标——攻击持久性（Attack Persistence），用于衡量后门攻击效果的衰减程度。在前人研究未能广泛探讨如何提高攻击持久性的背景下，作者提出了FCBA方法。该方法通过聚合更多的触发信息，生成更完整的后门模式，从而在全局模型中更好地植入后门。经过训练的后门模型对后续的正常更新具有更强的抗性，使得测试集上的攻击成功率更高。作者在三个数据集上对这一方法进行了测试，并在不同的设置下评估了两种模型的表现。结果显示，FCBA的持久性优于现有最先进的联邦学习后门攻击方法。在GTSRB数据集上，经过120轮攻击后，FCBA的攻击成功率较基线提升了50%以上。开源。
+```
 
-仔细阅读PDF，详细解释`Input-Aware Dynamic Backdoor Attack`这篇文章
 
 
+再次详细解释这篇文章
+```
+*FedRecover: Recovering from Poisoning Attacks in Federated Learning using Historical Information* 提出了一种名为FedRecover的方法，用于在联邦学习（Federated Learning, FL）系统中从中毒攻击中恢复全局模型。FedRecover方法的关键在于利用历史信息来估计客户端的模型更新，而不是在恢复过程中要求客户端重新计算和通信这些更新。这一方法的目的是减少恢复过程中的计算和通信开销，同时保持恢复后的全局模型的准确性。
+```
 
 
 
-
-可以远程在linux上执行命令吗，直接执行的那种。而不是说我需要先连接上服务器，再执行命令。最好是我使用现成的命令，直接一句命令就在远程Linux服务器上执行。
-
-
-
-
-
-你理解错了，这样还是要先连接到服务器再执行命令。比如我想在linux上执行一个ffmpeg命令。我应该如何做？不能先登录服务器，再执行命令。
-
-
-
-
-
-好的，很棒。我想scp传输一些文件，要求传输当前目录下除了share目录的所有文件。
-
-
-
-
-
-Linux拷贝文件并显示进度
-
-
-
-
-
-解释`rsync -a --info=progress2 源文件路径 目标路径`
-
-
-
-
-
-
-写一个bash脚本，接受一个时间参数，然后显示进度条并且在时间到达时进度条达到100%。
-
-例如`Timer.sh 5`，则显示一个不断更新的进度条，5秒后走完。
-
-
-
-
-
-Windows tree命令设置最大显示深度
-
-
-
-
-
-
-仔细阅读PDF，并解释`FedRecover Recovering from Poisoning Attacks in Federated Learning using Historical Information`这篇文章
-
-
-
-
-
-git如何加入子git
-
-
-
-
-子模块的修改可以给原仓库提PR吗
-
-
-
-
-`FedRecover: Recovering from Poisoning Attacks in Federated Learning using Historical Information`具体是怎么做的？
-
-
-
-
-
-存储历史上每次的更新会不会占用过多的空间？
-
-
-
-
-
-git clone了一个仓库，如何将其作为另一个仓库的一个新分支？
-
-
-
-
-
-
-解释`git fetch`命令，以及它都会干什么
+这篇文章是把客户端的每次历史梯度全部保存在中央服务器上吗？
