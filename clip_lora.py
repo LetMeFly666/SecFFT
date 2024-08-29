@@ -89,7 +89,7 @@ test_loader = DataLoader(cifar100_test, batch_size=128, shuffle=False)
 num_workers = args.num_workers
 rounds = args.rounds
 round_to_start_attack = args.round_to_start_attack
-local_epochs = 5
+local_epochs = 20
 batch_size = 64
 logger.info(
     f"Number of workers: {num_workers}, Number of rounds: {rounds}, Round to start attack: {round_to_start_attack}"
@@ -337,6 +337,9 @@ for round in range(rounds):
 # save the summary of worker
 for idx, worker in enumerate(workers):
     csv_file = os.path.join(output_dir, f"woker{idx}_summary.csv")
+    df = pd.DataFrame(worker.train_summaries)
+    df.to_csv(csv_file, index=False)
+
 
 # save the model
 import datetime
