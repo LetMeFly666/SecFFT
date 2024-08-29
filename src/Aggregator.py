@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+import copy
 
 
 class Aggregator:
@@ -21,20 +22,6 @@ class Aggregator:
 
     def load(self, path):
         self.model.load_state_dict(torch.load(path))
-
-    def get_trainable_params(self):
-        params = {}
-        for name, param in self.model.named_parameters():
-            if param.requires_grad:
-                params[name] = param.clone().detach().requires_grad_(False)
-
-        return params
-
-    def set_trainable_params(self, target_model_params):
-        for name, param in self.model.named_parameters():
-            if param.requires_grad:
-                with torch.no_grad():
-                    param.copy_(target_model_params[name])
 
     def predict(self, images):
         self.model.eval()

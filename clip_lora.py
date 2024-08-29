@@ -16,6 +16,8 @@ import logging
 import pandas as pd
 import warnings
 import argparse
+import copy
+
 
 # command line arguments
 parser = argparse.ArgumentParser(description="Run PEFT on CIFAR-100 dataset")
@@ -93,7 +95,7 @@ logger.info(
     f"Number of workers: {num_workers}, Number of rounds: {rounds}, Round to start attack: {round_to_start_attack}"
 )
 
-attackers = [i for i in range(20)]
+attackers = [i for i in range(4)]
 attack_type = "backdoor"
 attack_params = {
     "trigger_position": (0, 0),
@@ -162,6 +164,7 @@ target_model = get_peft_model(base_model, config)
 target_model.print_trainable_parameters()
 target_model.to(device)
 
+
 # Create workers for each subset
 workers = []
 for idx, train_subset in enumerate(train_subsets):
@@ -203,14 +206,22 @@ aggregator = Aggregator(
     device=device,
 )
 
-
 csv_file = os.path.join(output_dir, "aggregator_summary.csv")
 aggregator_summary = []
-target_model_params = aggregator.get_trainable_params()
+
+# save the target model parameters
+target_model_params = {}
+for name, param in target_model.named_parameters():
+    if param.requires_grad:
+        target_model_params[name] = param.clone().detach().requires_grad_(False)
+
 for round in range(rounds):
     gradients = {}
+    logger.info(f"target_model_params: {target_model_params.values()}")
     for idx, worker in enumerate(workers):
-        worker.set_trainable_params(target_model_params)
+        for name, param in local_model.named_parameters():
+            if param.requires_grad:
+                param.data = copy.deepcopy(target_model_params[name])
         gradient = worker.train()
         gradients[idx] = gradient
 
@@ -298,7 +309,9 @@ for round in range(rounds):
         start = end
     assert start == mean_gradients.numel(), "The number of parameters does not match"
 
-    aggregator.set_trainable_params(target_model_params)
+    for name, param in target_model.named_parameters():
+        if param.requires_grad:
+            param.data = copy.deepcopy(target_model_params[name])
 
     normal_accuracy, normal_loss = aggregator.eval(test_loader)
     print(

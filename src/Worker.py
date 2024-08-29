@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 import random
 import logging
+import copy
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -121,7 +123,10 @@ class Worker:
         self.model = self.model.to(device)
 
     def train(self):
-        target_model_params = self.get_trainable_params()
+        target_model_params = {}
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                target_model_params[name] = param.clone().detach().requires_grad_(False)
 
         self.model.train()
         text_descriptions = [
@@ -183,12 +188,12 @@ class Worker:
         self.scheduler.step()  # 是否是这个影响了准确率
         self.round += 1
 
-        # compute the gradient
-        local_model_params = self.get_trainable_params()
-        # logger.info(f"local_model_params: {local_model_params}")
         gradient = {}
-        for name, param in local_model_params.items():
-            gradient[name] = param - target_model_params[name]
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    gradient[name] = param - target_model_params[name]
+        # print(f"gradient: {gradient}")
         return gradient
 
     def save(self, path):
@@ -196,17 +201,3 @@ class Worker:
 
     def load(self, path):
         self.model.load_state_dict(torch.load(path))
-
-    def get_trainable_params(self):
-        params = {}
-        for name, param in self.model.named_parameters():
-            if param.requires_grad:
-                params[name] = param.clone().detach().requires_grad_(False)
-
-        return params
-
-    def set_trainable_params(self, target_model_params):
-        for name, param in self.model.named_parameters():
-            if param.requires_grad:
-                with torch.no_grad():
-                    param.copy_(target_model_params[name])
