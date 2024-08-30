@@ -40,7 +40,7 @@ class Worker:
         self.attack_type = attack_type
         self.round_to_start_attack = round_to_start_attack
         self.attack_params = attack_params
-
+        self.lr_init = 1e-2
         self.has_flip = False
         self.has_backdoor = False
 
@@ -69,12 +69,6 @@ class Worker:
         )
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
-        # TODO
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=1e-3, momentum=0.9)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=self.rounds, gamma=0.1
-        )
 
     # def label_flip(self):
     #     original_targets = np.array(self.data_set.dataset.targets)
@@ -127,6 +121,10 @@ class Worker:
         for name, param in self.model.named_parameters():
             if param.requires_grad:
                 target_model_params[name] = param.clone().detach().requires_grad_(False)
+
+        # TODO
+        lr = self.lr_init * 0.1 ** (self.round % 10)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
 
         self.model.train()
         text_descriptions = [
