@@ -21,9 +21,9 @@ class Worker:
         data_set,
         device,
         class_names,
-        rounds,
         round_to_start_attack,
-        epochs,
+        inner_epochs,
+        start_round=0,
         attack_type="",
         attack_params={},
         batch_size=256,
@@ -34,27 +34,16 @@ class Worker:
         self.idx = idx
         self.data_set = data_set
         self.class_names = class_names
-        self.rounds = rounds
-        self.round = 0
-        self.epochs = epochs
+        self.epochs = inner_epochs
+        self.start_round = start_round
         self.attack_type = attack_type
         self.round_to_start_attack = round_to_start_attack
         self.attack_params = attack_params
         self.lr_init = 1e-2
         self.has_flip = False
-        self.has_backdoor = False
+        self.backdoored = False
 
         self.train_summaries = []
-
-        # if self.attack_type == "gradient ascent":
-        #     assert "attack_rate" in self.attack_params
-
-        # if self.attack_type == "label flip":
-        #     assert "source_labels" in self.attack_params
-        #     assert "target_label" in self.attack_params
-        #     assert "flip_rate" in self.attack_params
-        #     # assert "bidirectional" in self.attack_params
-        #     assert self.attack_params["source_labels"] != self.attack_params["target_label"]
 
         if self.attack_type == "backdoor":
             # assert "trigger" in self.attack_params
@@ -69,31 +58,6 @@ class Worker:
         )
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
-    # def label_flip(self):
-    #     original_targets = np.array(self.data_set.dataset.targets)
-    #     subset_indices = self.data_set.indices
-    #     all_flip_indices = []
-    #     for source_label in self.attack_params["source_labels"]:
-    #         target_indices = np.random.permutation(
-    #             np.where(original_targets[subset_indices] == source_label)[0]
-    #         )
-    #         n_flip = int(len(target_indices) * self.attack_params["flip_rate"])
-    #         flip_indices = target_indices[:n_flip]
-    #         all_flip_indices.extend(flip_indices)
-
-    #     for idx in all_flip_indices:
-    #         self.data_set.dataset.targets[subset_indices[idx]] = self.attack_params[
-    #             "target_label"
-    #         ]
-
-    #     source_labels_str = ", ".join(
-    #         [self.class_names[label] for label in self.attack_params["source_labels"]]
-    #     )
-    #     logger.info(
-    #         f"Flipped {len(all_flip_indices)} labels from {source_labels_str} "
-    #         f"to {self.class_names[self.attack_params['target_label']]}"
-    #     )
 
     def backdoor_attack(self):
         subset_indices = self.data_set.indices
@@ -112,11 +76,22 @@ class Worker:
             f"Worker {self.idx}: Injected {n_backdoor} backdoor samples with label {target_label_name}"
         )
 
+    def add_trigger(self, images, labels):
+        n_backdoor = int(images.size(0) * self.attack_params["backdoor_rate"])
+        backdoor_indices = random.sample(range(images.size(0)), n_backdoor)
+        # images.shaoe: (batch_size, 3, 224, 224) trigger.shape: (3, 224, 224)
+        x, y = self.attack_params["trigger_position"]
+        h, w = self.attack_params["trigger_size"]
+        for idx in backdoor_indices:
+            images[idx][:, x : x + h, y : y + w] = self.attack_params["trigger_value"]
+            labels[idx] = self.attack_params["target_label"]
+        return images, labels
+
     def to(self, device):
         self.device = device
         self.model = self.model.to(device)
 
-    def train(self):
+    def train(self, cur_round):
         target_model_params = {}
         for name, param in self.model.named_parameters():
             if param.requires_grad:
@@ -127,20 +102,13 @@ class Worker:
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
 
         self.model.train()
-        text_descriptions = [
-            f"This is a photo of a {label}" for label in self.class_names
-        ]
-        tokenized_text = self.processor(
-            text=text_descriptions, padding=True, truncation=True, return_tensors="pt"
-        ).to(self.device)
 
         if (
-            self.round >= self.round_to_start_attack
+            cur_round >= self.round_to_start_attack
             and self.attack_type == "backdoor"
-            and self.has_backdoor == False
+            and self.backdoored == False
         ):
-            self.backdoor_attack()
-            self.has_backdoor = True
+            self.backdoored = True
 
         # assert len(self.data_loader) >= self.epochs
         batch_idxs = [i for i in range(len(self.data_loader))]
@@ -157,7 +125,22 @@ class Worker:
 
             images = images.to(self.device)
             labels = labels.to(self.device)
+            # TODO add trigger if self.backdoored
+            if self.backdoored:
+                images, labels = self.add_trigger(images, labels)
+
             self.optimizer.zero_grad()
+
+            # 这里是否需要重新
+            text_descriptions = [
+                f"This is a photo of a {label}" for label in self.class_names
+            ]
+            tokenized_text = self.processor(
+                text=text_descriptions,
+                padding=True,
+                truncation=True,
+                return_tensors="pt",
+            ).to(self.device)
 
             text_features = self.model.get_text_features(**tokenized_text)
             image_features = self.model.get_image_features(images)
@@ -183,8 +166,6 @@ class Worker:
                     "batch_size": images.size(0),
                 }
             )
-        self.scheduler.step()  # 是否是这个影响了准确率
-        self.round += 1
 
         gradient = {}
         with torch.no_grad():
