@@ -54,19 +54,18 @@ class Worker:
         )
 
     def add_trigger(self, images, labels):
-        n_backdoor = int(images.size(0) * self.attack_params["backdoor_rate"])
-        backdoor_indices = random.sample(range(images.size(0)), n_backdoor)
-        # images.shaoe: (batch_size, 32, 32, 3)
+        n_backdoor = int(len(images) * self.attack_params["backdoor_rate"])
+        backdoor_indices = range(n_backdoor)
         x, y = self.attack_params["trigger_position"]
         h, w = self.attack_params["trigger_size"]
+        print(
+            f"Worker {self.idx} Add Trigger at ({x}, {y}) with size ({h}, {w}) images.shape: {images.shape}"
+        )
         for idx in backdoor_indices:
-            images[idx][x : x + h, y : y + w, :] = self.attack_params["trigger_value"]
+            images[idx][:, x : x + h, y : y + w] = self.attack_params["trigger_value"]
             labels[idx] = self.attack_params["target_label"]
-        return images, labels
 
-    def to(self, device):
-        self.device = device
-        self.model = self.model.to(device)
+        return images, labels
 
     def train(self, cur_round):
         target_model_params = {}

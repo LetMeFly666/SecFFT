@@ -25,9 +25,10 @@ parser = argparse.ArgumentParser(description="Run PEFT on CIFAR-100 dataset")
 parser.add_argument("-n", "--num_workers", type=int, help="Number of workers")
 parser.add_argument("-r", "--rounds", type=int, help="Number of rounds")
 parser.add_argument(
-    "-a", "--round_to_start_attack", type=int, help="Round to start attack"
+    "-s", "--round_to_start_attack", type=int, help="Round to start attack"
 )
 parser.add_argument("-o", "--output_dir", type=str, help="Output directory")
+parser.add_argument("-a", "--advertiser_num", type=int, help="Number of attackers")
 args = parser.parse_args()
 
 warnings.filterwarnings(
@@ -79,13 +80,13 @@ test_loader = DataLoader(cifar100_test, batch_size=128, shuffle=False)
 num_workers = args.num_workers
 outer_rounds = args.rounds
 round_to_start_attack = args.round_to_start_attack
+advertiser_num = args.advertiser_num
 local_epochs = 20
 batch_size = 64
 logger.info(
-    f"Number of workers: {num_workers}, Number of rounds: {outer_rounds}, Round to start attack: {round_to_start_attack}"
+    f"Number of workers: {num_workers}, Number of rounds: {outer_rounds}, Round to start attack: {round_to_start_attack}, Number of attackers: {advertiser_num}"
 )
-
-attackers = [i for i in range(4)]
+attackers = [i for i in range(advertiser_num)]
 attack_type = "backdoor"
 attack_params = {
     "trigger_position": (0, 0),
@@ -118,7 +119,7 @@ modules = [
 ]
 target_modules.extend([f"{layer}.{module}" for layer in layers for module in modules])
 target_modules.append("visual_projection")
-logger.info(f"Target modules: {target_modules}")
+# logger.info(f"Target modules: {target_modules}")
 config = LoraConfig(
     r=16,
     lora_alpha=16,
@@ -202,7 +203,6 @@ for name, param in target_model.named_parameters():
 
 for round in range(outer_rounds):
     gradients = {}
-    logger.info(f"target_model_params: {target_model_params.values()}")
     for idx, worker in enumerate(workers):
         for name, param in local_model.named_parameters():
             if param.requires_grad:
@@ -215,8 +215,6 @@ for round in range(outer_rounds):
         flattend_gradients.append(
             torch.cat([params.flatten() for params in gradient.values()])
         )
-    logger.info(f"gradient shape: {flattend_gradients[0].shape}")
-
     gradients_tensor = torch.stack(flattend_gradients)
     # gradients_tensor = torch.stack(gradients)
     normalized_gradients = gradients_tensor / gradients_tensor.norm(dim=1, keepdim=True)
@@ -233,8 +231,6 @@ for round in range(outer_rounds):
     plt.savefig(os.path.join(output_dir, f"cosine_similarity_round_{round}.png"))
     plt.close()
 
-    # print the shape of gradients tensor
-    print(f"Gradients tensor shape: {gradients_tensor.shape}")
     # save the gradients tensor
     torch.save(
         gradients_tensor, os.path.join(output_dir, f"gradients_tensor_round_{round}.pt")
@@ -263,6 +259,7 @@ for round in range(outer_rounds):
     cosine_similarity_matrix_dct = (
         torch.mm(normalized_gradients_dct, normalized_gradients_dct.T).to("cpu").numpy()
     )
+
     # heatmap
     plt.figure(figsize=(10, 8))
     sns.heatmap(cosine_similarity_matrix_dct, annot=False, cmap="Reds", cbar=True)
@@ -285,13 +282,14 @@ for round in range(outer_rounds):
 
     mean_gradients = gradients_tensor.mean(dim=0)
 
+    logger.info(f"Round {round} - Mean gradients: {mean_gradients.shape}")
+
     start = 0
     for name, param in target_model_params.items():
         end = start + param.numel()
-        target_model_params[name] = (
-            mean_gradients[start:end].reshape(param.shape) + param
-        )
+        param.data += mean_gradients[start:end].reshape(param.shape)
         start = end
+
     assert start == mean_gradients.numel(), "The number of parameters does not match"
 
     for name, param in target_model.named_parameters():
@@ -304,8 +302,15 @@ for round in range(outer_rounds):
     )
     backdoor_accuracy, backdoor_loss = aggregator.eval(test_loader, attack_params)
     print(
-        f"Round {round} -Backdoor Accuracy: {backdoor_accuracy:.4f}, Loss: {backdoor_loss:.4f}"
+        f"Round {round} -Backdoor Accuracy on Test: {backdoor_accuracy:.4f}, Loss: {backdoor_loss:.4f}"
     )
+    for idx in range(advertiser_num):
+        backdoor_accuracy, backdoor_loss = aggregator.eval(
+            workers[idx].data_loader, attack_params
+        )
+        print(
+            f"Round {round} -Backdoor Accuracy on Worker {idx}: {backdoor_accuracy:.4f}, Loss: {backdoor_loss:.4f}"
+        )
     aggregator_summary.append(
         {
             "normal_accuracy": normal_accuracy,
@@ -319,15 +324,12 @@ for round in range(outer_rounds):
     df = pd.DataFrame(aggregator_summary)
     df.to_csv(csv_file, index=False)
 
-# save the summary of worker
-for idx, worker in enumerate(workers):
-    csv_file = os.path.join(output_dir, f"woker{idx}_summary.csv")
-    df = pd.DataFrame(worker.train_summaries)
-    df.to_csv(csv_file, index=False)
+    # save the summary of worker
+    for idx, worker in enumerate(workers):
+        csv_file = os.path.join(output_dir, f"woker{idx}_summary.csv")
+        df = pd.DataFrame(worker.train_summaries)
+        df.to_csv(csv_file, index=False)
 
-
-# save the model
-import datetime
 
 save_path = f"{output_dir}/models_cifar100"
 os.makedirs(save_path)

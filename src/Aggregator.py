@@ -43,15 +43,15 @@ class Aggregator:
 
         with torch.no_grad():
             for images, labels in tqdm(data_loader, desc="Evaluating"):
+                print(f"evaluating {len(images)} images images.shape: {images.shape}")
                 if attack_params:
                     x, y = attack_params["trigger_position"]
                     h, w = attack_params["trigger_size"]
                     for idx in range(len(images)):
-                        images[idx][x : x + h, y : y + w, :] = attack_params[
+                        images[idx][:, x : x + h, y : y + w] = attack_params[
                             "trigger_value"
                         ]
                         labels[idx] = attack_params["target_label"]
-
                 inputs = self.processor(
                     text=text_inputs,
                     images=images,
