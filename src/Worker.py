@@ -1,10 +1,7 @@
 import torch
-import numpy as np
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 import random
 import logging
-import copy
 
 
 logging.basicConfig(level=logging.INFO)
@@ -46,7 +43,6 @@ class Worker:
         self.train_summaries = []
 
         if self.attack_type == "backdoor":
-            # assert "trigger" in self.attack_params
             assert "trigger_position" in self.attack_params
             assert "trigger_size" in self.attack_params
             assert "trigger_value" in self.attack_params
@@ -57,33 +53,14 @@ class Worker:
             self.data_set, batch_size=batch_size, shuffle=True
         )
 
-        self.loss_fn = torch.nn.CrossEntropyLoss()
-
-    def backdoor_attack(self):
-        subset_indices = self.data_set.indices
-        np.random.shuffle(subset_indices)
-        n_backdoor = int(len(subset_indices) * self.attack_params["backdoor_rate"])
-        backdoor_indices = subset_indices[:n_backdoor]
-        for idx in backdoor_indices:
-            image = self.data_set.dataset.data[idx]
-            x, y = self.attack_params["trigger_position"]
-            h, w = self.attack_params["trigger_size"]
-            image[x : x + h, y : y + w, :] = self.attack_params["trigger_value"]
-            self.data_set.dataset.targets[idx] = self.attack_params["target_label"]
-            self.data_set.dataset.data[idx] = image
-        target_label_name = self.class_names[self.attack_params["target_label"]]
-        logger.info(
-            f"Worker {self.idx}: Injected {n_backdoor} backdoor samples with label {target_label_name}"
-        )
-
     def add_trigger(self, images, labels):
         n_backdoor = int(images.size(0) * self.attack_params["backdoor_rate"])
         backdoor_indices = random.sample(range(images.size(0)), n_backdoor)
-        # images.shaoe: (batch_size, 3, 224, 224) trigger.shape: (3, 224, 224)
+        # images.shaoe: (batch_size, 32, 32, 3)
         x, y = self.attack_params["trigger_position"]
         h, w = self.attack_params["trigger_size"]
         for idx in backdoor_indices:
-            images[idx][:, x : x + h, y : y + w] = self.attack_params["trigger_value"]
+            images[idx][x : x + h, y : y + w, :] = self.attack_params["trigger_value"]
             labels[idx] = self.attack_params["target_label"]
         return images, labels
 
@@ -97,11 +74,16 @@ class Worker:
             if param.requires_grad:
                 target_model_params[name] = param.clone().detach().requires_grad_(False)
 
-        # TODO
-        lr = self.lr_init * 0.1 ** (self.round % 10)
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
+        lr = self.lr_init * 0.1 ** ((cur_round - self.start_round) % 10)
+        optimizer = torch.optim.Adam(
+            self.model.parameters(),
+            lr=lr,
+            betas=(0.9, 0.98),
+            eps=1e-6,
+            weight_decay=0.2,
+        )
 
-        self.model.train()
+        loss_fn_image = torch.nn.CrossEntropyLoss()
 
         if (
             cur_round >= self.round_to_start_attack
@@ -110,7 +92,9 @@ class Worker:
         ):
             self.backdoored = True
 
-        # assert len(self.data_loader) >= self.epochs
+        self.model.train()
+        text_inputs = [f"This is a photo of a {label}" for label in self.class_names]
+
         batch_idxs = [i for i in range(len(self.data_loader))]
         if len(self.data_loader) <= self.epochs:
             selected_idxs = batch_idxs
@@ -118,52 +102,36 @@ class Worker:
             selected_idxs = random.sample(batch_idxs, self.epochs)
 
         for cur_idx, (images, labels) in enumerate(
-            tqdm(self.data_loader, desc=f"Worker {self.idx} Round {self.round} Train")
+            tqdm(self.data_loader, desc=f"Worker {self.idx} Round {cur_round} Train")
         ):
             if cur_idx not in selected_idxs:
                 continue
+            optimizer.zero_grad()
 
-            images = images.to(self.device)
-            labels = labels.to(self.device)
             # TODO add trigger if self.backdoored
             if self.backdoored:
                 images, labels = self.add_trigger(images, labels)
 
-            self.optimizer.zero_grad()
-
-            # 这里是否需要重新
-            text_descriptions = [
-                f"This is a photo of a {label}" for label in self.class_names
-            ]
-            tokenized_text = self.processor(
-                text=text_descriptions,
-                padding=True,
-                truncation=True,
+            inputs = self.processor(
+                text=text_inputs,
+                images=images,
                 return_tensors="pt",
+                padding=True,
+                do_rescale=False,
             ).to(self.device)
+            labels = labels.to(self.device)
 
-            text_features = self.model.get_text_features(**tokenized_text)
-            image_features = self.model.get_image_features(images)
+            outputs = self.model(**inputs)
+            logits_per_image = outputs.logits_per_image
+            loss = loss_fn_image(logits_per_image, labels)
+            loss.backward()
+            optimizer.step()
 
-            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-
-            text_probs = 100.0 * image_features @ text_features.T
-            loss_value = self.loss_fn(text_probs, labels)
-
-            loss_value.backward()
-            self.optimizer.step()
-
+            accuracy = (logits_per_image.argmax(dim=1) == labels).sum().item()
             self.train_summaries.append(
                 {
-                    "epoch": self.round,
-                    "loss": loss_value.item(),
-                    "accuracy": text_probs.argmax(dim=-1)
-                    .eq(labels)
-                    .float()
-                    .mean()
-                    .item(),
-                    "batch_size": images.size(0),
+                    "loss": loss.item(),
+                    "accuracy": accuracy / images.size(0),
                 }
             )
 
@@ -172,7 +140,6 @@ class Worker:
             for name, param in self.model.named_parameters():
                 if param.requires_grad:
                     gradient[name] = param - target_model_params[name]
-        # print(f"gradient: {gradient}")
         return gradient
 
     def save(self, path):

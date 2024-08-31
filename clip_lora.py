@@ -2,6 +2,7 @@
 import os
 import torch
 from torch.utils.data import random_split, DataLoader
+from torchvision import transforms
 from torchvision.datasets import CIFAR100
 from transformers import CLIPProcessor
 from peft import LoraConfig
@@ -58,41 +59,30 @@ assert device.type == "cuda", "Please make sure CUDA is available"
 cifar100_train = CIFAR100(
     os.path.expanduser("~\Desktop\clip_lora\.cache"),
     train=True,
-    transform=lambda image: processor(images=image, return_tensors="pt")[
-        "pixel_values"
-    ].squeeze(0),
+    transform=transforms.ToTensor(),
     download=False,
 )
 cifar100_test = CIFAR100(
     os.path.expanduser("~\Desktop\clip_lora\.cache"),
     train=False,
-    transform=lambda image: processor(images=image, return_tensors="pt")[
-        "pixel_values"
-    ].squeeze(0),
-    download=False,
-)
-cifar100_backdoor_test = CIFAR100(
-    os.path.expanduser("~\Desktop\clip_lora\.cache"),
-    train=False,
-    transform=lambda image: processor(images=image, return_tensors="pt")[
-        "pixel_values"
-    ].squeeze(0),
+    transform=transforms.ToTensor(),
     download=False,
 )
 
 class_names = cifar100_train.classes
 train_size = len(cifar100_train)
 test_size = len(cifar100_test)
+
 test_loader = DataLoader(cifar100_test, batch_size=128, shuffle=False)
 
 # config for federated learning
 num_workers = args.num_workers
-rounds = args.rounds
+outer_rounds = args.rounds
 round_to_start_attack = args.round_to_start_attack
 local_epochs = 20
 batch_size = 64
 logger.info(
-    f"Number of workers: {num_workers}, Number of rounds: {rounds}, Round to start attack: {round_to_start_attack}"
+    f"Number of workers: {num_workers}, Number of rounds: {outer_rounds}, Round to start attack: {round_to_start_attack}"
 )
 
 attackers = [i for i in range(4)]
@@ -116,17 +106,6 @@ train_subsets = random_split(cifar100_train, subset_lengths)
 logger.info(f"Train dataset size: {len(cifar100_train)}")
 logger.info(f"Test dataset size: {len(cifar100_test)}")
 
-# put trigger into the test dataset
-for i in range(len(cifar100_backdoor_test)):
-    image = cifar100_backdoor_test.data[i]
-    x, y = attack_params["trigger_position"]
-    h, w = attack_params["trigger_size"]
-    image[x : x + h, y : y + w, :] = attack_params["trigger_value"]
-    cifar100_backdoor_test.data[i] = image
-    cifar100_backdoor_test.targets[i] = attack_params["target_label"]
-data_backdoor_loader = DataLoader(cifar100_backdoor_test, batch_size=128, shuffle=False)
-
-# get the models
 target_modules = []
 layers = [f"vision_model.encoder.layers.{i}" for i in range(12)]
 modules = [
@@ -176,9 +155,9 @@ for idx, train_subset in enumerate(train_subsets):
             data_set=train_subset,
             device=device,
             class_names=class_names,
-            rounds=rounds,
+            inner_epochs=local_epochs,
+            start_round=0,
             round_to_start_attack=round_to_start_attack,  # epoch_to_start_attack
-            epochs=local_epochs,
             attack_type=attack_type,
             attack_params=attack_params,
             batch_size=batch_size,
@@ -191,10 +170,10 @@ for idx, train_subset in enumerate(train_subsets):
             data_set=train_subset,
             device=device,
             class_names=class_names,
-            rounds=rounds,
-            round_to_start_attack=rounds + 1,
-            epochs=local_epochs,
+            inner_epochs=local_epochs,
+            round_to_start_attack=outer_rounds + 1,
             batch_size=batch_size,
+            start_round=0,
         )
     workers.append(worker)
 
@@ -206,6 +185,12 @@ aggregator = Aggregator(
     device=device,
 )
 
+normal_accuracy, normal_loss = aggregator.eval(test_loader)
+logger.info(
+    f"Round {-1} -Normal Accuracy: {normal_accuracy:.4f}, Loss: {normal_loss:.4f}"
+)
+
+
 csv_file = os.path.join(output_dir, "aggregator_summary.csv")
 aggregator_summary = []
 
@@ -215,14 +200,14 @@ for name, param in target_model.named_parameters():
     if param.requires_grad:
         target_model_params[name] = param.clone().detach().requires_grad_(False)
 
-for round in range(rounds):
+for round in range(outer_rounds):
     gradients = {}
     logger.info(f"target_model_params: {target_model_params.values()}")
     for idx, worker in enumerate(workers):
         for name, param in local_model.named_parameters():
             if param.requires_grad:
                 param.data = copy.deepcopy(target_model_params[name])
-        gradient = worker.train()
+        gradient = worker.train(round)
         gradients[idx] = gradient
 
     flattend_gradients = []
@@ -315,11 +300,11 @@ for round in range(rounds):
 
     normal_accuracy, normal_loss = aggregator.eval(test_loader)
     print(
-        f"Round {round + 1} -Normal Accuracy: {normal_accuracy:.4f}, Loss: {normal_loss:.4f}"
+        f"Round {round} -Normal Accuracy: {normal_accuracy:.4f}, Loss: {normal_loss:.4f}"
     )
-    backdoor_accuracy, backdoor_loss = aggregator.eval(data_backdoor_loader)
+    backdoor_accuracy, backdoor_loss = aggregator.eval(test_loader, attack_params)
     print(
-        f"Round {round + 1} -Backdoor Accuracy: {backdoor_accuracy:.4f}, Loss: {backdoor_loss:.4f}"
+        f"Round {round} -Backdoor Accuracy: {backdoor_accuracy:.4f}, Loss: {backdoor_loss:.4f}"
     )
     aggregator_summary.append(
         {

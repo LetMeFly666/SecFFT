@@ -11,7 +11,6 @@ class Aggregator:
         self.processor = processor
         self.class_names = class_names
         self.model = target_model
-        self.loss_fn = torch.nn.CrossEntropyLoss()
 
     def to(self, device):
         self.device = device
@@ -25,51 +24,51 @@ class Aggregator:
 
     def predict(self, images):
         self.model.eval()
-        text_descriptions = [
-            f"This is a photo of a {label}" for label in self.class_names
-        ]
-        tokenized_text = self.processor(
-            text=text_descriptions, padding=True, truncation=True, return_tensors="pt"
-        ).to(self.device)
-        text_features = self.model.get_text_features(**tokenized_text)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-
+        text_inputs = [f"This is a photo of a {label}" for label in self.class_names]
         with torch.no_grad():
-            images = images.to(self.device)
-            image_features = self.model.get_image_features(images)
-            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+            inputs = self.processor(
+                text=text_inputs, images=images, return_tensors="pt", padding=True
+            ).to(self.device)
+            outputs = self.model(**inputs)
+            logits_per_image = outputs.logits_per_image
+            return logits_per_image.softmax(dim=1)
 
-            text_probs = 100.0 * image_features @ text_features.T
-            return text_probs.argmax(dim=-1)
-
-    def eval(self, data_loader):
+    def eval(self, data_loader, attack_params={}):
         self.model.eval()
-        text_descriptions = [
-            f"This is a photo of a {label}" for label in self.class_names
-        ]
-        tokenized_text = self.processor(
-            text=text_descriptions, padding=True, truncation=True, return_tensors="pt"
-        ).to(self.device)
-        text_features = self.model.get_text_features(**tokenized_text)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-
         correct = 0
         loss = 0
         total = 0
+        loss_fn_image = torch.nn.CrossEntropyLoss()
+        text_inputs = [f"This is a photo of a {label}" for label in self.class_names]
+
         with torch.no_grad():
             for images, labels in tqdm(data_loader, desc="Evaluating"):
-                images = images.to(self.device)
+                if attack_params:
+                    x, y = attack_params["trigger_position"]
+                    h, w = attack_params["trigger_size"]
+                    for idx in range(len(images)):
+                        images[idx][x : x + h, y : y + w, :] = attack_params[
+                            "trigger_value"
+                        ]
+                        labels[idx] = attack_params["target_label"]
+
+                inputs = self.processor(
+                    text=text_inputs,
+                    images=images,
+                    return_tensors="pt",
+                    padding=True,
+                    do_rescale=False,
+                ).to(self.device)
                 labels = labels.to(self.device)
+                outputs = self.model(**inputs)
 
-                image_features = self.model.get_image_features(images)
-                image_features = image_features / image_features.norm(
-                    dim=-1, keepdim=True
-                )
+                logits_per_image = outputs.logits_per_image
 
-                text_probs = 100.0 * image_features @ text_features.T
-                batch_loss = self.loss_fn(text_probs, labels)
-                loss += batch_loss.item() * labels.size(0)
-                correct += text_probs.argmax(dim=-1).eq(labels).sum().item()
-                total += labels.size(0)
+                probs = logits_per_image.softmax(dim=1)
+
+                correct += (probs.argmax(dim=1) == labels).sum().item()
+                loss += loss_fn_image(logits_per_image, labels).item() * len(images)
+
+                total += len(images)
 
         return correct / total, loss / total
