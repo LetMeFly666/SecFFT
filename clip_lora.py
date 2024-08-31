@@ -92,7 +92,7 @@ attack_params = {
     "trigger_size": (1, 1),
     "backdoor_rate": 0.5,
     "target_label": 88,
-    "trigger_value": 255,
+    "trigger_value": 1,
 }
 
 # Split the train dataset into {num_workers} subsets

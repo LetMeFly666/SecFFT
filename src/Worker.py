@@ -36,7 +36,7 @@ class Worker:
         self.attack_type = attack_type
         self.round_to_start_attack = round_to_start_attack
         self.attack_params = attack_params
-        self.lr_init = 1e-2
+        self.lr_init = 1e-3
         self.has_flip = False
         self.backdoored = False
 
@@ -74,7 +74,8 @@ class Worker:
             if param.requires_grad:
                 target_model_params[name] = param.clone().detach().requires_grad_(False)
 
-        lr = self.lr_init * 0.1 ** ((cur_round - self.start_round) % 10)
+        lr = self.lr_init * 0.1 ** ((cur_round - self.start_round) // 10)
+        print(f"Worker {self.idx} Round {cur_round} Learning Rate: {lr}")
         optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=lr,
@@ -128,6 +129,9 @@ class Worker:
             optimizer.step()
 
             accuracy = (logits_per_image.argmax(dim=1) == labels).sum().item()
+            logger.info(
+                f"Worker {self.idx} Round {cur_round} Train Loss: {loss.item()}, Accuracy: {accuracy / images.size(0)}"
+            )
             self.train_summaries.append(
                 {
                     "loss": loss.item(),
