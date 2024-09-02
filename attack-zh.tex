@@ -43,6 +43,7 @@
 \subsection{Related work}
 \subsubsection{Federated Learning}
 Federated Learning
+$$g^t = g^{t-1} + \frac{\eta}{N_p}\sum_{N_p}^{i=1}(h^t_i - g^{t-1}$$
 
 \subsubsection{Fine Tuning}
 Fine Tuning
@@ -97,6 +98,55 @@ Fine Tuning
 这其实是属于有约束的最优化问题。不失一般性，我们可以在高维空间中找到一个点，使得这个点到所有向量所在直线的距离之和最小。那么这个点就可以作为我们想要寻找的“汇聚点”。我们已知每条向量所在直线的方程，因此只需设这个点的坐标，将其与所有直线的距离之和累加就能得到一个带有未知数的表达式。目的是让这个表达式的值最小，问题就变成了一个不等式问题，求解即可得到该点的坐标。
 
 得出了每个客户端的“汇聚点”，使用简单的聚类的方法就能有效地识别出恶意客户端了。
+
+不失一般性，假设空间中有 $n$ 条直线，每条直线可以表示为一个点 $\mathbf{p}_i$ 和一个方向向量 $\mathbf{d}_i$，那么第 $i$ 条直线的方程可以表示为：
+\[
+\mathbf{l}_i(t) = \mathbf{p}_i + t \mathbf{d}_i, \quad t \in \mathbb{R}.
+\]
+
+对于某个空间中的点 $\mathbf{x}$，它到第 $i$ 条直线的距离可以用以下公式计算：
+\[
+\text{dist}(\mathbf{x}, \mathbf{l}_i) = \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|},
+\]
+其中 $\times$ 表示向量的叉积。
+
+\section*{优化目标}
+
+我们的目标是找到一个点 $\mathbf{x}$，使得它到所有直线的距离之和最短，即最小化以下目标函数：
+\[
+f(\mathbf{x}) = \sum_{i=1}^n \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|}.
+\]
+
+这个问题是一个非线性优化问题，直接求解解析解较为困难。可以使用数值优化的方法，如梯度下降法、牛顿法、共轭梯度法或其它非线性优化算法来求解。以下是使用梯度下降法的步骤：
+
+\begin{enumerate}
+    \item \textbf{计算梯度：}
+
+    对于每个 $i$，距离函数对 $\mathbf{x}$ 的梯度为：
+    \[
+    \nabla_{\mathbf{x}} \left( \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|} \right) = \frac{((\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i) \times \mathbf{d}_i}{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \| \| \mathbf{d}_i \|}.
+    \]
+    整体目标函数的梯度是各个距离函数梯度的和：
+    \[
+    \nabla f(\mathbf{x}) = \sum_{i=1}^n \nabla_{\mathbf{x}} \left( \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|} \right).
+    \]
+
+    \item \textbf{选择初始点：}
+
+    通常可以从一个任意的点开始，比如所有直线的交点或它们中心的平均值作为初始点。
+
+    \item \textbf{更新点位置：}
+
+    使用梯度下降法更新点的位置：
+    \[
+    \mathbf{x}_{\text{new}} = \mathbf{x}_{\text{old}} - \eta \nabla f(\mathbf{x}_{\text{old}}),
+    \]
+    其中 $\eta$ 是学习率，可以根据需要进行调整。
+
+    \item \textbf{迭代过程：}
+
+    重复计算梯度和更新点的位置，直到收敛到一个小的误差阈值或达到最大迭代次数。
+\end{enumerate}
 
 \onecolumn
 \begin{longtable}{|p{3.5cm}|p{2cm}|p{10.5cm}|} 
