@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-08-29 17:13:42
+ * @LastEditTime: 2024-09-03 09:29:16
 -->
 # SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
 
@@ -17,7 +17,7 @@ LLM的FL安全性相关实验。
 + [master](https://github.com/LetMeFly666/SecFFT/tree/master): 仓库主分支，最终版本的代码将会发布在这里
 + [paper](https://github.com/LetMeFly666/SecFFT/tree/paper): 论文分支，论文的latex源码，论文中所需的一些图片最终也会添加到这里
 + [z.001.tip-adapter](https://github.com/LetMeFly666/SecFFT/tree/z.001.tip-adapter): 先[使用Tip-Adapter](https://github.com/LetMeFly666/SecFFT/blob/d2b385e040117cdc776e856a2f899c711cce9b78/README.md?plain=1#L329-L331)，并融入了联邦学习框架
-+ [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/Pesuking)使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)
++ [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/Pesuking)使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)。（`git push Let main:wb.001.lora`）
 
 ## Log
 
@@ -166,7 +166,7 @@ round 10's acc: 95.25
 
    + 本文目前(2024.8.27)有17次被引用次数，其中暂未发现针对这种攻击提出的防御手段。
 
-### Log008 - 2024.8.27_21:45-2024.8.28_晚
+### Log008 - 2024.8.27_21:45-2024.8.29_17:32
 
 **任务**
 
@@ -179,11 +179,78 @@ round 10's acc: 95.25
 
 *Efficient and persistent backdoor attack by boundary trigger set constructing against federated learning*  之前的backdoor方法通常从训练数据集中随机选择触发候选样本，这种做法容易扰乱样本分布，并模糊它们之间的边界，导致主要任务的准确性下降。此外，这些方法使用的触发器通常是手工制作且未经过优化，导致后门映射关系较弱，攻击成功率较低。  为了解决这些问题，本文提出了一种灵活的后门攻击方法，称为触发样本选择与优化（Trigger Sample Selection and Optimization, TSSO）。这一方法受到神经网络分类模式的启发，利用自编码器（Autoencoders）和局部敏感哈希（Locality-Sensitive Hashing）来选择在类边界处的触发候选样本，从而实现精确注入。此外，TSSO通过全局模型和历史结果迭代优化触发器的表示，从而建立一个稳健的映射关系。 文章在四个经典数据集上评估了TSSO方法，特别是在非独立同分布（non-IID）的设置下，TSSO在更少的训练轮次中取得了更高的攻击成功率，并延长了后门攻击的效果。即使在扩展性测试中，部署防御措施的情况下，TSSO仍然能够在只有4%恶意客户端（中毒率为1/640）的情况下达到超过80%的攻击成功率。这展示了TSSO在后门攻击中的高效性和持久性。 相当于是把单次的攻击变地和正常的训练很类似，因此难以识别。
 
-*Beyond Traditional Threats: A Persistent Backdoor Attack on Federated Learning* CCFA，研究指出，在联邦学习中，由于后续的正常更新，后门攻击的效果会逐渐减弱，这表现为攻击成功率在多轮迭代中显著下降，最终可能完全失效。为了量化这种现象，文章引入了一个新的指标——攻击持久性（Attack Persistence），用于衡量后门攻击效果的衰减程度。在前人研究未能广泛探讨如何提高攻击持久性的背景下，作者提出了FCBA方法。该方法通过聚合更多的触发信息，生成更完整的后门模式，从而在全局模型中更好地植入后门。经过训练的后门模型对后续的正常更新具有更强的抗性，使得测试集上的攻击成功率更高。作者在三个数据集上对这一方法进行了测试，并在不同的设置下评估了两种模型的表现。结果显示，FCBA的持久性优于现有最先进的联邦学习后门攻击方法。在GTSRB数据集上，经过120轮攻击后，FCBA的攻击成功率较基线提升了50%以上。开源。
+*Beyond Traditional Threats: A Persistent Backdoor Attack on Federated Learning* CCFA，研究指出，在联邦学习中，由于后续的正常更新，后门攻击的效果会逐渐减弱，这表现为攻击成功率在多轮迭代中显著下降，最终可能完全失效。为了量化这种现象，文章引入了一个新的指标——攻击持久性（Attack Persistence），用于衡量后门攻击效果的衰减程度。在前人研究未能广泛探讨如何提高攻击持久性的背景下，作者提出了FCBA方法。该方法通过聚合更多的触发信息，生成更完整的后门模式，从而在全局模型中更好地植入后门。经过训练的后门模型对后续的正常更新具有更强的抗性，使得测试集上的攻击成功率更高。作者在三个数据集上对这一方法进行了测试，并在不同的设置下评估了两种模型的表现。结果显示，FCBA的持久性优于现有最先进的联邦学习后门攻击方法。在GTSRB数据集上，经过120轮攻击后，FCBA的攻击成功率较基线提升了50%以上。 核心思想是通过聚合更多的触发信息，生成更复杂和完整的后门模式，从而使得后门在全局模型中植入得更深、更持久。  开源。
 
-*FedRecover: Recovering from Poisoning Attacks in Federated Learning using Historical Information* 提出了一种名为FedRecover的方法，用于在联邦学习（Federated Learning, FL）系统中从中毒攻击中恢复全局模型。FedRecover方法的关键在于利用历史信息来估计客户端的模型更新，而不是在恢复过程中要求客户端重新计算和通信这些更新。这一方法的目的是减少恢复过程中的计算和通信开销，同时保持恢复后的全局模型的准确性。
+*FedRecover: Recovering from Poisoning Attacks in Federated Learning using Historical Information* 提出了一种名为FedRecover的方法，用于在联邦学习（Federated Learning, FL）系统中从中毒攻击中恢复全局模型。FedRecover方法的关键在于利用历史信息来估计客户端的模型更新，而不是在恢复过程中要求客户端重新计算和通信这些更新。这一方法的目的是减少恢复过程中的计算和通信开销，同时保持恢复后的全局模型的准确性。  文章中没有提到是否存储了所有客户端历史上的每次梯度（占据空间过多的问题）。
 
 *Model Poisoning Attacks to Federated Learning via Multi-Round Consistency* 多轮的攻击。PoisonedFL通过引入多轮次一致性（multi-round consistency）和动态攻击幅度调整这两个关键组件，显著提高了攻击效果。该方法不依赖于真实客户端的信息，并且对服务器部署的防御机制具有很强的适应性。 1）多轮次一致性：PoisonedFL通过确保恶意客户端在多个训练轮次中的模型更新方向一致，即使在个别轮次中攻击效果被削弱，累积的攻击效果仍然能够显著地偏移全局模型。2）动态攻击幅度调整：为了避免恶意更新被防御机制完全过滤掉，PoisonedFL动态调整攻击幅度。根据过去轮次的攻击效果，调整恶意更新的强度，以实现攻击的隐蔽性与有效性之间的平衡。  *但是*，这篇文章和我们要检测的攻击正好相反，我们要检测的攻击是那种迂回式攻击，这篇文章的图二说别的攻击可能是“迂回”的，而PoisonedFL结合多轮直奔目标。
+
+### Log009 - 2024.8.29_19:38-2024.8.31_9:00 # TODO: 9.2
+
+~~[上次commit](https://github.com/LetMeFly666/SecFFT/blob/557f1469b7693af0f92dfe9a15e300beba527550)是为了开会时在另外一台电脑上看文档，所以充充提交的。~~
+
+开了2h多的会，然后周老师带我和王波去川味滋吃了一顿[坏笑]。这次的目标比较明确。
+
+后天早上9点前写好，Latex版，加上一两张图。
+
+**一、Method(Observation)**
+
+1. 不连续的攻击（时间上不连续）
+2. 每次都攻但比较隐蔽
+   
+   1. 拆分/限缩，单轮次幅度很小
+   2. 角度，不直奔目标，迂回曲折达到最终目标
+
+**二、具体方案**
+
+找汇聚问题的数学解决方案。可问问数学系同学。
+
+问题定义：
+
+1. 空间中有一些直线，有没有什么办法找到一个最小的球或圆，把所有的直线或者大部分的直线包括进来？
+2. 空间中有一些直线，有没有什么办法找到这些直线的汇聚点
+
+思路：
+
+1. 思路1，来自[安博](https://github.com/aqz6779)：最大通量问题？
+2. 思路2，来自KCer：连接每个直线的交点为一个多边形？或者每次连接3个点求三角形的外切圆？tell其找一点到所有直线距离之和最小的思路后：设点的坐标，然后累加所有距离得到一个表达式，让这个表达式值最小，就转化成了一个不等式问题。
+3. 思路3，来自我的舞伴wmc：对不相交直线的距离最小化？应该属于有约束的最优化问题，而且是多变量的，应该有很多种解法。
+4. 思路4，来自hkx：matlab模拟然后看汇聚点？emm，好像不太可行。
+5. 思路n，来自[ChatGPT](https://chatgpt.com/)：找一个点，到所有直线的距离之和最小？
+6. 思路n，来自[ChatGPT](https://chatgpt.com/c/25b6a756-917d-4299-a249-ea699b473d54)：几何最小包围球方法（Minimum Enclosing Ball Method）？在谷歌学术上找到了一个[Two algorithms for the minimum enclosing ball problem](https://www.academia.edu/download/88593697/1654.pdf)
+7. 思路n，来自[ChatGPT](https://chatgpt.com/c/25b6a756-917d-4299-a249-ea699b473d54)：基于贪心算法的近似方法？1)从某一个候选球心开始，逐渐扩大半径，直到包括尽可能多的直线。
+
+待搜索：
+
+1. 不相交直线的距离最小化
+2. 找到一个点到所有直线的距离之和最小
+3. 求解器
+4. 有约束的最优化
+
+**Not Paper** (BangDream)
+
+自动演出：活动P/火的使用情况
+
+1. 6390 / 3+3+3
+2. 994 / 1+0+0
+3. 230 / 1
+
+手动演出：
+
+1. 2745 / 1+1+1
+2. 2480 / 2+2
+3. 630 / 2
+4. 8505 / 3+3+3
+5. 8370 / 3+3+3
+
+### Log010 - 2024.9.2_23:14-2024.9.4_上午
+
+开了大约一个半小时会。
+
+杨老师新idea：先两条线求最小圆，接着加入第三条线（如果第三条线和这个圆在同一平面就扩大半径，否则就圆变球），接着加入下一条线，...。总体思路是每次加入一条线，扩大半径或升维以包裹全部。可搜：中心距。
+
+1. 画场景图
+2. 实验验证距离猜想
 
 ## End
 
