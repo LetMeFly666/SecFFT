@@ -40,15 +40,15 @@
 \usepackage{enumerate}
 
 \begin{document}
-\subsection{Related work}
-\subsubsection{Federated Learning}
+\section{Related work}
+\subsection{Federated Learning}
 Federated Learning
 $$g^t = g^{t-1} + \frac{\eta}{N_p}\sum_{N_p}^{i=1}(h^t_i - g^{t-1}$$
 
-\subsubsection{Fine Tuning}
+\subsection{Fine Tuning}
 Fine Tuning
 
-\subsubsection{Backdoor attack}
+\subsection{Backdoor attack}
 后门攻击对深度学习模型构成了严重的安全威胁，它旨在通过对模型输入添加特殊扰动来诱导目标模型产生不当行为，例如图像分类器中的错误分类等。我们将现有针对模型的后门攻击分为两种，即空间隐蔽性后门攻击和时间隐蔽性后门攻击。
 
 空间隐蔽性后门攻击是指攻击者通过微调模型参数、修改输入特征或操纵模型训练过程等方式，使得现有防御方法无法在特征空间中有效区分恶意攻击者与良性参与者，从而有效逃避检测。Shadowcast\cite{xu2024shadowcast}通过在特征空间中引入微小、不可察觉的扰动，操纵视觉语言模型（VLMs）在特定视觉输入下生成误导性的文本输出。BadClip\cite{liang2024badclip}提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。Flip\cite{jha2023label}通过修改训练数据的标签，使得模型训练轨迹接近于带有后门的专家模型，从而在特征空间中达到隐蔽攻击的效果，即使在图像干净的情况下也能逃避现有检测方法。
@@ -58,7 +58,7 @@ Fine Tuning
 
 总的来看，现有的后门攻击方法已展现出显著的隐蔽性和持久性，能够有效规避当前的检测机制。这些攻击不仅在特征空间中巧妙隐藏恶意意图，还能在长期训练过程中保持攻击效果，对模型行为产生持续而深远的影响，也对模型安全构成了严峻挑战。这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
 
-\subsubsection{Defenses}
+\subsection{Defenses}
 在当前深度学习模型的安全性研究中，针对后门攻击的防御措施主要可以分为两大类：后门检测和后门缓解。% Backdoor Mitigation or Elimination
 
 后门检测主要旨在识别模型中已存在的后门攻击。在这一类中，SEER\cite{zhu2024seer}提出了一种用于视觉-语言模型的后门检测算法，通过在图像和文本模态的特征空间中联合搜索目标文本和图像触发器，成功实现了在多种场景下的后门检测。ASSET\cite{pan2023asset}提出了一种通过主动诱导后门样本和干净样本在模型行为上的差异，从而实现跨多种深度学习范式的鲁棒后门数据检测方法，并在端到端监督学习、自监督学习和迁移学习中表现出色。DECREE\cite{feng2023detecting}提出了一种用于检测自监督学习中预训练图像编码器后门的创新方法，该方法无需依赖标签数据或下游分类器，且在多种数据集和攻击类型下表现出极高的检测准确率。
@@ -68,18 +68,135 @@ Fine Tuning
 尽管这些方法在应对后门攻击方面展现了显著效果，但在面对更隐蔽或复杂的后门攻击时，效果依然可能不够理想。某些方法还依赖于外部知识或置信度的设定，可能导致误判或性能瓶颈。此外，这些方法在实际应用中也增加了计算开销和训练时间。因此，未来的研究仍需在提升整体性能与效率的同时，着力解决隐蔽或复杂后门攻击的防御挑战。
 
 
-\subsection{Threat Model}
-\subsubsection{Attacker's Goal and Capability}
+\section{Threat Model}
+\subsection{Attacker's Goal and Capability}
 
-\subsubsection{Defender's Goal and Capability}
+\begin{itemize}
+    \item 攻击者的知识：
+    \begin{itemize}
+        \item 攻击者 \(A\) 具备与正常客户端相同的背景知识，能够观察到全局模型的变化。
+        \item 攻击者无法控制服务器，也禁止访问其他诚实客户端的训练数据或本地模型更新。
+    \end{itemize}
+    \item 攻击者的能力：
+    \begin{itemize}
+        \item 攻击者 \(A\) 可以随意更改数据集、模型上传梯度的方向以及大小。
+        \item 一个攻击者可能会联合其他攻击者发动协同攻击。
+    \end{itemize}
+    \item 攻击者的目的：
+    \begin{itemize}
+        \item 通过操纵恶意客户端的本地模型更新来扰乱全局模型的训练，使得全局模型在攻击者选择的触发模式下对输入数据产生错误分类。
+    \end{itemize}
+\end{itemize}
 
-\subsection{Method}
 
-后门攻击在于使得模型建立起触发器和标签之间的关联，而不是常规图像之间的关联。参考介绍后门攻击原理的文章
-发现：注意力变化，后门攻击使得模型在图片上的注意力发生了变化，使得模型的注意力从图片的基础特征转移到触发器的特征，从而后门攻击导致模型的梯度更新相较于传统的梯度更新存在方向和数量之间的差异。但当前的隐蔽攻击方式能够逃避传统的检测方式，比如基于余弦相似性的恶意更新识别。（参考文章）大模型参数维度过高，通过cosine识别的话，无法体现出细微的差异，给了后门攻击的可乘之机。
-方法：从模型更新的频率入手，利用DCT进行转换，提取出干净的频率分布样本，最后利用KL散度（HDBSCAN聚类）进行恶意用户识别。
+\subsection{Defender's Goal}
+模型性能，鲁棒性，有效性
+\section{Method}
+本节将仔细说明本文的主要思想以及详细的设计。此外，为了清晰且易于理解，表\ref{tabl:notations}中总结了本文中使用过的符号及相应的解释。
 
-\subsubsection{结合历史记录}
+\begin{table*}[h]
+\centering
+\caption{Notations and Corresponding Definitions}
+\label{tabl:notations}
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Notation} & \textbf{Definition} \\ \hline
+$\mathcal{N}$ & The number of the total clients. \\ \hline
+$\mathcal{M}$ & The number of the participants during each round. \\ \hline
+$\mathcal{D}_i$ & The private local dataset of client $C_i$. \\ \hline
+$\mathbf{w}_t$ & The global model at round $t$. \\ \hline
+$\mathbf{g}_i^t$ & The local update of client $C_i$ during the $t$-th round. \\ \hline
+$\mathbf{G}_i^t $ & 低频分量。 \\ \hline
+$m$ & 低频分量的长度。 \\ \hline
+$C_i^t$ & The $i$-th cluster at round $t$. \\ \hline
+$\bar{\mathbf{g}}_{j}^{t,i}$ & The $j$-th normalized local update within $i$-th cluster during the $t$-th round. \\ \hline
+$\tilde{\mathbf{g}}^{t,i}$ & The partial aggregated update of the $i$-th cluster during the $t$-th round. \\ \hline
+$\tilde{\mathbf{g}}_0^t$ & The clean ingredient at round $t$. \\ \hline
+$\mathbf{g}^t$ & The global update at round $t$. \\ \hline
+$\bar{\mathbf{g}}^t$ & The normalized global update at round $t$. \\ \hline
+$F(\mathbf{w})$ & The expected empirical loss function concerning the model $\mathbf{w}$ over $\{\mathcal{D}_i\}_{i=1}^{n}$. \\ \hline
+$f(\mathcal{D}, \mathbf{w})$ & The empirical loss function concerning the model $\mathbf{w}$ on $\mathcal{D}$. \\ \hline
+\end{tabular}
+\end{table*}
+
+
+\subsection{单轮攻击识别}
+\textbf{Motivation}: 后门攻击
+% 后门攻击的性质：后门攻击在于使得模型建立起触发器和标签之间的关联，而不是常规图像之间的关联。
+% 为什么考虑转换到频率维度，现有的方案存在哪些缺点。
+
+\textbf{Overview}: 从模型更新的频率入手，利用DCT进行转换，提取出干净的频率分布样本，最后利用KL散度（HDBSCAN聚类）进行恶意用户识别。
+
+\begin{enumerate}
+\item \textbf{频域转换}
+假设每个本地模型更新的梯度为 \(g_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示客户端，\(t\) 表示通信轮次，\(d\) 是梯度向量的维度。对于每个梯度 \(g_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，其转换公式为：
+\[
+G_i^t[k] = \sum_{n=0}^{d-1} g_i^t[n] \cos\left( \frac{\pi}{d} \left(n + \frac{1}{2}\right) k \right), \quad k = 0, 1, \ldots, d-1
+\]
+
+转换后，选择保留前 \(m\) 个低频分量，并将其他高频分量截断为零：
+
+\[
+G_i^t[k] = \begin{cases}
+G_i^t[k], & \text{if } k < m \\
+0, & \text{if } k \geq m
+\end{cases}
+\]
+
+得到由低频分量构成的向量：
+
+\[
+\mathbf{G}_i^t = (G_i^t[0], G_i^t[1], \ldots, G_i^t[m-1])
+\]
+
+\item \textbf{干净向量计算}
+
+将所有客户端的低频向量表示为矩阵 \(H^t = ({G_0^t}^T, {G_1^t}^T, \ldots, {G_{\mathcal{M}}^t}^T) \in \mathbb{R}^{m \times \mathcal{M}}\)，其中每一列代表一个客户端的低频向量，\(\mathcal{M}\) 表示在第 \(t\) 轮通信中用户数量。通过PCA来提取干净向量，即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)。最后，得到干净向量 \(\tilde{G}^t_0\)：
+
+\[
+\tilde{G}^t_0 = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
+\]
+
+
+\item \textbf{距离计算}
+
+对于每个客户端的低频向量\(\mathbf{G}_i^t = (G_i^t[0], G_i^t[1], \ldots, G_i^t[m-1])\)以及干净向量\(\tilde{G}^t_0\)，通过Softmax函数来将它们转换为相应的概率分布：
+
+\[
+P_i^t[k] = \frac{\exp(G_i^t[k])}{\sum_{j=0}^{m-1} \exp(G_i^t[j])}, \quad k = 0, 1, \ldots, m-1
+\]
+
+\[
+Q^t[k] = \frac{\exp(\tilde{G}^t_0[k])}{\sum_{j=0}^{m-1} \exp(\tilde{G}^t_0[j])}, \quad k = 0, 1, \ldots, m-1
+\]
+
+利用KL散度衡量两个概率分布 \(P\) 和 \(Q\) 之间的距离。对于每个客户端 \(i\) 的低频向量分布 \(P_i^t\) 和干净向量分布 \(Q^t\)，KL散度定义为：
+
+\[
+D_{i} = D_{\text{KL}}(P_i^t \| Q^t) = \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)
+\]
+
+% 距离向量 \(D\) 的每个元素 \(D_{i}\) 表示客户端 \(i\) 的低频向量与干净向量之间的KL散度，向量形式为：
+
+% \[
+% D_{i} = D_{\text{KL}}(P_i^t \| Q^t), \quad i = 1, 2, \ldots, K_t
+% \]
+
+\item \textbf{单轮恶意用户识别}
+
+利用HDBSCAN对计算出来的KL散度\(D_i\)进行聚类，得到簇\(C_1, C_2, \ldots, C_f\)。从所有簇中选出最大的一簇（即包含用户数量最多的簇），记作 \(C_{\text{max}}\)。将 \(C_{\text{max}}\) 中的所有用户标记为良性用户。对于除 \(C_{\text{max}}\) 外的所有其他簇 \(C_i\)（\(i \neq \text{max}\)），将其所有用户标记为恶意用户。 设 \(U_{\text{nor}}\) 表示良性用户集合， \(U_{\text{mal}}\) 表示恶意用户集合，则：
+
+\[
+U_{\text{nor}} = C_{\text{max}}
+\]
+
+\[
+U_{\text{mal}} = \bigcup_{i \neq \text{max}} C_i
+\]
+
+\end{enumerate}
+
+\subsection{结合历史记录}
 
 在前面的部分中，对于单次的攻击，我们已经比较有效地识别。但是在一些实际的攻击中，可能会存在攻击不连续或者每次攻击都比较隐蔽的情况。在这一部分，我们提出了一种结合历史轨迹进行检测的方式，有效处理这种类型的攻击。
 
@@ -110,7 +227,7 @@ Fine Tuning
 \]
 其中 $\times$ 表示向量的叉积。
 
-\section*{优化目标}
+\subsubsection*{优化目标}
 
 我们的目标是找到一个点 $\mathbf{x}$，使得它到所有直线的距离之和最短，即最小化以下目标函数：
 \[
