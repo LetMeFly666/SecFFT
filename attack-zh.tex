@@ -129,29 +129,25 @@ $f(\mathcal{D}, \mathbf{w})$ & The empirical loss function concerning the model 
 
 \begin{enumerate}
 \item \textbf{频域转换}
-假设每个本地模型更新的梯度为 \(g_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示客户端，\(t\) 表示通信轮次，\(d\) 是梯度向量的维度。对于每个梯度 \(g_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，其转换公式为：
+
+假设每个本地模型更新的梯度为 \(g_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示客户端，\(t\) 表示通信轮次，\(d\) 为模型上传更新的维度。对于每个更新 \(g_i^t\)，我们通过一维的DCT-II将其转换为对应的频率分布，对应转换公式为：
 \[
-G_i^t[k] = \sum_{n=0}^{d-1} g_i^t[n] \cos\left( \frac{\pi}{d} \left(n + \frac{1}{2}\right) k \right), \quad k = 0, 1, \ldots, d-1
+G_i^t[k] = \sum_{n=0}^{d-1} g_i^t[n] \cos\left( \frac{\pi}{d} \left(n + \frac{1}{2}\right) k \right)
 \]
 
-转换后，选择保留前 \(m\) 个低频分量，并将其他高频分量截断为零：
-
 \[
-G_i^t[k] = \begin{cases}
-G_i^t[k], & \text{if } k < m \\
-0, & \text{if } k \geq m
-\end{cases}
+\quad k \in [0, d-1]
 \]
 
-得到由低频分量构成的向量：
+转换后，保留前 \(m\) 个低频分量， 得到由低频分量构成的向量：
 
 \[
-\mathbf{G}_i^t = (G_i^t[0], G_i^t[1], \ldots, G_i^t[m-1])
+\mathbf{G}_i^t = (G_i^t[0], G_i^t[1], \ldots, G_i^t[m-1])^T
 \]
 
 \item \textbf{干净向量计算}
 
-将所有客户端的低频向量表示为矩阵 \(H^t = ({G_0^t}^T, {G_1^t}^T, \ldots, {G_{\mathcal{M}}^t}^T) \in \mathbb{R}^{m \times \mathcal{M}}\)，其中每一列代表一个客户端的低频向量，\(\mathcal{M}\) 表示在第 \(t\) 轮通信中用户数量。通过PCA来提取干净向量，即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)。最后，得到干净向量 \(\tilde{G}^t_0\)：
+将所有客户端的低频向量表示为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{\mathcal{M}}^t}) \in \mathbb{R}^{m \times \mathcal{M}}\)，其中每一列代表一个客户端的低频向量，\(\mathcal{M}\) 表示在第 \(t\) 轮通信中用户数量。利用最大左奇异值向量来作为相应的干净向量（原理？），即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)。最后，得到干净向量 \(\tilde{G}^t_0\)：
 
 \[
 \tilde{G}^t_0 = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
@@ -163,11 +159,11 @@ G_i^t[k], & \text{if } k < m \\
 对于每个客户端的低频向量\(\mathbf{G}_i^t = (G_i^t[0], G_i^t[1], \ldots, G_i^t[m-1])\)以及干净向量\(\tilde{G}^t_0\)，通过Softmax函数来将它们转换为相应的概率分布：
 
 \[
-P_i^t[k] = \frac{\exp(G_i^t[k])}{\sum_{j=0}^{m-1} \exp(G_i^t[j])}, \quad k = 0, 1, \ldots, m-1
+P_i^t[k] = \frac{\exp(G_i^t[k])}{\sum_{j=0}^{m-1} \exp(G_i^t[j])}, \quad k \in [0, m-1]
 \]
 
 \[
-Q^t[k] = \frac{\exp(\tilde{G}^t_0[k])}{\sum_{j=0}^{m-1} \exp(\tilde{G}^t_0[j])}, \quad k = 0, 1, \ldots, m-1
+Q^t[k] = \frac{\exp(\tilde{G}^t_0[k])}{\sum_{j=0}^{m-1} \exp(\tilde{G}^t_0[j])}, \quad k \in [0, m-1]
 \]
 
 利用KL散度衡量两个概率分布 \(P\) 和 \(Q\) 之间的距离。对于每个客户端 \(i\) 的低频向量分布 \(P_i^t\) 和干净向量分布 \(Q^t\)，KL散度定义为：
@@ -212,57 +208,121 @@ U_{\text{mal}} = \bigcup_{i \neq \text{max}} C_i
 
 这些攻击都难以检测，但是不论其方式再怎么千变万化，最终一定要达到攻击者所想达到的目标。我们对训练过程进行建模，每次中央服务器下发的模型视为高维空间中的一个点，而客户端训练后上传的梯度视为从这个点出发的一个向量。这样，对于每个客户端，我们就可以得到个有很多具有起点的向量的图。由于梯度是诱导模型变换的方向，因此攻击者若想要达到攻击目的，不论其攻击过程有多么地曲折和隐蔽，其所有向量最终指向的目的区域一定是和良性客户端不同的。我们将这些高维空间中具有起点的绝大多数向量的目的汇聚区域称为“汇聚点”。在允许一定返回的离群值的前提下，我们有理由认为一个客户端的汇聚点就是这个客户端的最终目的。因此问题就变成了如何寻找高维空间中多条具有起点的向量的汇聚点了。TODO: 精美图一张。
 
-这其实是属于有约束的最优化问题。不失一般性，我们可以在高维空间中找到一个点，使得这个点到所有向量所在直线的距离之和最小。那么这个点就可以作为我们想要寻找的“汇聚点”。我们已知每条向量所在直线的方程，因此只需设这个点的坐标，将其与所有直线的距离之和累加就能得到一个带有未知数的表达式。目的是让这个表达式的值最小，问题就变成了一个不等式问题，求解即可得到该点的坐标。
+这其实是属于有约束的最优化问题。不失一般性，我们可以将其视为一个近似最小覆盖超球的问题。
 
-得出了每个客户端的“汇聚点”，使用简单的聚类的方法就能有效地识别出恶意客户端了。
+\subsection{问题背景与建模}
 
-不失一般性，假设空间中有 $n$ 条直线，每条直线可以表示为一个点 $\mathbf{p}_i$ 和一个方向向量 $\mathbf{d}_i$，那么第 $i$ 条直线的方程可以表示为：
-\[
-\mathbf{l}_i(t) = \mathbf{p}_i + t \mathbf{d}_i, \quad t \in \mathbb{R}.
-\]
+在联邦学习（Federated Learning, FL）场景中，每个客户端上传的梯度可以视为一条射线，这条射线的起点是中央服务器下发的模型参数，方向是客户端计算的梯度方向。通过计算每个客户端上传的梯度所形成的射线与一个最小覆盖超球之间的关系，我们可以分析并识别潜在的恶意客户端。
 
-对于某个空间中的点 $\mathbf{x}$，它到第 $i$ 条直线的距离可以用以下公式计算：
-\[
-\text{dist}(\mathbf{x}, \mathbf{l}_i) = \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|},
-\]
-其中 $\times$ 表示向量的叉积。
+\subsubsection{问题定义}
 
-\subsubsection*{优化目标}
+给定 \( n \) 条射线，每条射线由起点 \( P_i \) 和方向向量 \( \mathbf{d}_i \) 表示。目标是找到一个球的球心 \( O \) 和半径 \( r \)，使得球被大多数射线（例如 \( 90\% \)）穿过。
 
-我们的目标是找到一个点 $\mathbf{x}$，使得它到所有直线的距离之和最短，即最小化以下目标函数：
-\[
-f(\mathbf{x}) = \sum_{i=1}^n \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|}.
-\]
+\subsubsection{数学表述}
 
-这个问题是一个非线性优化问题，直接求解解析解较为困难。可以使用数值优化的方法，如梯度下降法、牛顿法、共轭梯度法或其它非线性优化算法来求解。以下是使用梯度下降法的步骤：
+我们需要找到一个点 \( O \) 和半径 \( r \)，使得对于至少 \( k = \lceil 0.9n \rceil \) 条射线 \( i \)，存在一个 \( t_i \geq 0 \) 使得：
+
+\begin{equation}
+\| O - (P_i + t_i \mathbf{d}_i) \|^2 \leq r^2.
+\end{equation}
+
+这个问题可以转化为一个优化问题，目标是最小化球的半径 \( r \)，并满足所需比例的射线穿过球的约束。
+
+\subsection{迭代算法步骤}
+
+该算法采用一种迭代优化方法，通过逐步调整球心 \( O \) 和半径 \( r \)，使其逐渐逼近最优解。具体步骤如下：
+
+\subsubsection{初始化}
+
+\begin{itemize}
+    \item 初始球心 \( O_0 \) 设置为所有射线起点的几何中心：
+
+    \begin{equation}
+    O_0 = \frac{1}{n} \sum_{i=1}^n P_i.
+    \end{equation}
+
+    \item 初始半径 \( r_0 \) 设置为从初始球心到所有射线起点的最大距离：
+
+    \begin{equation}
+    r_0 = \max_{0\leq i\leq \lceil n\times \varepsilon\rceil} \|O_0 - P_i\|.
+    \end{equation}
+\end{itemize}
+
+\subsubsection{迭代过程}
+
+对于每一步迭代 \( k \)，我们执行以下步骤：
 
 \begin{enumerate}
-    \item \textbf{计算梯度：}
+    \item \textbf{计算投影点}：对于每条射线 \( i \)，找到射线与当前球心 \( O_k \) 最近的点 \( Q_i \)，并计算参数 \( t_i \)：
 
-    对于每个 $i$，距离函数对 $\mathbf{x}$ 的梯度为：
-    \[
-    \nabla_{\mathbf{x}} \left( \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|} \right) = \frac{((\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i) \times \mathbf{d}_i}{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \| \| \mathbf{d}_i \|}.
-    \]
-    整体目标函数的梯度是各个距离函数梯度的和：
-    \[
-    \nabla f(\mathbf{x}) = \sum_{i=1}^n \nabla_{\mathbf{x}} \left( \frac{\| (\mathbf{x} - \mathbf{p}_i) \times \mathbf{d}_i \|}{\| \mathbf{d}_i \|} \right).
-    \]
+    \begin{equation}
+    t_i = \max\left(0, \frac{(O_k - P_i) \cdot \mathbf{d}_i}{\|\mathbf{d}_i\|^2}\right),
+    \end{equation}
 
-    \item \textbf{选择初始点：}
+    其中，\( Q_i \) 是射线上的点，计算公式为：
 
-    通常可以从一个任意的点开始，比如所有直线的交点或它们中心的平均值作为初始点。
+    \begin{equation}
+    Q_i = P_i + t_i \mathbf{d}_i.
+    \end{equation}
 
-    \item \textbf{更新点位置：}
+    \item \textbf{计算与球心的距离}：计算球心 \( O_k \) 到这些投影点 \( Q_i \) 的距离 \( D_i \)：
 
-    使用梯度下降法更新点的位置：
-    \[
-    \mathbf{x}_{\text{new}} = \mathbf{x}_{\text{old}} - \eta \nabla f(\mathbf{x}_{\text{old}}),
-    \]
-    其中 $\eta$ 是学习率，可以根据需要进行调整。
+    \begin{equation}
+    D_i = \|O_k - Q_i\|.
+    \end{equation}
 
-    \item \textbf{迭代过程：}
+    \item \textbf{选择最近的 \( k \) 个点}：对所有距离 \( D_i \) 进行排序，选择最近的 \( k \) 个点，计算这些点中的最大距离 \( D_k^{(k)} \)。
 
-    重复计算梯度和更新点的位置，直到收敛到一个小的误差阈值或达到最大迭代次数。
+    \item \textbf{更新球心和半径}：
+
+    % 如果新的最大距离 \( D_k^{(k)} \) 大于当前半径 \( r_k \)，则更新球心 \( O_k \) 和半径 \( r_k \)：
+
+    将球心向着新球心的方向移动一段距离
+
+    \begin{equation}
+    % O_{k+1} = O_k + \alpha \left(\frac{1}{k} \sum_{i \in \text{最近的 } k \text{ 个点}} (Q_i - O_k)\right),
+    O_{t} = O_{t-1} + \alpha \left(\frac{1}{n\times \varepsilon} \sum_{0\leq i\leq \lceil n\times \varepsilon\rceil} (Q_i - O_t)\right),
+    \end{equation}
+
+    \begin{equation}
+    r_{k+1} = D_k^{(k)},
+    \end{equation}
+
+    其中，\( \alpha \) 是学习率，通常取一个小的正值（如 0.1）。这个更新步骤的作用是朝着一个更加紧凑的覆盖超球方向优化。
+
+    \item \textbf{终止条件}：当更新后的半径 \( r_{k+1} \) 与上一次的半径 \( r_k \) 相差小于一个小的阈值 \( \epsilon \)（例如 \( 10^{-6} \)时，停止迭代。
+\end{enumerate}
+
+\subsection{置信度定义}
+
+在联邦学习（Federated Learning, FL）环境下，恶意客户端可能会通过上传异常梯度来影响全局模型的训练过程。为提高系统的鲁棒性，本研究提出了一种基于几何优化的置信度计算方法，用于评估客户端上传梯度的有效性和一致性。具体而言，我们将每个客户端的射线表示为一个起点 \(P_i\) 和方向 \(\mathbf{d}_i\)，并通过求解覆盖大多数射线的最小超球来定义每个客户端的置信度。
+
+置信度 \(C_i\) 定义为与该最小球半径 \(r_i\) 的倒数成正比的度量，公式如下：
+
+\begin{equation}
+C_i = \frac{1}{r_i + \epsilon},
+\end{equation}
+
+其中，\(r_i\) 表示覆盖大多数射线（例如 \(90\%\)）的最小球半径，\(\epsilon\) 是一个小的正数（如 \(10^{-6}\)），用于防止除零错误。
+
+通过这一定义，置信度 \(C_i\) 的值反映了客户端 \(i\) 上传梯度方向的集中程度。置信度越高（即半径 \(r_i\) 越小），表明该客户端的梯度方向较为一致，反之则表示梯度方向较为分散，可能存在异常行为或恶意攻击的迹象。
+
+\subsection{置信度在梯度聚合中的应用}
+
+在 FL 场景中，为了减轻恶意客户端上传的异常梯度对全局模型的影响，可以根据每个客户端的置信度对其上传的梯度进行加权聚合。假设 \(g_i\) 为客户端 \(i\) 上传的梯度更新，则加权后的全局梯度更新 \(G\) 可表示为：
+
+\begin{equation}
+G = \frac{\sum_{i=1}^{n} C_i \cdot g_i}{\sum_{i=1}^{n} C_i}.
+\end{equation}
+
+该公式中的 \(C_i \cdot g_i\) 表示根据客户端 \(i\) 的置信度对其上传的梯度进行加权，分母 \(\sum_{i=1}^{n} C_i\) 用于归一化，以确保所有客户端加权后的梯度贡献和为 1。通过这种方式，置信度高的客户端对最终聚合结果的影响较大，而置信度低的客户端影响较小。
+
+使用置信度加权的梯度聚合方法可以显著提高 FL 系统的鲁棒性和安全性，具体表现为以下几个方面：
+
+\begin{enumerate}
+    \item \textbf{抵御恶意客户端攻击}：由于恶意客户端的置信度 \(C_i\) 较低，其上传的异常梯度对全局模型更新的影响有限，能够有效减轻攻击效果。
+    \item \textbf{增强模型鲁棒性}：置信度高的客户端通常具有一致的梯度方向，在聚合中占据主导地位，确保了全局模型更新的方向更加稳定和有效。
+    \item \textbf{自适应聚合策略}：该方法能够根据客户端的实际行为动态调整聚合策略，而无需事先设定恶意客户端的数量或行为模式，这使得方法在各种场景下更具通用性和适应性。
 \end{enumerate}
 
 \onecolumn
