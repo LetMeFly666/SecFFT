@@ -1,0 +1,11 @@
+将休眠 10564.469666 秒，直到 2024-09-08 06:12:00 执行操作...
+Traceback (most recent call last):
+  File "C:\Users\LetMeFly\Desktop\大语言模型\Codes\SecFFT\temp.mouse.2.py", line 60, in <module>
+    perform_actions()
+  File "C:\Users\LetMeFly\Desktop\大语言模型\Codes\SecFFT\temp.mouse.2.py", line 24, in perform_actions
+    pyautogui.hotkey('ctrl', 'v')
+  File "F:\OtherApps\Program\Python\Python\lib\site-packages\pyautogui\__init__.py", line 597, in wrapper
+    failSafeCheck()
+  File "F:\OtherApps\Program\Python\Python\lib\site-packages\pyautogui\__init__.py", line 1722, in failSafeCheck
+    raise FailSafeException(
+pyautogui.FailSafeException: PyAutoGUI fail-safe triggered from mouse moving to a corner of the screen. To disable this fail-safe, set pyautogui.FAILSAFE to False. DISABLING FAIL-SAFE IS NOT RECOMMENDED.
