@@ -51,8 +51,8 @@
 
 空间隐蔽性后门攻击是指攻击者通过微调模型参数、修改输入特征或操纵模型训练过程等方式，使得现有防御方法无法在特征空间中有效区分恶意攻击者与良性参与者，从而有效逃避检测。Shadowcast\cite{xu2024shadowcast}通过在特征空间中引入微小、不可察觉的扰动，操纵视觉语言模型（VLMs）在特定视觉输入下生成误导性的文本输出。BadClip\cite{liang2024badclip}提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。Flip\cite{jha2023label}通过修改训练数据的标签，使得模型训练轨迹接近于带有后门的专家模型，从而在特征空间中达到隐蔽攻击的效果，即使在图像干净的情况下也能逃避现有检测方法。
 
-时间隐蔽性后门攻击是指攻击者通过调整模型训练过程或优化后门植入等方式，使后门在恶意攻击者结束攻击后仍能长期存在，不被后续良性更新所覆盖，从而持续影响模型行为。 Chameleon\cite{dai2023chameleon}关注如何通过对比学习来调整中毒样本、干扰样本以及促进样本嵌入表示之间的关系，从而提高后门攻击的空间隐蔽性。ImgTrojan\cite{tao2024imgtrojan}通过在视觉语言模型的训练数据中注入少量恶意样本，使得这些后门即使在模型后续的良性训练中仍能保持有效，从而持续影响模型的行为。\cite{gu2023gradient}提出了一种新的梯度控制方法，通过跨层梯度幅度归一化和层内梯度方向投影，解决了参数高效调优（PET）过程中后门攻击的遗忘问题，从而维持攻击的持久性和隐蔽性。A3FL\cite{zhang2024a3fl}通过对抗性适应损失函数来优化触发器的方式，使得后门能够在全局训练动态中持久存在，从而在联邦学习模型中实现高效且持久的攻击效果。
-% 总之，现有的后门攻击策略在空间隐蔽性和时间隐蔽性方面都有了显著的进展。空间隐蔽性后门攻击通过优化特征空间中的触发器或梯度，使得恶意行为难以被现有的检测方法发现，从而实现了更高效、更难以检测的攻击。而时间隐蔽性后门攻击则专注于提高后门的持久性，使得即使在恶意攻击结束后，这些后门依然能够在模型中长期存在并继续影响其行为。通过这些攻击方式的结合，攻击者能够在各种应用场景中有效地躲避检测，并确保攻击效果的持续性，这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
+时间隐蔽性后门攻击是指攻击者通过调整模型训练过程或优化后门植入等方式，使后门在恶意攻击者结束攻击后仍能长期存在，不被后续良性更新所覆盖，从而持续影响模型行为。 Chameleon\cite{dai2023chameleon}关注如何通过对比学习来调整中毒样本、干扰样本以及促进样本嵌入表示之间的关系，从而提高后门攻击的空间隐蔽性。ImgTrojan\cite{tao2024imgtrojan}通过在视觉语言模型的训练数据中注入少量恶意样本，使得这些后门即使在模型后续的良性训练中仍能保持有效，从而持续影响模型的行为。\cite{gu2023gradient}提出了一种新的更新控制方法，通过跨层更新幅度归一化和层内更新方向投影，解决了参数高效调优（PET）过程中后门攻击的遗忘问题，从而维持攻击的持久性和隐蔽性。A3FL\cite{zhang2024a3fl}通过对抗性适应损失函数来优化触发器的方式，使得后门能够在全局训练动态中持久存在，从而在联邦学习模型中实现高效且持久的攻击效果。
+% 总之，现有的后门攻击策略在空间隐蔽性和时间隐蔽性方面都有了显著的进展。空间隐蔽性后门攻击通过优化特征空间中的触发器或更新，使得恶意行为难以被现有的检测方法发现，从而实现了更高效、更难以检测的攻击。而时间隐蔽性后门攻击则专注于提高后门的持久性，使得即使在恶意攻击结束后，这些后门依然能够在模型中长期存在并继续影响其行为。通过这些攻击方式的结合，攻击者能够在各种应用场景中有效地躲避检测，并确保攻击效果的持续性，这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
 
 总的来看，现有的后门攻击方法已展现出显著的隐蔽性和持久性，能够有效规避当前的检测机制。这些攻击不仅在特征空间中巧妙隐藏恶意意图，还能在长期训练过程中保持攻击效果，对模型行为产生持续而深远的影响，也对模型安全构成了严峻挑战。这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
 
@@ -65,21 +65,21 @@
 
 尽管这些方法在应对后门攻击方面展现了显著效果，但在面对更隐蔽或复杂的后门攻击时，效果依然可能不够理想。某些方法还依赖于外部知识或置信度的设定，可能导致误判或性能瓶颈。此外，这些方法在实际应用中也增加了计算开销和训练时间。因此，未来的研究仍需在提升整体性能与效率的同时，着力解决隐蔽或复杂后门攻击的防御挑战。
 
-\begin{algorithm}
-\caption{Local model training process}
-\label{alg:local_update}
-\begin{algorithmic}[1]
-\State \textbf{Input:} $\theta_g^{t-1}, D_i, b, \eta, E_l$ \Comment{$E_l$ is the local epochs, $\eta$ is the local learning rate, and $b$ is the batch size}
-\State \textbf{Output:} $\triangledown \theta_i^t$ \Comment{Local model update}
+% \begin{algorithm}
+% \caption{Local model training process}
+% \label{alg:local_update}
+% \begin{algorithmic}[1]
+% \State \textbf{Input:} $\theta_g^{t-1}, D_i, b, \eta, E_l$ \Comment{$E_l$ is the local epochs, $\eta$ is the local learning rate, and $b$ is the batch size}
+% \State \textbf{Output:} $\triangledown \theta_i^t$ \Comment{Local model update}
 
-\State $(\theta_i^{t})^0 \gets \theta_g^{t-1}$ \Comment{Initialize model weights}
-\For{$e = 1$ to $E_l$}
-    \State $D_i^b \sim Sample(D_i, b)$ \Comment{Randomly sample a batch $D_i^b$ of size $b$ from $D_i$}
-    \State $(\theta_i^{t})^e \gets (\theta_i^{t})^{e-1} - \eta \nabla f(D_i^b, (\theta_i^{t})^{e-1})$
-\EndFor
-\State \textbf{return} $(\theta_i^{t})^{E_l} - (\theta_i^{t})^0$
-\end{algorithmic}
-\end{algorithm}
+% \State $(\theta_i^{t})^0 \gets \theta_g^{t-1}$ \Comment{Initialize model weights}
+% \For{$e = 1$ to $E_l$}
+%     \State $D_i^b \sim Sample(D_i, b)$ \Comment{Randomly sample a batch $D_i^b$ of size $b$ from $D_i$}
+%     \State $(\theta_i^{t})^e \gets (\theta_i^{t})^{e-1} - \eta \nabla f(D_i^b, (\theta_i^{t})^{e-1})$
+% \EndFor
+% \State \textbf{return} $(\theta_i^{t})^{E_l} - (\theta_i^{t})^0$
+% \end{algorithmic}
+% \end{algorithm}
 
 \section{System Model}
 
@@ -90,31 +90,36 @@
     假设系统模型中存在 $n$ 个机器人节点，每个节点记作 $R_i$, $i \in \{1, 2, \ldots, n\}$。 每个机器人节点 $R_i$ 拥有一个本地数据集 $D_i = \{x_{i,j}, y_{i,j}\}_{j=1}^{|D_i|}$，其中 $x_{i,j}$ 表示输入数据，$y_{i,j}$ 表示对应的标签数据，$|D_i|$ 为数据集的大小，$D = \bigcup_{i=1}^{n} D_i$表示整体的数据集。
 
     \item \textbf{LoRA}：
-    在LoRA(Low-Rank Adaptation) 方法中，模型原始的参数为$\Theta$，模型引入的增量参数为$\theta$，每一个参数矩阵 $W$ 被表示为：
+    在LoRA(Low-Rank Adaptation) 方法中，每一个参数矩阵 $W$ 被表示为：
     \[
     W = W_0 + \Delta W, \quad \Delta W = BA
     \]
-    其中，$W_0$ 为模型的原始权重矩阵，$\Delta W$ 是低秩增量矩阵，$B \in \mathbb{R}^{d_i \times r}$ 和 $A \in \mathbb{R}^{r \times d_o}$ 是低秩分解矩阵，$r$ 为矩阵的秩，满足 $r \ll \min(d_i, d_o)$。在联邦微调过程中，每个机器人节点仅对 $\theta$ 进行本地更新，保持 $\Theta$ 不变，从而降低通信和计算开销。
+    其中，$W_0$ 为模型的原始权重矩阵，$\Delta W$ 是低秩增量矩阵，$B$ 和 $A$ 是低秩分解矩阵，$r$ 为矩阵的秩。假设模型原始参数$\Theta = \sum {W_0}$，模型引入的增量参数$\theta = \sum {W}$。在联邦微调过程中，仅对增量参数$\theta$ 进行微调更新，保持原始参数$\Theta$不变。
     
     \item \textbf{本地模型训练}：
-    在每轮联邦训练的开始时，中心服务器将全局模型的增量参数 $\theta_g^{t-1}$ 发送给每个机器人节点。每个机器人节点$R_i$在获得增量参数$\theta_g^{t-1}$后，基于本地数据集 $D_i$ 进行微调训练，算法\ref{alg:local_update}展示了节点进行本地模型每轮训练的主要过程。
-    ，其目标是最小化本地损失函数 $f(D_i^b, \theta_i^{t})$：
+    在每轮联邦训练的开始时，中心服务器将全局模型的增量参数 $\theta_g^{t-1}$ 发送给每个机器人节点$R_i$。每个节点在获得增量参数$\theta_g^{t-1}$后，基于本地数据集 $D_i$ 进行微调训练。
+    % 算法\ref{alg:local_update}展示了节点进行本地模型每轮训练的主要过程。
+    假设本地训练的轮次为$E_l$，批次大小为$b$，学习率为$\eta$。对于每一轮，节点$R_i$首先从其本地数据集$D_i$中随机抽取一个批次数据$D_i^b \sim Sample(D_i, b)$，然后利用随机梯度下降等优化算法，对增量参数进行更新，
     \[
-    f(D_i^b, \theta_i^{t}) = \frac{1}{|D_i^b|} \sum_{j=1}^{|D_i^b|} \ell(x_{i,j}, y_{i,j}; \Theta + \theta_i^{t})
+    (\theta_i^{t})^e = (\theta_i^{t})^{e-1} - \eta \nabla f(D_i^b, (\theta_i^{t})^{e-1})\]
+    ，其中$(\theta_i^{t})^e$表示在第$e$轮微调后的参数，初始时$(\theta_i^{t})^0 = \theta_g^{t-1}$。
+    本地训练的目标是最小化损失函数 $f(D_i^b, (\theta_i^{t})^e)$：
+    \[
+    f(D_i^b, (\theta_i^{t})^e) = \frac{1}{|D_i^b|} \sum_{j=1}^{|D_i^b|} \ell(x_{i,j}, y_{i,j}; \Theta + (\theta_i^{t})^e)
     \]
-    其中$\Theta$为模型的原始参数， $\ell$表示损失函数例如交叉熵损失函数。训练结束后，节点将经过本地优化后的增量参数更新 $\triangledown \theta_i^t = (\theta_i^t)^{E_l} - (\theta_i^t)^0$ 上传到中心服务器。
+    其中$\Theta$是模型的原始参数， $\ell$表示损失函数（如交叉熵损失）。本地训练完成后，节点计算其增量参数更新 $\triangledown \theta_i^t = (\theta_i^t)^{E_l} - (\theta_i^t)^0$ 并上传至中心服务器。
     \item \textbf{联邦聚合}：
     在每轮本地训练结束后，中心服务器从每个机器人节点 $R_i$ 收集本地更新$\triangledown \theta_i^t$，并利用相应的聚合算法进行聚合，以更新全局增量参数得到$\theta_g^t$，其计算公式为：
     \[
-    \theta_g^t = Aggregate(\triangledown \theta_1^t, \triangledown \theta_2^t, \dots, \triangledown \theta_n^t)
+    \theta_g^t = \theta_g^{t-1} + Aggregate(\triangledown \theta_1^t, \triangledown \theta_2^t, \dots, \triangledown \theta_n^t)
     \]
-    其中，$\theta_g^t$ 是第 $t$ 轮更新的全局增量参数，更新后的全局增量参数 $\theta_g^t$ 将在下一轮训练前下发给所有机器人节点，用于进一步的本地微调。
+    其中，$Aggregate$表示中心服务器使用到的聚合算法，例如FedAvg、Krum、Bulyan、RoseAgg等，$\theta_g^t$ 是第 $t$ 轮更新的全局增量参数，更新后的全局增量参数 $\theta_g^t$ 将在下一轮训练前下发给所有机器人节点，用于进一步的本地微调。
 \end{enumerate}
 
 \section{Threat Model}
 \begin{itemize}
     \item Attacker's Goal：假设在对视觉语言模型进行联邦微调的场景中，存在一个或者多个由攻击者操纵的恶意节点。其目标是对全局模型 $\mathbf{F}$ 进行后门植入，使得模型能够将任何带有预定义触发器 $\delta$ 的测试输入分类为目标类别 $t$，同时尽可能保持对干净输入的分类准确性。
-    \item Attacker's ability: 假设攻击者对恶意节点的本地训练过程拥有绝对的控制权，即攻击者可以随意操作本地数据、触发器模式、优化方式以及本地更新等。同时攻击者可以使用“聪明”的攻击策略进行攻击，即单轮攻击可能不会体现攻击效果，而是在多轮攻击的联合作用下成功植入后门。这种场景是实际存在的，因为服务器只能从客户端获取训练后的模型，而无法获知模型的具体训练过程。相应地，攻击者无法影响中央服务器上的操作，例如更改聚合规则或篡改其他良性客户端的模型更新。
+    \item Attacker's Ability: 在联邦学习场景中，假设攻击者对恶意节点的本地训练过程具有完全的控制权。这意味着攻击者可以任意操控本地数据、触发器模式、优化策略和本地更新过程。此外，攻击者可以采用“智能”攻击策略，这种策略的特点是攻击效果不会在单轮训练中显现，而是通过多轮训练的累积效应逐步将后门植入全局模型中。这种场景在实际中是可能存在的，因为中央服务器只能接收到客户端上传的训练后模型更新，而无法知晓每个客户端的具体训练过程。然而，攻击者无法对中央服务器的操作进行干扰，例如，无法更改全局模型的聚合规则或篡改其他良性客户端的模型更新。
 \end{itemize}
 
 % \subsection{Defender's Goal}
@@ -146,7 +151,8 @@ $\lambda_{max}^t$ & The largest singular value of matrix $H^t$ during the $t$-th
 $\xi_{max}^t$ & The corresponding left singular vector of singular value $\lambda_{max}^t$ during the $t$-th round. \\ \hline
 $P_i^t$ & The distribution corresponding to $G_i^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
 $Q^t$ &  The distribution corresponding to $\tilde{G}_{0}^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
-$O_t$ &  The center of the high dimensional ball $t$-th round. \\ \hline
+$O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
+\( {v}_{i}^{t'} \) & The vector of the high dimensional ball $t'$-th round.\\ \hline
 
 % 待总结
 
@@ -155,13 +161,11 @@ $O_t$ &  The center of the high dimensional ball $t$-th round. \\ \hline
 
 
 \subsection{单轮恶意节点识别}
-\textbf{Motivation}: 目前的防御策略主要集中于利用攻击的浅层语义特征来进行恶意节点识别，所谓浅层语义是指模型上传更新的方向，范数以及神经元符号等。然而，这些基于浅层特征的防御方法在高维空间中存在显著的局限性。
+\textbf{Motivation}: 目前的防御策略主要集中于利用攻击的“浅层语义特征”来进行恶意节点识别，所谓浅层语义是指模型上传更新的方向，范数以及神经元符号等几何或者统计特性。然而，这些基于浅层特征的防御方法在高维空间中存在显著的局限性。
 % Multi-metrics adaptively identifies backdoors in Federated learning
-首先，这些防御方式只能在特定假设条件下对某些类型的攻击起作用。例如，余弦距离能够检测出具有较大方向偏差的恶意梯度，而欧几里得距离则用于检测通过扩大$L_2$范数影响全局模型的恶意梯度。同时最新的研究表明，基于欧几里得距离等传统的距离度量方法在高维空间中无法有效区分恶意和良性梯度，因为这些方法往往受到维度灾难的影响。最新的攻击策略已经能够通过精心调整，巧妙地避开这些基于浅层语义特征的防御措施，从而成功植入后门。
-% 后门攻击的性质：后门攻击在于使得模型建立起触发器和标签之间的关联，而不是常规图像之间的关联。
-% 为什么考虑转换到频率维度，现有的方案存在哪些缺点。
+首先，这些防御方式只能在特定假设条件下对某些类型的攻击起作用。例如，余弦距离能够检测出具有较大方向偏差的恶意更新，而欧几里得距离则用于检测通过扩大$L_2$范数影响全局模型的恶意更新。同时最新的研究表明，基于欧几里得距离等传统的距离度量方法在高维空间中无法有效区分恶意和良性更新，因为这些方法往往受到维度灾难的影响。此外攻击策略也在不停的演变，现在的攻击者已经能够通过精心调整，使恶意更新在方向、范数等浅层特征上与良性更新相似，从而巧妙地避开这些基于浅层语义特征的防御措施，最终在全局模型中植入后门。值得注意的是，后门攻击的本质在于让模型建立起预定义触发器和目标之间的联系，因此无论攻击者如何调整自己的攻击方式或策略，其上传的模型更新相较于良性用户始终具有分布上的差异。
 
-\textbf{Overview}: 无论攻击者如何调整自己的攻击方式或策略，其上传的模型更新始终相较于良性用户具有分布上的差异。%TODO
+\textbf{Overview}: 为解决基于浅层语义特征的防御方法在高维空间中面临的局限性，我们从后门攻击的本质出发，提出了一种基于深层语义特征的防御策略，重点分析模型更新在频率域上的分布差异。通过将本地模型更新转换到频域，我们能够更深入地捕捉恶意更新在低频成分上的异常表现，这些异常通常难以通过传统的浅层特征检测方法发现。通过对频率域上的特征进行分析，我们可以有效地区分出恶意节点与良性节点，从而增强联邦学习系统在面对复杂后门攻击时的鲁棒性和检测精度。
 
 \begin{algorithm}
 \caption{Malicious Node Detection via DCT}
@@ -173,12 +177,7 @@ $O_t$ &  The center of the high dimensional ball $t$-th round. \\ \hline
 \State Step 1: Frequency Domain Transformation
 \For {Node $R_i$}
     \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_i^t)$
-    \For{$k = 0$ to $d-1$}
-        \State $G_i^t[k] \gets 0$
-        \For{$j = 0$ to $d-1$}
-            \State $G_i^t[k] \gets G_i^t[k] + \bar{\theta_i^t}[j] \cos \left( \frac{\pi}{d} \left(j + \frac{1}{2}\right) k \right)$
-        \EndFor
-    \EndFor
+    \State $G_i^t = Trunc(DCT(\bar{\theta_i^t}), m)$ \Comment{Compute DCT and retain only the top $m$ low-frequency components}
 \EndFor
 
 \State
@@ -195,7 +194,7 @@ $O_t$ &  The center of the high dimensional ball $t$-th round. \\ \hline
 \State Step 3: Kullback-Leibler Divergence Calculation
 \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t_0)$
 \For {Node $R_i$}
-    \State $KL_i \gets \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)$
+    \State $Ki \gets \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)$
 \EndFor
 \State $S \gets \{KL_1, KL_2, \ldots, KL_n\}$ \Comment{The distribution differences calculated by KL divergence.}
 
@@ -209,24 +208,23 @@ $O_t$ &  The center of the high dimensional ball $t$-th round. \\ \hline
 \end{algorithm}
 算法\ref{alg:malicious-node-detection}展示了整体的恶意用户识别过程，主要包含四个步骤：Frequency Domain Transformation, Clean Ingredient Extraction, Kullback-Leibler Divergence Calculation,Single-round Malicious Node Detection。
 \begin{enumerate}
-\item \textbf{Frequency Domain Transformation}
+\item \textbf{Frequency Domain Transformation}：
+相比于目前基于浅层语义特征的防御方法，我们利用DCT进行频域转换，将模型的更新向量映射到频域空间，以探究其在频率域上的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的4-7行所示，假设每个本地模型的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，并提取低频分量，得到频率向量\(G_i^t\)。这里的 $Trunc$ 操作表示仅保留前 $m$ 个低频分量，以捕捉频域中更具代表性的特征用于后续的恶意节点检测。
 
-Frequency Domain Transformation的主要过程如算法\ref{alg:malicious-node-detection}的4-12行所示。假设每个本地模型的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，我们通过一维的DCT-II将其转换为对应的频率分布，并提取对应的m个低频成分，得到低频向量\(G_i^t\)。对应的计算过程如下：
-\begin{equation}
-G_i^t = Trunc(DCT(Flatten(\triangledown \theta_i^t), m)
-\end{equation}
+% 对应的计算过程如下：
+% \begin{equation}
+% G_i^t = Trunc(DCT(Flatten(\triangledown \theta_i^t), m)
+% \end{equation}
 
-\begin{equation}
-Flatten: \bar{\theta_i^t} = Flatten(\triangledown \theta_i^t)
-\end{equation}
+% \begin{equation}
+% Flatten: \bar{\theta_i^t} = Flatten(\triangledown \theta_i^t)
+% \end{equation}
 
-\begin{equation}
-DCT: G_i^t[k] = \sum_{j=0}^{d-1} \bar{\theta_i^t}[j] \cos \left( \frac{\pi}{d} \left(j + \frac{1}{2}\right) k \right)
-\end{equation}
+% \begin{equation}
+% DCT: G_i^t[k] = \sum_{j=0}^{d-1} \bar{\theta_i^t}[j] \cos \left( \frac{\pi}{d} \left(j + \frac{1}{2}\right) k \right)
+% \end{equation}
 
-\item \textbf{Clean Ingredient Extraction}
-
-Clean Ingredient Extraction的主要过程如算法\ref{alg:malicious-node-detection}的15-18行所示。将所有节点的低频向量堆叠为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{\mathcal{M}}^t}) \in \mathbb{R}^{m \times n}\)，其中每一列代表一个节点的低频向量。通过计算矩阵的最大奇异值及其对应的左奇异向量来作为相应的干净成分。即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净向量 \(\tilde{G}_0^t\)：
+\item \textbf{Clean Ingredient Extraction}：在将模型更新向量转换到频域空间后，我们基于“恶意节点的数量少于良性节点”的假设，通过奇异值分解（SVD）从所有节点的频域向量中提取出“干净成分”，并以此作为区分恶意与良性节点的标准。其主要过程如算法\ref{alg:malicious-node-detection}的10-13行所示，将所有节点的频率向量堆叠为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{\mathcal{M}}^t}) \in \mathbb{R}^{m \times n}\)，其中每一列代表一个节点的低频向量。通过计算矩阵的最大奇异值及其对应的左奇异向量来作为相应的干净成分。即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净成分 \(\tilde{G}_0^t\)。这个干净成分\(\tilde{G}_0^t\)表示了良性节点的主要成分，能够有效地与恶意节点的异常行为区分开来，从而用于后续的恶意节点检测。
 
 \begin{equation}
 \tilde{G}^t_0 = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
@@ -234,67 +232,75 @@ Clean Ingredient Extraction的主要过程如算法\ref{alg:malicious-node-detec
 \end{equation}
 
 
-\item \textbf{Kullback-Leibler Divergence Calculation}
+\item \textbf{Kullback-Leibler Divergence Calculation}：在得到干净分量后，我们计算每个节点的频率向量与干净成分之间的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的16-20行所示，对于每个节点的低频向量\(\mathbf{G}_i^t\)以及上一步求得的干净成分\(\tilde{G}^t_0\)，通过Softmax函数来将它们转换为相应的概率分布 \(P_i^t\) 和 \(Q^t\) 。然后利用KL散度计算每个节点概率分布\((P_i^t\)和干净分量概率分布 \(Q^t\) 之间的距离，得到相应的分布差异集合\(S = ({{KL}}_1, {{KL}}_2, \ldots, {{KL}}_n)\)。这个集合反映了每个节点频率向量相对于干净成分的异常程度，较大的KL散度值表示节点对应的频率向量与干净成分的分布差异较大，提示该节点可能是恶意节点。最终，这些分布差异将作为恶意节点检测的基础，通过进一步分析来区分良性节点和潜在的恶意节点。
 
-Kullback-Leibler Divergence Calculation的主要过程如算法\ref{alg:malicious-node-detection}的21-25行所示。对于每个节点的低频向量\(\mathbf{G}_i^t\)以及干净以及上一步求得的干净成分\(\tilde{G}^t_0\)，通过Softmax函数来将它们转换为相应的概率分布 \(P_i^t\) 和 \(Q^t\) 。然后利用KL散度即公式\ref{equation:KL}计算每个节点概率分布\((P_i^t\)和干净分量概率分布 \(Q^t\) 之间的距离，得到相应的分布差异集合\(S = {{KL}}_1, {{KL}}_2, \ldots, {{KL}}_n\)。
+% \begin{equation}
+% {{KL}}_i = D(P_i^t \| Q^t) = \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)
+% \label{equation:KL}
+% \end{equation}
 
-\begin{equation}
-{{KL}}_i = D(P_i^t \| Q^t) = \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)
-\label{equation:KL}
-\end{equation}
+% 其中
+% \[
+% P_i^t = Softmax(G_i^t)
+% \]
 
-其中
-\[
-P_i^t = Softmax(G_i^t)
-\]
-
-\[
-Q^t = Softmax(\tilde{G_0^t})
-\]
+% \[
+% Q^t = Softmax(\tilde{G_0^t})
+% \]
 
 
-\item \textbf{Single-round Malicious Node Detection}
+\item \textbf{Single-round Malicious Node Detection}：为了进一步识别恶意节点，我们利用良性节点与干净成分的分布高度相似这一特性，对分布差异集合$S$进行聚类分析。具体来说，我们采用流行的HDBSCAN算法对计算得到的KL散度集合$S$进行聚类，主要过程如算法\ref{alg:malicious-node-detection}的23-24行所示。聚类结果为多个簇\(C_1, C_2, \ldots, C_K\)，从所有簇中选出最大的一簇（即包含节点数量最多的簇），记作 \(C_{max}\)。基于良性节点在每轮训练中数量通常多于恶意节点的假设，以及良性节点与干净成分之间的KL散度通常更为相似，我们将 \(C_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)。对于其他所有簇\(C_i\)（\(i \neq {max}\)），其中的所有节点则被标记为恶意节点，记作\(U_{mal}\)。  
 
-最后Single-round Malicious Node Detection的的主要过程如算法\ref{alg:malicious-node-detection}的28-29行所示。利用HDBSCAN对计算出来的KL散度集合$S$进行聚类，得到簇\(C_1, C_2, \ldots, C_K\)，从所有簇中选出最大的一簇（即包含节点数量最多的簇），记作 \(C_{max}\)。基于每轮参与训练的良性节点相较于恶意节点数量较多的假设，并且相较于恶意节点，所有良性节点与干净分量之间的KL散度具有更高的相似性，因此将 \(C_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)。对于除\(C_{max}\)外的所有其他簇\(C_i\)（\(i \neq {max}\)），将其中所有节点标记为恶意节点\(U_{mal}\)。 
+
+% TODO 总结
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/t_sne_indicative_layer_round_0.png}
+    \hspace{0.1in}
+    \includegraphics[width=0.4\textwidth]{img/t_sne_dct_round_0.png}
+    \caption{Result}
+\end{figure}
+
+% 放图
 
 \end{enumerate}
 
 \subsection{多轮次攻击识别}
 
-\textbf{Motivation}: 后门攻击
+\textbf{Motivation}: 为了规避异常检测，有很多通过多轮次的组合攻击来植入后门的攻击。本部分结合每个客户端的历史记录，通过识别攻击者最终的模型引导意图点来识别恶意节点。
 
-\textbf{Overview}: 前面的攻击中已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$G_t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史梯度变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖掉$\varepsilon$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
+\textbf{Overview}: 前面的攻击中已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$t-T\leq t'< t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\varepsilon$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
 
 \begin{algorithm}
 \caption{Malicious Node Detection via History}
 \label{alg:malicious-node-detection-history}
 \begin{algorithmic}[1]
-\State \textbf{Input:} Global model history $\{G_{t-T}, G_{t-T+1}, \dots, G_{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{l_i}^{t-T}, \triangledown \theta_{l_i}^{t-T+1}, \dots, \triangledown \theta_{l_i}^{t-1}\}$, threshold $\varepsilon$
+\State \textbf{Input:} Global model history $\{G_{t-T}, G_{t-T+1}, \dots, G_{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \triangledown \theta_{i}^{t-T+1}, \dots, \triangledown \theta_{i}^{t-1}\}$, threshold $\varepsilon$
 \State \textbf{Output:} Set of clients marked as normal $U_{nor}$ and set of clients marked as malicious $U_{mal}$
 \State Step 1: Keep T-rounds History
-\For {Node $l_i$}
-    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_{l_i}^t)$
+\For {Node $i$}
+    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_{i}^t)$
     \State $DB.gradient\ \ +=\ \ \bar{\theta_i^t}$
     \State $DB.model\ \ +=\ \ G_{t-1}$
 \EndFor
 \State Step 2: Construct Ray Model
-\For {Node $l_i$}
+\For {Node $i$}
     \State Construct rays using flattened global models and gradient updates:
-    \State $P_{l_i}^{t-j} = Flatten(G_{t-j-1})$, $\mathbf{d}_{l_i}^{t-j} = \bar{\theta}_{l_i}^{t-j}$ for $j = 0, 1, \ldots, T-1$
+    \State $P_{i}^{t-j} = Flatten(G_{t-j-1})$, $\mathbf{d}_{i}^{t-j} = \bar{\theta}_{i}^{t-j}$ for $j = 0, 1, \ldots, T-1$
 \EndFor
 \State Step 3: Minimum Enclosing Hypersphere Calculation
-\For {Node $l_i$}
+\For {Node $i$}
     \State Initialize center $O_0$ and radius $r_0$
     \While {Not Converged}
-        \State Calculate projection points $Q_{l_i}^{t-j}$ and sort by distance to $O_k$
-        \State Compute $D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{l_i}^{t-j}\|$
-        \State Update $O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{l_i}^{t-j} - O_k)\right)$
+        \State Calculate projection points $Q_{i}^{t-j}$ and sort by distance to $O_k$
+        \State Compute $D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|$
+        \State Update $O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{i}^{t-j} - O_k)\right)$
         \State Update $r_{k+1} = D_k$
     \EndWhile
     \State Calculate confidence $C_i = \frac{1}{r_i + \epsilon}$
 \EndFor
 \State Step 4: Abnormal Detection
-\For {Node $l_i$}
+\For {Node $i$}
     \State Calculate adjusted LOF: $\text{adjusted\_lof}(x_i) = \text{LOF}(x_i) \times (r_i + \epsilon)$
     \State Determine threshold $\tau'$ and classify nodes as normal or malicious
 \EndFor
@@ -308,60 +314,62 @@ Q^t = Softmax(\tilde{G_0^t})
 
 \item \textbf{Keep T-rounds History}
 
-“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将梯度变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$G_t$，将客户端$l_i$第$t$轮次训练后的模型记为$\theta^t_{l_i}$。客户端$l_i$将训练后的模型$\theta^t_{l_i}$减去训练前中央服务器下发的全局模型$G_t$，就得到了$t$轮次的梯度变化$\triangledown \theta^t_{l_i}=\theta^t_{l_i}-G_{t-1}$。客户端将梯度变化$\triangledown \theta^t_{l_i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的梯度变化$\triangledown \theta^t_{l_i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上次下发的全局模型$G_{t-1}$。中央服务器最多保留$T$轮次的模型和梯度历史记录。此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
+“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$G_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_g$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$G_t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-G_{t-1}$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上伦次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
 
 \item \textbf{Obtain the Purpose Intention}
 
-“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表$t-1$轮次的全局模型，射线的方向代表$t$轮次展平后的梯度变化。问题的优化目标是：找到一个最小的超球，包含至少$\varepsilon$比例的射线。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
+“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上伦次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
 
-“Construct Ray Model”的主要过程如下。对于每个客户端 \(l_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的梯度更新历史。
+“Construct Ray Model”的主要过程如下。对于每个客户端 \(R_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的更新变化历史。
 
 \begin{itemize}
-    \item 设 \( G_{t-T}, G_{t-T+1}, \dots, G_{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\theta_{l_i}^{t-T}}, \overline{\theta_{l_i}^{t-T+1}}, \dots, \overline{\theta_{l_i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(l_i\) 上传的展平后的梯度变化向量。
-    \item 对于每一轮 \( t-j \) (\( j = 0, 1, \dots, T-1 \))，我们将每个射线的起点表示为展平后的全局模型 \( G_{t-j-1} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\theta}_{l_i}^{t-j} \)。因此，射线模型可以构建如下：
+    \item 设 \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(i\) 上传的展平后的梯度变化向量。
+    \item 对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
 
     \begin{equation}
-    \overline{\theta_{l_i}^{t-j}} = Flatten(G_{t-j-1}),
+    \overline{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1}),
     \end{equation}
-
     \begin{equation}
-    \mathbf{d}_{l_i}^{t-j} = \bar{\theta}_{l_i}^{t-j},
+    {v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}},
     \end{equation}
 
-    其中，\( \overline{\theta_{l_i}^{t-j}} \) 是射线的起点，\( \mathbf{d}_{l_i}^{t-j} \) 是射线的方向向量。
+    其中，\( \overline{\theta_{i}^{t'-1}} \) 是射线的起点，\( {v}_{i}^{t'} \) 是射线的方向向量。
 \end{itemize}
 
-“Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \varepsilon \) 比例的射线的最小超球。
+“Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \zeta \) 比例的射线的最小超球。
 
 \begin{itemize}
     \item 首先，设定初始球心 \( O_0 \) 为所有射线起点的几何中心，计算公式如下：
 
     \begin{equation}
-    O_0 = \frac{1}{T} \sum_{j=0}^{T-1} \overline{\theta_{l_i}^{t-T+1}}.
+    O_0 = \frac{1}{T} \sum_{t'=\max\{t-T+1, 1\}}^{t} \overline{\theta_g^{t'-1}}.
     \end{equation}
 
     \item 初始半径 \( r_0 \) 设定为从初始球心 \( O_0 \) 到所有射线起点的最大距离：
 
     \begin{equation}
-    r_0 = \max_{1\leq T} \|O_0 - \overline{\theta_{l_i}^{t-T+1}}\|.
+    r_0 = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_0 - \overline{\theta_{g}^{t'}}\|.
     \end{equation}
 
     \item 接下来，采用迭代方法来更新球心和半径：
     \begin{itemize}
-       \item 对于每次迭代 \( k \)，计算当前球心 \( O_k \) 到所有射线的最近投影点 \( Q_{l_i}^{t-j} \)，按照距离当前球心的位置排序
+
+        \item TODO: O上标  投影点是什么
+    
+       \item 对于每次迭代 \( k \)，计算当前球心 \( O_k \) 到所有射线的最近投影点 \( \bar{O}_{i}^{t'} \)，按照距离当前球心的位置从小到大排序
 
         \begin{equation}
-        \text{Sort}(\{ \| O - \overline{\theta_{l_i}^{t-T+1}} \| : i = 1, 2, \ldots, T \})
+        \text{Sort}(\{ \| O - \overline{\theta_{i}^{t-T+1}} \| : i = 1, 2, \ldots, T \})
         \end{equation}
 
         并计算这些投影点的最大距离 \( D_k \)：
 
         \begin{equation}
-        D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{l_i}^{t-j}\|.
+        D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|.
         \end{equation}
 
         \begin{equation}
-        O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{l_i}^{t-j} - O_k)\right),
+        O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{i}^{t-j} - O_k)\right),
         \end{equation}
 
         \begin{equation}
@@ -379,7 +387,7 @@ Q^t = Softmax(\tilde{G_0^t})
 \min_{O, r} \, r 
 \end{equation}
 $$
-\text{s.t.} \quad \| O - (\overline{\theta_{l_i}^{t-T+1}} + t_i \mathbf{d}_i) \|^2 \leq r^2, \, 1\leq i\leq \lceil n \times \varepsilon \rceil
+\text{s.t.} \quad \| O - (\overline{\theta_{i}^{t-T+1}} + t_i \mathbf{d}_i) \|^2 \leq r^2, \, 1\leq i\leq \lceil n \times \varepsilon \rceil
 $$
 
 \item \textbf{Abnormal Detection}
@@ -399,7 +407,7 @@ $$
     \text{reach-dist}_\varepsilon(x_i, x_j) = \max(\text{dist}(x_i, x_j), \varepsilon\text{-dist}(x_j)),
     \end{equation}
 
-    这里，\(\varepsilon\text{-dist}(x_j)\) 表示点 \(x_j\) 到其第 \(\varepsilon\) 个最近邻的距离。
+    这里，\(\eta\varepsilon\text{-dist}(x_j)\) 表示点 \(x_j\) 到其第 \(\varepsilon\) 个最近邻的距离。
 
     \item 对于点 \(x_i\)，其局部离群因子（LOF）定义为其邻域内所有点的局部可达密度与自身局部可达密度的比值的平均值：
 
@@ -460,7 +468,6 @@ $$
 \end{itemize}
 
 通过使用主观逻辑模型对客户端梯度进行聚合，能够有效利用信任度信息来优化全局模型的更新过程，减少因恶意客户端或不确定性导致的模型偏差。
-
 \end{enumerate}
 
 % \textbf{时间上不连续的攻击}
@@ -598,81 +605,117 @@ $$
 
 \subsubsection{Experimental Setup}
 
-本实验在一台配置高性能硬件的计算机上进行，操作系统为 Ubuntu 20.04.3 LTS，内核版本为 5.15.0-73-generic，以确保计算稳定性和结果的可靠性。计算机配置了 Intel(R) Core(TM) i9-10940X @ 3.30GHz 的处理器，具有28个核心，最大频率可达4.8GHz，能够提供强大的并行计算能力以高效处理大规模计算任务。内存为 128GB DDR4，速度为 2933 MT/s，这种大容量的内存配置有助于在处理复杂数据集和大规模模型训练时减少内存瓶颈，提升数据加载和处理速度。图形处理单元（GPU）方面，采用了2块 NVIDIA GeForce RTX 3090，每块显存为24GB，驱动版本为 470.239.06，CUDA 版本为 11.4。双GPU配置提供了强大的并行计算能力，可以显著加速深度学习模型的训练过程，特别是在图像处理和自然语言处理等需要大量计算的任务中表现尤为出色。存储设备为高速SSD，支持数据的高速读写操作，显著降低I/O操作时间，确保大数据集的快速加载和模型的高效训练。为了确保实验结果的可靠性和再现性，本实验使用了标准的数据集，包括MNIST数据集、CIFAR-10数据集等主流的数据集。上述硬件配置为实验提供了充足的计算资源，能够支持大规模深度学习模型的训练和复杂算法的测试。我们采用了一些先进的攻击方式，并使用我们的防御方式和State-Of-The-Art以及较为主流的防御方式进行对比，并针对“结合多轮次进行攻击”的攻击方式进行了实验，验证了我们的有效性。
+\subsubsection{硬件设施}
 
-\onecolumn
-\begin{longtable}{|p{3.5cm}|p{2cm}|p{10.5cm}|} 
-    \caption{Attack}
-    \label{table:attack} \\ \hline
-    Title & Conference & Main Content \\ \hline
-    \endfirsthead \hline
-    Title & Conference & Main Content \\ \hline 
-    \endhead \hline
-   Flip\cite{jha2023label} & Neurips(2023) &  本文提出了一种新颖的标签投毒攻击方法，称为FLIP。与传统的后门攻击不同，FLIP仅通过修改训练数据的标签即可实现对模型的控制，而无需更改图像本身。这种方法特别适用于当训练标签可能来自潜在恶意的第三方（如众包标注或知识蒸馏）的场景。本文通过实验展示了FLIP在多个数据集和模型架构上的高效性，证明了在仅污染少量标签的情况下，FLIP能够显著影响模型的预测结果。 \\ \hline
-   % \cite{yang2023data} & ICML(2023) & 本文首次研究了针对多模态模型的投毒攻击，包括视觉和语言两种模态。研究的主要问题是：（1）语言模态是否也容易受到投毒攻击？（2）哪种模态更易受攻击？本文提出了三种针对多模态模型的投毒攻击，并通过在不同数据集和模型架构上的广泛评估，表明这些攻击可以在保持模型实用性的同时实现显著的攻击效果。为缓解这些攻击，本文还提出了预训练和后训练的防御措施，并证明这些防御措施能够显著降低攻击效果，同时保持模型的效用。\\ \hline
-   Chameleon\cite{dai2023chameleon} & ICML(2023) & 这篇文章的主要贡献在于提出了Chameleon攻击方法，这是一种通过利用正常图像与被污染图像之间的关系，来增强后门在联邦学习（FL）系统中持久性的策略。通过对比学习调整图像嵌入距离，Chameleon成功延长了后门的存续时间，使其在多种数据集、后门类型和模型架构下的耐久性提高了1.2至4倍，显著优于现有方法。 \\ \hline
-   Gradient Control\cite{gu2023gradient} & ACL(2023) & 这篇文章提出了一种新的梯度控制方法，旨在解决参数高效调优（PET）过程中后门攻击的遗忘问题。通过将后门注入过程视为多任务学习，文章引入了跨层梯度幅度归一化和层内梯度方向投影两种策略，以减少不同任务之间的梯度冲突和梯度大小的不平衡，从而增强后门攻击在用户微调模型后的效果。实验结果表明，该方法在情感分类和垃圾邮件检测任务中显著提高了后门攻击的持久性和有效性。 \\ \hline
-   A3FL\cite{zhang2024a3fl} & Neurips(2024) & 这篇文章的主要贡献是提出了一种新的后门攻击方法A3FL，它通过对抗性自适应策略优化后门触发器，使其在联邦学习的全局训练动态中更持久、更难被检测到。与现有方法相比，A3FL显著提高了攻击的成功率和隐蔽性，并在多种防御机制下展现了出色的效果，揭示了现有防御方法的不足，强调了开发新防御策略的必要性。\\ \hline
-   Shadowcast\cite{xu2024shadowcast} & Arxiv(2024) & 这篇文章主要介绍了一种针对视觉语言模型（VLMs）的隐蔽数据投毒攻击方法，称为Shadowcast。该方法通过向模型的训练数据中注入视觉上与正常图像几乎无法区分的投毒样本，从而误导模型在推理时生成错误或误导性的信息。文章探讨了两种攻击类型：标签攻击（Label Attack）和说服攻击（Persuasion Attack），前者旨在让模型错误识别图像类别，而后者通过生成具有说服力但错误的文本，改变用户对图像的认知。实验结果表明，Shadowcast攻击在多种VLM架构下都非常有效，且在不同的提示词和数据增强条件下依然保持攻击效果。\\ \hline
-   BadCLIP\cite{liang2024badclip} & CVPR(2024) & 这篇文章提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，称为BadCLIP。BadCLIP通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。此外，该方法通过对抗性训练，增强了中毒样本的视觉特征，使得后门在模型经过清洁数据微调后仍能保持有效。实验结果显示，BadCLIP在多种防御机制下都表现出显著的攻击成功率，展示了其对现有防御方法的强大威胁。\\ \hline
-   ImgTrojan\cite{tao2024imgtrojan} & arxiv(2024) & 文章主要讨论了一种名为“ImgTrojan”的攻击方法，该方法旨在通过在视觉语言模型（VLM）的训练数据中注入恶意的图像-文本对，从而突破模型的安全屏障。这种方法通过数据投毒的方式，将原本无害的图像与恶意的文本提示关联起来，使得经过投毒训练的模型在遇到这些图像时，可能生成有害的内容。这种攻击方式在实验中展示了极高的成功率，即使在训练数据中仅包含极少量的投毒样本。 \\ \hline
-   % \cite{attack01} & arXiv preprint & 2024 & 本篇文章次揭示了在联邦学习环境下对大语言模型（LLM）进行指令调优时存在的安全漏洞。文章提出了一种简洁但有效的安全攻击方法，恶意客户端通过使用未对齐的数据来训练本地模型，从而大幅度削弱了全球模型的安全对齐性（“未对齐的数据”，是指那些与预期的安全或伦理规范不一致的数据。例如，未对齐的数据可能包含有害的、误导性的或是不道德的信息，而这些信息在普通情况下不会被用于训练模型）。实验表明，该攻击方法能够将模型的安全性降低高达70\%，而现有的防御方法在应对此类攻击时几乎无效，仅能提高4\%的安全性。为了解决这一问题，作者进一步提出了一种新的事后防御方法，即通过服务器端生成对齐数据并进一步对全局模型进行微调，从而增强模型的安全性（中央服务器在接收到各个客户端的更新后，会主动生成一组对齐的数据。这些对齐的数据是预先定义好的，确保与预期的安全和伦理规范一致。这些数据可能包含严格筛选过的内容，如道德上中立或积极的文本片段）。实验结果显示，这种防御方法能够将模型的安全性提高最多69\%，且不显著降低模型的有效性。（这篇看完了发现不是视觉大模型） \\ \hline
-   % \cite{attack02} & arXiv preprint & 2024 & 本篇文章探讨了一种针对大语言模型（LLMs）的新型训练方法，称为目标潜在对抗性训练（Targeted Latent Adversarial Training, LAT），文章提出了通过在模型的潜在表示（latent representations）中引入针对性的扰动，来更有效地消除模型中顽固的不良行为（如后门攻击和模型“越狱”）。(潜在表示是指在神经网络的中间层中，数据通过多层非线性变换后所形成的特征表示。这些表示通常处于更高的抽象层次，与原始输入相比，能够捕捉到数据的深层次特征。在视觉大模型中，这些潜在表示可能包括图像的边缘、形状、纹理等更抽象的特征，而不再是具体的像素值。潜在表示在模型中扮演着至关重要的角色，因为它们是模型用来进行预测和决策的核心特征。)(针对性的扰动是指在训练或评估过程中，特意对模型的输入或潜在表示进行细微的修改或扰动，以诱导模型产生特定的（通常是不希望的）行为。通过这种方法，可以测试和增强模型在面对各种攻击时的鲁棒性。在本文中，作者使用潜在空间中的针对性扰动来模拟攻击，目的是强化模型的防御能力，使其能够抵抗类似的实际攻击，如后门攻击或越狱行为。)研究表明，与传统的对抗性训练相比，目标潜在对抗性训练可以显著提高模型抵抗这些攻击的能力，同时对模型的整体性能影响较小。文章通过实验验证了该方法在增强模型鲁棒性方面的有效性，尤其是在面对未知触发条件的后门攻击时，表现出色。  \\ \hline
-   % \cite{attack03} & arXiv preprint & 2024 & 本文探讨了开放权重大语言模型（LLMs）在面对篡改攻击时的脆弱性，并提出了一种名为TAR（Tampering Attack Resistance）的方法，旨在增强这些模型的抗篡改能力。文章指出，现有的安全防护措施，如拒绝机制和偏好训练，容易在少量微调步骤后被攻击者绕过，导致模型被恶意修改。为此，TAR方法通过对抗性训练和元学习，设计了一种新的防护机制，使得即使在经历数千步的微调攻击后，模型仍能保持其原有的安全防护功能。实验结果显示，与现有方法相比，TAR显著提高了模型的抗篡改能力，同时保留了模型的正常功能。研究还通过大量红队评估验证了TAR方法的有效性，展示了其在应对各种复杂攻击时的鲁棒性。(红队评估是一种在网络安全和机器学习领域常用的测试方法，它通过模拟攻击者的行为来评估系统或模型的安全性和防御能力。红队通常扮演“敌方”角色，主动寻找和利用系统的漏洞，以测试系统在真实攻击场景下的表现。这种方法帮助识别和修复安全漏洞，使系统在面对潜在的实际攻击时更加稳健。这篇文章中研究人员通过设计多个测试对手，这些对手模拟了各种可能的攻击策略，试图篡改或破坏大语言模型的功能。文章中提到进行了28个不同的红队评估测试，每个测试都旨在突破TAR的防护机制。)文章中的攻击方式涉及通过微调大语言模型的权重来篡改其行为。攻击者可以在模型的开放权重上进行少量微调，使其在特定情况下产生不希望的输出。例如，攻击者可能会在输入特定触发词时，让模型生成有害内容或偏离其正常功能。\\ \hline
-   % \cite{attack04} & arXiv preprint & 2024 & 这是一篇综述。本文主要介绍了以下攻击方式：\begin{itemize}
-   %  \item 对抗性攻击：通过对输入数据进行微小的扰动，这些扰动虽然对人类几乎不可见，但会导致模型产生显著错误的输出，例如在图像分类中，可能会使模型将一个正常的图像误分类为完全不同的类别；
-   %  \item 后门攻击：和之前咱做的一样；
-   %  \item 数据中毒攻击：攻击者向模型的训练数据中注入恶意样本，这些样本会导致模型在遇到类似数据时输出错误结果，例如在物体识别任务中，中毒数据可能会导致模型误将无害物体识别为威胁；
-   %  \item 模型逃逸：攻击者通过调整输入或模型参数，试图找到绕过模型防御机制的方法，使模型输出不受控制的内容，这种攻击常用于测试模型的防御效果；
-   %  \item 多模态攻击：针对处理多种类型输入（如文本和图像）的模型，攻击者通过操纵一种模态的输入来影响另一种模态的输出，例如在多模态对话系统中，通过改变图像输入可能会影响系统的文本回应；
-   %  \item 跨语言攻击：在多语言任务中，攻击者通过在一种语言中引入扰动来影响模型在另一种语言中的表现，这类攻击特别针对多语言翻译或生成模型，可能导致不同语言间的翻译不准确或失真。
-   %  \end{itemize}\\ \hline
-   % \cite{attack05} &  Advances in Neural Information Processing Systems 34 (NeurIPS 2021) & 2021 & 本篇文章讨了如何保护通过“彩票假设”（Lottery Ticket Hypothesis, LTH）找到的稀疏子网络（即“中奖票”）的所有权。文章提出了一种新的基于稀疏结构信息的验证方法，通过在网络的稀疏结构中嵌入签名来进行所有权验证。这种方法能够在白盒和黑盒场景下保护模型的知识产权，并且对细微调整（如微调和剪枝）具有很强的鲁棒性。研究还通过大量实验验证了该方法在多种模型（如ResNet-20、ResNet-18、ResNet-50）和数据集（如CIFAR-10和CIFAR-100）上的有效性，展示了其在应对移除攻击和模糊攻击时的坚韧性。具体攻击方式有：细微调整（Fine-tuning）攻击：对模型进行微调来改变模型的权重值，同时希望不改变网络的稀疏结构。这种攻击旨在通过调整权重，试图使嵌入的签名信息变得不可辨认或无效。然而，由于嵌入的信息是基于网络的稀疏结构（即被剪枝后的模型结构），细微调整难以改变这一基础结构，从而无法有效移除签名。剪枝（Pruning）攻击：攻击者尝试通过进一步剪枝来移除嵌入的签名信息。这种攻击的目的是通过减少模型的非零参数，使得嵌入的结构信息丢失。然而，文章中提出的嵌入方法确保了签名信息在极端稀疏的情况下仍能保留，即使剪枝比例达到一定程度，签名依然可以从稀疏结构中提取出来。模糊攻击（Ambiguity Attacks）：攻击者试图通过制造伪签名或模糊原有签名的信息来混淆所有权验证。这种攻击可能包括添加噪声、篡改稀疏结构等手段，旨在使得验证机制无法区分真实的所有权签名和伪造的信息。然而，文章中的验证方法通过设计稳健的结构嵌入机制，使得这种模糊攻击难以成功。(“签名”指的是嵌入到神经网络稀疏结构中的一种独特的标识信息。这种签名通过在模型的剪枝过程中，利用网络的稀疏性来实现。具体而言，当模型被剪枝后，一部分神经元和连接被移除，剩余的结构会呈现出一种特定的稀疏模式。作者通过在这种稀疏模式中嵌入一个特定的结构或模式，这个模式就是所谓的“签名”。这种签名是不可见的，但可以通过特定的验证过程来提取和识别。其主要功能是为网络的所有权提供证据，类似于给模型打上了一个“水印”。当有人试图非法复制或篡改模型时，这个嵌入的签名仍然可以被识别出来，从而验证模型的归属。签名的鲁棒性设计使其能够抵抗常见的攻击方式（如微调和进一步的剪枝），即使模型经历了这些操作，签名依然可以从其稀疏结构中被提取出来，证明模型的所有权。)(模型的所有权是指对一个机器学习模型（如神经网络模型）所拥有的法律和知识产权。所有权通常由开发者或公司拥有，表示他们对模型的设计、训练数据、训练方法以及最终生成的模型参数等有控制权和排他性使用权。这意味着只有模型的所有者有权利决定如何使用、修改、发布或授权使用该模型。（可能涉及到知识产权保护、商业机密的保密）)\\ \hline
-   % \cite{attack06} & Portail HAL theses(theses.hal.science) & 2022 & 这篇文章有185页。本篇文章讨论了如何通过数字水印技术来保护机器学习模型的知识产权，防止模型被盗用。文章首先提供了当前水印技术的概述，并进一步扩展了这些技术在图像分类任务之外的应用，涵盖了回归、机器翻译和强化学习模型。作者还提出了针对模型托管平台的伪造攻击（即试图通过伪造水印来绕过验证）并介绍了一种基于公平性的水印技术，以增强模型在黑盒环境中的安全性。实验结果表明，这些水印技术不仅可以有效防止模型盗用，还能够在面对各种攻击时保持鲁棒性。
-   % 数字水印是一种嵌入信息的技术，用于在数字内容（如图像、音频、视频或机器学习模型）中隐藏特定的信息，以表明所有权或版权。对于机器学习模型来说，数字水印是一种通过特定算法将标识信息嵌入到模型的权重、结构或输出中的技术。这种标识信息通常是不可见或难以察觉的，但可以通过特定的提取过程来验证。（数字水印的目的有：知识产权保护：开发者可以通过在模型中嵌入水印来证明模型的所有权，防止未经授权的复制和使用；盗版检测：如果一个模型被盗用或未经许可发布，水印可以作为证据，证明模型的来源和合法所有者；内容跟踪：水印可以帮助追踪模型的使用情况，尤其是在多个平台或用户之间共享时，确保模型的使用符合许可协议。） \\ \hline
-    % \endfoot
-    % \hline
-    % \endlastfoot
-    % \hline
-\end{longtable}
+本实验在一台Ubuntu操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU。
 
-\newpage
-\onecolumn
-\begin{longtable}{|p{3.5cm}|p{2cm}|p{10.5cm}|} 
-    \caption{Defense}
-    \label{table:defense} \\ \hline
-    Title & Conference & Main Content \\ \hline
-    \endfirsthead \hline
-    Title & Conference & Main Content \\ \hline 
-    \endhead \hline
-    SEER\cite{zhu2024seer} & AAAI 2024 & 这篇文章介绍了一种名为SEER的新型后门检测算法，专门用于检测视觉-语言模型中的后门攻击。研究的动机源于现有单模态模型（如图像分类模型）的后门检测方法无法直接应用于多模态模型（如视觉-语言模型）的复杂性和搜索空间的增加。为此，作者提出了一种新方法，通过在视觉和语言模态共享的特征空间中联合搜索图像触发器和恶意目标文本来检测后门。该方法的主要步骤包括：初始化目标文本和图像触发器的特征表示，设计优化算法在图像和文本空间中联合搜索可能的后门触发器和目标文本，并通过分析搜索结果来判断模型是否存在后门。实验结果表明，SEER在各种设置下能够以超过92\%的检测率成功识别视觉-语言模型中的后门，并且无需访问训练数据或了解下游任务。文章还比较了SEER与现有方法的效率，表明SEER在计算效率和检测效果方面均具有显著优势。\\ \hline
+\subsubsection{基本设置}
 
-    Semantic Shield\cite{ishmam2024semantic} & CVPR 2024 & 这篇文章提出了一种名为“Semantic Shield”的方法，旨在通过精细化知识对齐来防御视觉-语言模型中的后门和投毒攻击。研究的动机在于，随着大规模视觉-语言模型在实际应用中的广泛使用，这些模型变得容易受到攻击，如通过向训练数据中注入恶意数据来操纵模型行为。现有的防御方法通常无法有效应对这些攻击，尤其是在对比学习的多模态模型中。该方法通过引入外部知识来指导模型关注与外部知识对齐的视觉区域，从而避免模型学习到与攻击信号相关的错误关联。具体来说，研究人员使用大型语言模型（如Vicuna）从图像字幕中提取潜在的知识元素（KE），并通过对比学习的方式将这些KE与图像区域对齐。此外，模型的注意力机制也被调整，使其更加关注与KE高度对齐的图像区域，从而降低对受攻击区域的依赖。\\ \hline
+在本实验中，我们采用了常用的联邦学习场景进行评估。具体设置如下：
 
-    DECREE\cite{feng2023detecting} & CVPR 2023 & 主要关注自监督学习中预训练图像编码器的后门检测问题，鉴于现有方法在处理不同类型的后门攻击时表现不一致，且通常需要标签数据或下游分类器，本文提出了一种无需标签数据或下游分类器的新方法。DECREE 通过利用输入图像特征的扰动性和鲁棒性之间的差异来识别潜在的后门攻击，采用了一种基于自适应优化的策略，有效地将干净样本与后门样本分离。 \\ \hline
-  
-    ASSET\cite{pan2023asset} & USENIX 2023 & 这篇文章介绍了一种名为“ASSET”的方法，旨在跨多种深度学习范式中实现稳健的后门数据检测。研究动机是当前的后门检测方法在不同的深度学习设置（如自监督学习和迁移学习）中的表现差异很大，尤其在面对最新的干净标签后门攻击时，现有方法表现不佳。为了解决这一问题，作者提出了ASSET方法，它通过主动诱导后门样本和干净样本之间的模型行为差异来促进它们的分离。具体来说，ASSET采用了一个两步优化过程：首先在一个干净的基础数据集上最小化损失，然后在整个包含后门样本的训练集上最大化同样的损失，从而使后门样本和干净样本在损失值上出现显著差异，进而实现样本的分离和检测。\\ \hline
-
-    MCLDef\cite{yue2023model} & ACM MM 2023 & 这篇文章介绍了一种名为“基于模型对比学习的后门消除”（Model-Contrastive Learning for Backdoor Elimination，简称MCLDef）的新方法。研究的动机是当前的后门攻击对深度神经网络（DNNs）构成了显著威胁，而现有的后门防御方法在降低攻击成功率（ASR）的同时，往往会显著降低模型对干净数据的分类准确性（BA）。为了解决这一问题，作者提出了MCLDef方法，该方法通过模型对比学习来消除DNN中的后门，并最大限度地减少对BA的影响。具体来说，MCLDef通过定义正对和负对的特征对来进行对比学习：正对指的是干净数据样本与其中毒对应数据的特征表示，负对则是中毒数据样本在后门模型和纯化模型中的特征表示。通过对比学习，MCLDef能够缩小或消除中毒数据在特征空间中的聚类，并将中毒数据的特征拉向其干净对应样本的特征，从而有效地消除后门攻击带来的影响。 \\ \hline
-
-    DPoE\cite{liu2023shortcuts} & Arxiv 2023 & 这篇文章提出了一种名为DPoE（Denoised Product-of-Experts）的后门防御框架，旨在应对自然语言处理（NLP）模型中由多种不同触发器引发的后门攻击。研究的动机在于，现有的后门防御方法主要针对显式触发器，而难以有效应对隐式或多种触发器混合的复杂攻击。DPoE方法的核心思想是通过设计一个由两个模型组成的集成框架：一个浅层模型专门捕捉后门攻击中存在的“捷径”，即错误关联；另一个主模型则避免学习这些“捷径”。此外，DPoE引入了去噪设计来减轻由后门攻击者造成的标签翻转问题，从而进一步增强防御效果。 \\ \hline
-
-    PSIM\cite{zhao2024defending} & arxiv 2024 & 这篇文章的主要内容是探讨参数高效微调（PEFT）方法在语言模型中的安全问题，特别是在模型的预训练阶段被植入后门的情况下。这种攻击被称为“权重中毒后门攻击”，发生在模型的预训练阶段，攻击者通过在训练数据中加入特定的触发器，并使用这些数据训练模型，从而在模型的权重中嵌入后门。当微调后的模型遇到这些触发器时，模型会按照攻击者的意图输出错误的结果。本文的主要目的是揭示PEFT方法在面对这种预训练阶段的权重中毒后门攻击时的脆弱性。研究表明，与全参数微调方法相比，PEFT更容易受到这种攻击，攻击成功率接近100\%。为了解决这一问题，作者提出了一种名为“中毒样本识别模块”（PSIM）的防御方法，通过预测置信度来识别和过滤可能被植入后门的样本，从而有效防御这些攻击，同时保持模型的分类准确性。 \\ \hline
+\begin{itemize}
+    \item \textbf{数据集}：我们使用了MNIST和CIFAR-10数据集。MNIST数据集包含60,000张28x28像素的灰度手写数字图像，分为10个类别。CIFAR-10【TODO:引用】数据集包含60,000张32x32像素的彩色图像，分为10个类别。
     
-    CleanCLIP\cite{bansal2023cleanclip} & ICCV 2023 & 这篇文章提出了一种名为CleanCLIP的方法，旨在减轻多模态对比学习模型（如CLIP）中数据投毒攻击的影响。研究动机是因为现有的多模态对比学习模型在训练过程中容易受到后门攻击的威胁，甚至少量的中毒样本就可以显著操控模型行为。CleanCLIP通过在模型预训练后进行微调来减弱这种攻击的影响。具体来说，该方法在微调过程中，通过同时应用多模态对比损失和自监督学习目标，使模型独立地学习每种模态（图像和文本）的表示，减少后门触发器与目标标签之间的错误关联。实验结果表明，CleanCLIP在不影响模型对干净样本性能的前提下，有效降低了多种后门攻击的成功率。此外，文章还讨论了不同的微调方法对清除后门触发器的效果，并发现CleanCLIP能够显著削弱这些攻击的影响。 \\ \hline
+    \item \textbf{模型}：在MNIST和CIFAR-10数据集上，我们使用了Vision Transformer (ViT) 模型，并使用LOAR进行微调。ViT 是一种基于 Transformer 架构的图像分类模型，它将图像划分为固定大小的patch，并将其输入到Transformer编码器中进行处理。
+    
+    \item \textbf{联邦相关机制（聚合算法）}：我们采用了经典的联邦平均（Federated Averaging, FedAvg）算法作为聚合机制。FedAvg算法通过聚合每个客户端在本地计算的模型更新，来生成全局模型。
+    
+\end{itemize}
 
-    SEER\cite{defense01} & AAAI2024 & 这篇文章介绍了一种名为SEER的创新算法，用于检测视觉-语言模型（Vision-Language Models）中的backdoor攻击。backdoor攻击是一种攻击方式，攻击者可以在模型中植入“后门”，当特定触发条件满足时，模型会表现出异常行为。为了防御这种攻击，SEER算法通过联合搜索图像中的触发器（触发器是攻击者放入图像中的特殊标记或模式，用于激活模型中的后门）和与之关联的恶意目标文本来检测是否存在backdoor。SEER算法的具体防御步骤如下：首先，SEER算法会初始化一个特定的文本表示，该表示是基于一个词典中的所有文本的平均特征。这一步的目的是为后续的搜索过程提供一个合理的起点。接下来，SEER通过优化算法在共享的特征空间中搜索图像中的潜在触发器和与之相关联的目标文本。这里的特征空间是指模型用来同时表示图像和文本的多维空间。SEER的目标是找到一种图像模式（即触发器）和一个目标文本，这两者在特征空间中具有非常高的相似性（这意味着触发器和目标文本之间存在很强的关联）。在搜索过程中，SEER会根据相似性计算结果来识别可能的backdoor。如果发现模型中存在一个图像触发器与某个目标文本之间的强关联，SEER就会标记该模型为可能存在backdoor。图像触发器：这是攻击者嵌入在图像中的特定模式或标记，当模型看到带有这个标记的图像时，会触发backdoor行为。比如在一张图片的角落放置一个特定的形状或颜色。强关联：在特征空间中，两个对象（如图像和文本）之间的高相似性意味着它们在这个空间中的表示非常接近，这种情况称为强关联。对于backdoor检测来说，如果一个图像触发器和目标文本之间的相似性过高，就意味着模型可能已经被攻击。通过这些步骤，SEER算法能够有效地检测出是否存在backdoor攻击，尤其是在模型训练数据和具体下游任务未知的情况下。这种方法不仅提高了检测的效率，而且在各种攻击场景下，SEER的检测准确率超过了92\%，表现出极高的可靠性和适应性。 \\ \hline
-    Revisiting Backdoor Attacks against Large Vision-Language Models\cite{defense02} & Arxiv(2024) & 这篇文章研究了视觉-语言大模型（LVLMs）在指令调优阶段面临的backdoor攻击的普遍性，特别是在训练和测试数据分布不一致的实际场景中。文章通过实验证明，大多数现有的backdoor攻击方法在这种跨域场景下的泛化性较差，但通过对攻击触发器的优化，文章展示了一种能够显著提高攻击成功率的新方法。具体防御步骤如下：1. 攻击触发器设计：文章首先分析了现有backdoor攻击的触发器模式，发现其与具体图像或模型无关的触发器往往具有更好的泛化能力。因此，作者设计了一种新的触发器模式，使其能够在不同的图像和文本域偏移的情况下，依然有效地触发backdoor攻击。2. 多模态数据的指令调优：为了构建一个多样化的指令集，文章采用了稳定扩散模型和大型语言模型（如GPT-3.5）来改变图像和文本域。具体而言，作者使用风格转换技术来改变图像的艺术风格，并通过文本摘要和扩展来调整文本信息密度。这些改变旨在测试不同数据分布下的backdoor攻击效果。3. 实验验证：通过在多个标准图像描述数据集上的实验，文章验证了不同类型backdoor攻击在跨域场景中的表现。结果表明，尽管图像域的变化通常会削弱大多数攻击的泛化性，但经过优化的触发器模式，如本文提出的新方法，能够显著提高攻击成功率，在某些场景下成功率甚至达到97\%以上。触发器：这是在模型训练过程中故意植入的特定模式，当模型在推理阶段遇到这种模式时，会表现出预设的异常行为。简单来说，触发器就像是一个隐藏在图像或文本中的“密码”，当模型看到这个“密码”时，它就会按照攻击者的预期做出反应。泛化能力：泛化能力指的是一个攻击方法在面对与训练时不同的数据分布时，仍能保持其攻击效果的能力。对于backdoor攻击来说，泛化能力越强，攻击就越难以被发现和防御。通过这些步骤，文章展示了在视觉-语言模型中，如何通过设计更具适应性的触发器，增强backdoor攻击的泛化性。这项研究强调了在跨域数据场景中进行防御的重要性，并指出现有防御方法可能无法完全防范这种复杂的攻击模式。 \\ \hline
-    BadVLMDriver\cite{defense03} & Arxive(2024) & 这篇文章提出了一种名为BadVLMDriver的物理backdoor攻击方法，专门针对集成了视觉-语言模型（VLMs）的自动驾驶系统。与传统依赖数字修改的backdoor攻击不同，BadVLMDriver利用日常生活中的常见物理物体作为触发器，例如红色气球，来引发自动驾驶系统中的不安全行为，如突然加速。通过这种方法，攻击者可以在实际场景中诱导自动驾驶汽车做出危险的决定，展示了集成VLMs的自动驾驶技术所面临的严重安全威胁。具体的攻击与防御步骤如下：1. 攻击触发器嵌入：首先，攻击者使用基于自然语言指令的生成模型来生成backdoor训练样本。在这些样本中，攻击者利用图像编辑技术将物理触发器（如气球）嵌入到图像中，并通过大型语言模型（LLM）生成包含恶意行为的文本响应。2. 视觉指令调优：随后，利用这些backdoor样本对VLM进行调优。在此过程中，VLM不仅学习了触发器与恶意行为之间的映射，同时保留了模型在正常输入下的功能。为了增强攻击效果，文章采用了一种新颖的视觉指令调优方案，在调优过程中结合了带有触发器的backdoor样本和不带触发器的正常样本。3. 防御策略：针对这种攻击，文章建议使用增量学习的方式进行防御，即在post-training阶段采用另一组正常样本对模型进行进一步调优。这种方法可以显著降低backdoor攻击的成功率，但其代价与常规的模型微调过程相当，对于依赖第三方VLM的自动驾驶公司来说可能具有挑战性。物理触发器：物理触发器是指现实生活中的物体，当这些物体出现在自动驾驶系统的摄像头视野中时，会触发VLM做出预设的恶意行为。增量学习：增量学习是一种防御策略，通过在模型训练完成后进一步微调模型，以降低backdoor攻击的效果。通过这项研究，文章强调了开发强大防御机制的紧迫性，以保护自动驾驶技术免受类似的物理backdoor攻击。 \\ \hline
-    SurveyLVLM\cite{defense04} & JOURNAL OF LATEX CLASS FILES(2024) & 这篇文章是一篇综述，系统地回顾了当前针对大型视觉-语言模型（LVLMs）的攻击方法，涵盖了各种现有的攻击形式，如对抗攻击（adversarial attacks）、越狱攻击（jailbreak attacks）、提示注入攻击（prompt injection attacks）以及数据投毒和后门攻击（data poisoning/backdoor attacks）。文章不仅介绍了每种攻击的具体实施方法，还探讨了它们的优缺点和背后的脆弱性。此外，文章还总结了当前用于LVLM攻击的资源，如数据集、模型和评估指标，最后提出了未来的研究方向，强调了持续发展和改进LVLMs安全措施的重要性。具体攻击方法：1. 对抗攻击（Adversarial Attacks）：通过在输入数据中引入细微的扰动，导致模型产生错误的或不期望的输出。这种攻击可以在白盒、灰盒和黑盒环境中实施，取决于攻击者对模型内部信息的掌握程度。2. 越狱攻击（Jailbreak Attacks）：通过操纵输入，使得模型突破其原有的限制，输出有害或未经授权的内容。这种攻击通常利用对抗性扰动或提示操作来实现，目的是绕过模型的安全防线。3. 提示注入攻击（Prompt Injection Attacks）：通过操纵视觉或文本提示，注入有害指令，从而改变模型的行为或输出。这种攻击可能导致模型生成错误、偏颇或有害的响应，尤其在依赖精确和准确响应的系统中具有危险性。4. 数据投毒/后门攻击（Data Poisoning/Backdoor Attacks）：攻击者在模型训练过程中故意引入恶意数据，导致模型在推理阶段表现异常。后门攻击通常在训练数据中嵌入触发器，当触发器被激活时，模型会表现出特定的有害行为。对抗攻击：这是通过在输入数据上施加微小的扰动，使得模型产生错误或预期外的输出。越狱攻击：指攻击者通过操纵输入数据，绕过模型的安全措施，使模型执行未经授权的操作。提示注入：通过在提示信息中注入恶意内容来改变模型的输出。数据投毒：通过在训练数据中加入恶意样本，使模型学习到错误的模式。未来研究方向：文章提出，未来研究应重点探索如何在没有模型内部信息的情况下实施攻击，提升攻击的跨模型适应性，以及如何更好地评估和对比不同攻击方法的有效性。 \\ \hline
-    Semantic Shield\cite{defense05} & CVPR2024 & 这篇文章提出了一种名为Semantic Shield的防御方法，旨在保护视觉-语言模型（VLMs）免受backdooring和数据投毒攻击的威胁。该方法通过细粒度的知识对齐机制来抵御攻击，使模型在训练过程中更加关注与外部知识对齐的视觉区域，从而避免学习到攻击者引入的虚假关联。具体的防御步骤如下：1. 知识元素提取：首先，Semantic Shield使用大语言模型（如Vicuna）从每个图像的字幕中提取潜在的视觉知识元素（Knowledge Elements，KEs）。这些KEs包含了图像中可以帮助识别目标的特征，如“厚毛皮”或“锋利的爪子”。2. 图像块与KE对齐：在训练过程中，Semantic Shield引入了一个新的目标函数，强制模型将图像块与相应的KE对齐。具体来说，模型通过计算图像块和KE的相似度来判断哪些图像块更相关，并优先关注这些与KE高度对齐的区域。3. 基于KE的注意力调制：为了进一步增强防御效果，Semantic Shield调整了视觉Transformer模型的注意力机制，使其更关注与KE对齐的图像区域。攻击者通常在图像中随机注入触发器或噪声，这些区域通常与KE的对齐度较低，因此通过这种调制，模型能够有效忽略这些被攻击的区域。4. 动态对比损失加权：为了降低受攻击样本在模型训练中的影响，Semantic Shield在对比学习过程中引入了动态加权机制。模型会根据图像块与KE的整体对齐度调整每个样本的损失权重，从而降低被攻击样本对模型的干扰。知识元素（KEs）：KEs是从图像字幕中提取出的视觉特征或属性，用于帮助模型更好地理解图像内容，例如“厚毛皮”代表动物的一个特征。对比学习：一种用于训练模型的技术，目的是将相似的样本在特征空间中拉近，将不相似的样本拉远。通过这些步骤，Semantic Shield能够显著提高VLMs在面对backdooring和数据投毒攻击时的鲁棒性，同时保持模型的整体性能。实验结果表明，Semantic Shield在多个数据集和攻击场景下表现出色，显著优于现有的防御方法。 \\ \hline
-    VL-Trojan\cite{defense06} & NeurIPS2024 & 这篇文章提出了一种名为VL-Trojan的多模态指令backdoor攻击方法，专门针对自回归视觉语言模型（Autoregressive Visual Language Models，VLMs）。文章揭示了现有backdoor攻击在自回归VLMs中的局限性，特别是在视觉编码器被冻结且攻击者只能有限或黑盒访问目标模型的情况下。为了解决这些问题，VL-Trojan通过隔离与聚类策略来生成图像触发器，并通过字符级迭代生成文本触发器，以提升攻击的有效性和转移性。具体攻击步骤如下：1. 图像触发器生成：文章通过对比优化方法来生成图像触发器，即使在视觉编码器被冻结的情况下，依然可以将中毒样本的特征与干净样本的特征分离开来。具体而言，攻击者生成一个触发器，能够将中毒图像的特征与干净图像的特征在特征空间中进行有效的隔离和聚类。2. 文本触发器生成：为了增强攻击的转移性，VL-Trojan提出了字符级迭代搜索方法生成文本触发器。这种方法通过逐步优化字符组成的文本触发器，以最大化中毒提示和干净提示之间的特征不相似度。3. 反向训练：在生成触发器后，攻击者将这些触发器嵌入到一组中毒样本中，并将这些样本加入到指令调优数据集中。通过使用这些中毒样本进行反向训练，攻击者能够在推理过程中，诱导模型在遇到这些触发器时生成预设的响应。通过这些步骤，VL-Trojan在有限访问和黑盒设置下依然能够实现有效的backdoor攻击，成功率高达99.82\%，显著超越了其他基准方法。 \\ \hline
-    ROCLIP\cite{defense07} & NeurIPS2023 & 这篇文章提出了一种名为ROCLIP的防御方法，用于在预训练阶段保护多模态视觉语言模型（如CLIP）免受数据投毒和后门攻击的威胁。ROCLIP通过破坏受攻击的图像和文本对之间的关联，有效地防止了这些攻击在模型训练期间的成功。具体的防御步骤如下：1. 随机生成的文本池：ROCLIP方法在训练期间保持一个由随机选择的文本组成的池。与传统方法不同，ROCLIP不再将每个图像与其对应的字幕匹配，而是将每个图像与池中与其最相似的文本匹配。通过这种方式，ROCLIP能够有效破坏投毒图像和有害字幕之间的关联。2. 数据增强：在图像和文本上应用各种增强策略进一步加强防御效果。这些增强措施包括图像的随机裁剪、水平翻转、颜色抖动和文本的同义词替换等。通过增强，ROCLIP不仅降低了攻击成功率，还提升了模型在下游任务中的表现。3. 分批训练：ROCLIP采用分批训练策略，每隔几轮更新一次图像与最相似文本的匹配对，并在其余轮次中使用标准的CLIP损失进行训练。这一策略确保了即使在面对强力攻击时，ROCLIP依然能够有效防御。实验结果：实验表明，ROCLIP能够显著降低投毒和后门攻击的成功率。在应对数据投毒攻击时，ROCLIP将攻击成功率从93.75\%降至12.5\%，而对于后门攻击，成功率从78\%降至0\%。同时，ROCLIP还能提升模型的线性探测准确率，并且在零样本任务中的表现与CLIP相当。 \\ \hline
-    FABE\cite{defense08} & ICML2024 & 这篇文章提出了一种基于因果推断的防御框架，名为前门调整背门消除（Front-door Adjustment for Backdoor Elimination，FABE），旨在保护语言模型（LLMs）免受backdoor攻击。与传统的依赖特定触发器特征的防御方法不同，FABE通过构建前门变量来区分伪相关和真实因果关系，有效地防止各种类型的backdoor攻击。具体防御步骤如下：1. 前门变量生成：FABE使用一个经过微调的语言模型（称为防御模型）来生成前门变量。前门变量是一个与输入语义等价的文本，但其生成的预测结果不会受到backdoor攻击的影响。2. 因果效应估计：通过前门调整，FABE将估算的因果效应分为两个阶段：首先计算输入文本对前门变量的影响，然后计算前门变量对最终预测的影响。这种方法通过精确的因果效应估计，有效地消除了由攻击触发器引入的混淆。3. 防御效果评估：在多个数据集上，FABE显著降低了多种攻击策略的成功率。例如，FABE将攻击成功率从93.63\%降低到15.12\%，大幅度优于传统防御方法，显示了其在应对复杂backdoor攻击时的强大防御能力。通过这些步骤，FABE为语言模型的backdoor攻击防御提供了一个新的思路，克服了传统方法的局限性，尤其是在无法预先知道攻击特征的情况下。 \\ \hline
-    Shadowcast\cite{defense09} & arXiv(2024) & 这个和王波的一样，是特朗普和拜登那篇。这篇文章提出了Shadowcast，一种针对视觉语言模型（VLMs）的隐秘数据投毒攻击方法。Shadowcast通过生成视觉上与正常样本无异的投毒样本，使VLM在处理日常任务时输出错误或误导性的文本描述。这种攻击方法在两个场景中表现出极高的有效性：标签攻击（Label Attack）和说服攻击（Persuasion Attack）。标签攻击旨在让模型错误地识别图像的类别，而说服攻击则通过生成连贯但误导性的描述来影响用户对图像的理解。具体攻击步骤如下：1. 文本生成：首先，攻击者使用一个预训练的视觉语言模型生成描述性文本，这些文本与投毒样本的图像内容匹配。随后，攻击者通过一个大语言模型对这些文本进行细化，以确保它们明确传达目标概念（如“健康食品”）。2. 图像扰动：然后，攻击者对这些图像施加不可察觉的扰动，使得投毒图像在特征空间中接近原始概念图像，同时保持与目标概念描述一致。这种扰动使得VLM在训练时学习到错误的特征关联。3. 投毒样本生成：最后，攻击者将这些被扰动的图像与相应的文本配对，形成投毒样本。在模型训练过程中，这些投毒样本会使模型错误地将原始概念图像与目标概念文本关联，从而实现攻击目的。实验结果：Shadowcast展示了其在不同攻击场景中的高效性，尤其在黑盒设置下，攻击成功率依然较高，表明了这种攻击方法的广泛适用性。此外，Shadowcast还展现了对抗数据增强和图像压缩技术的鲁棒性。 \\ \hline
-    Contextual Backdoor Attack\cite{defense10} & Springer2024 & 这篇文章提出了一种名为Contextual Backdoor Attack的新型攻击方法，旨在通过极少量的上下文提示数据对大型语言模型（LLMs）进行隐秘的背门攻击。此攻击方法特别针对由LLM生成的代码驱动的具身智能代理（如机器人和自动驾驶系统），通过在特定环境下使用上下文相关的触发器（文本或视觉触发器）来激活模型中的后门，从而导致具身智能代理在执行任务时表现出异常行为。具体的攻击步骤如下：1. 生成和优化中毒示例：攻击者首先利用对抗性上下文生成技术，构建包含中毒提示的示例，并通过LLM评估器不断优化这些示例，以确保它们能够有效地感染目标LLM的上下文环境。2. 双模态触发机制：在攻击实施中，文本触发器控制代码缺陷的生成，而视觉触发器则控制代码缺陷的执行。只有当用户输入包含特定触发词时，LLM才会生成带有缺陷的代码，且这些缺陷代码只有在环境中出现特定视觉触发器时才会被执行。3. 代码缺陷模式：文章设计了五种攻击模式，包括恶意行为、代理可用性、关闭控制、偏见内容和隐私提取，分别针对具身智能代理的不同方面进行攻击。这些模式可以导致机器人执行错误的动作、延迟执行、提取用户隐私信息或生成具有种族偏见的内容。实验结果：实验表明，Contextual Backdoor Attack在多个任务上都表现出了很高的攻击成功率，并且在实际的自动驾驶系统中也能有效实施。此外，该攻击还展现出对抗检测机制的鲁棒性，难以被常规方法识别和防御。 \\ \hline
+\subsubsection{参数取值表}
 
-\end{longtable}
+\[
+\begin{array}{|c|c|c|}
+\hline
+\text{参数} & \text{MNIST} & \text{CIFAR-10} \\
+\hline
+\text{学习率} & 0.01 & 0.01 \\
+\text{全局轮次} & 50 & 50 \\
+\text{本地批次} & 5 & 5 \\
+\text{客户端数量} & 20 & 20 \\
+\text{批次大小} & 64 & 64 \\
+\text{优化器} & \text{SGD} & \text{SGD} \\
+\text{模型} & \text{ViT} & \text{ViT} \\
+\hline
+\end{array}
+\]
+
+
+% \subsubsection{攻防相关}
+
+% \onecolumn
+% \begin{longtable}{|p{3.5cm}|p{2cm}|p{10.5cm}|} 
+%     \caption{Attack}
+%     \label{table:attack} \\ \hline
+%     Title & Conference & Main Content \\ \hline
+%     \endfirsthead \hline
+%     Title & Conference & Main Content \\ \hline 
+%     \endhead \hline
+%    Flip\cite{jha2023label} & Neurips(2023) &  本文提出了一种新颖的标签投毒攻击方法，称为FLIP。与传统的后门攻击不同，FLIP仅通过修改训练数据的标签即可实现对模型的控制，而无需更改图像本身。这种方法特别适用于当训练标签可能来自潜在恶意的第三方（如众包标注或知识蒸馏）的场景。本文通过实验展示了FLIP在多个数据集和模型架构上的高效性，证明了在仅污染少量标签的情况下，FLIP能够显著影响模型的预测结果。 \\ \hline
+%    % \cite{yang2023data} & ICML(2023) & 本文首次研究了针对多模态模型的投毒攻击，包括视觉和语言两种模态。研究的主要问题是：（1）语言模态是否也容易受到投毒攻击？（2）哪种模态更易受攻击？本文提出了三种针对多模态模型的投毒攻击，并通过在不同数据集和模型架构上的广泛评估，表明这些攻击可以在保持模型实用性的同时实现显著的攻击效果。为缓解这些攻击，本文还提出了预训练和后训练的防御措施，并证明这些防御措施能够显著降低攻击效果，同时保持模型的效用。\\ \hline
+%    Chameleon\cite{dai2023chameleon} & ICML(2023) & 这篇文章的主要贡献在于提出了Chameleon攻击方法，这是一种通过利用正常图像与被污染图像之间的关系，来增强后门在联邦学习（FL）系统中持久性的策略。通过对比学习调整图像嵌入距离，Chameleon成功延长了后门的存续时间，使其在多种数据集、后门类型和模型架构下的耐久性提高了1.2至4倍，显著优于现有方法。 \\ \hline
+%    Gradient Control\cite{gu2023gradient} & ACL(2023) & 这篇文章提出了一种新的梯度控制方法，旨在解决参数高效调优（PET）过程中后门攻击的遗忘问题。通过将后门注入过程视为多任务学习，文章引入了跨层梯度幅度归一化和层内梯度方向投影两种策略，以减少不同任务之间的梯度冲突和梯度大小的不平衡，从而增强后门攻击在用户微调模型后的效果。实验结果表明，该方法在情感分类和垃圾邮件检测任务中显著提高了后门攻击的持久性和有效性。 \\ \hline
+%    A3FL\cite{zhang2024a3fl} & Neurips(2024) & 这篇文章的主要贡献是提出了一种新的后门攻击方法A3FL，它通过对抗性自适应策略优化后门触发器，使其在联邦学习的全局训练动态中更持久、更难被检测到。与现有方法相比，A3FL显著提高了攻击的成功率和隐蔽性，并在多种防御机制下展现了出色的效果，揭示了现有防御方法的不足，强调了开发新防御策略的必要性。\\ \hline
+%    Shadowcast\cite{xu2024shadowcast} & Arxiv(2024) & 这篇文章主要介绍了一种针对视觉语言模型（VLMs）的隐蔽数据投毒攻击方法，称为Shadowcast。该方法通过向模型的训练数据中注入视觉上与正常图像几乎无法区分的投毒样本，从而误导模型在推理时生成错误或误导性的信息。文章探讨了两种攻击类型：标签攻击（Label Attack）和说服攻击（Persuasion Attack），前者旨在让模型错误识别图像类别，而后者通过生成具有说服力但错误的文本，改变用户对图像的认知。实验结果表明，Shadowcast攻击在多种VLM架构下都非常有效，且在不同的提示词和数据增强条件下依然保持攻击效果。\\ \hline
+%    BadCLIP\cite{liang2024badclip} & CVPR(2024) & 这篇文章提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，称为BadCLIP。BadCLIP通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。此外，该方法通过对抗性训练，增强了中毒样本的视觉特征，使得后门在模型经过清洁数据微调后仍能保持有效。实验结果显示，BadCLIP在多种防御机制下都表现出显著的攻击成功率，展示了其对现有防御方法的强大威胁。\\ \hline
+%    ImgTrojan\cite{tao2024imgtrojan} & arxiv(2024) & 文章主要讨论了一种名为“ImgTrojan”的攻击方法，该方法旨在通过在视觉语言模型（VLM）的训练数据中注入恶意的图像-文本对，从而突破模型的安全屏障。这种方法通过数据投毒的方式，将原本无害的图像与恶意的文本提示关联起来，使得经过投毒训练的模型在遇到这些图像时，可能生成有害的内容。这种攻击方式在实验中展示了极高的成功率，即使在训练数据中仅包含极少量的投毒样本。 \\ \hline
+%    % \cite{attack01} & arXiv preprint & 2024 & 本篇文章次揭示了在联邦学习环境下对大语言模型（LLM）进行指令调优时存在的安全漏洞。文章提出了一种简洁但有效的安全攻击方法，恶意客户端通过使用未对齐的数据来训练本地模型，从而大幅度削弱了全球模型的安全对齐性（“未对齐的数据”，是指那些与预期的安全或伦理规范不一致的数据。例如，未对齐的数据可能包含有害的、误导性的或是不道德的信息，而这些信息在普通情况下不会被用于训练模型）。实验表明，该攻击方法能够将模型的安全性降低高达70\%，而现有的防御方法在应对此类攻击时几乎无效，仅能提高4\%的安全性。为了解决这一问题，作者进一步提出了一种新的事后防御方法，即通过服务器端生成对齐数据并进一步对全局模型进行微调，从而增强模型的安全性（中央服务器在接收到各个客户端的更新后，会主动生成一组对齐的数据。这些对齐的数据是预先定义好的，确保与预期的安全和伦理规范一致。这些数据可能包含严格筛选过的内容，如道德上中立或积极的文本片段）。实验结果显示，这种防御方法能够将模型的安全性提高最多69\%，且不显著降低模型的有效性。（这篇看完了发现不是视觉大模型） \\ \hline
+%    % \cite{attack02} & arXiv preprint & 2024 & 本篇文章探讨了一种针对大语言模型（LLMs）的新型训练方法，称为目标潜在对抗性训练（Targeted Latent Adversarial Training, LAT），文章提出了通过在模型的潜在表示（latent representations）中引入针对性的扰动，来更有效地消除模型中顽固的不良行为（如后门攻击和模型“越狱”）。(潜在表示是指在神经网络的中间层中，数据通过多层非线性变换后所形成的特征表示。这些表示通常处于更高的抽象层次，与原始输入相比，能够捕捉到数据的深层次特征。在视觉大模型中，这些潜在表示可能包括图像的边缘、形状、纹理等更抽象的特征，而不再是具体的像素值。潜在表示在模型中扮演着至关重要的角色，因为它们是模型用来进行预测和决策的核心特征。)(针对性的扰动是指在训练或评估过程中，特意对模型的输入或潜在表示进行细微的修改或扰动，以诱导模型产生特定的（通常是不希望的）行为。通过这种方法，可以测试和增强模型在面对各种攻击时的鲁棒性。在本文中，作者使用潜在空间中的针对性扰动来模拟攻击，目的是强化模型的防御能力，使其能够抵抗类似的实际攻击，如后门攻击或越狱行为。)研究表明，与传统的对抗性训练相比，目标潜在对抗性训练可以显著提高模型抵抗这些攻击的能力，同时对模型的整体性能影响较小。文章通过实验验证了该方法在增强模型鲁棒性方面的有效性，尤其是在面对未知触发条件的后门攻击时，表现出色。  \\ \hline
+%    % \cite{attack03} & arXiv preprint & 2024 & 本文探讨了开放权重大语言模型（LLMs）在面对篡改攻击时的脆弱性，并提出了一种名为TAR（Tampering Attack Resistance）的方法，旨在增强这些模型的抗篡改能力。文章指出，现有的安全防护措施，如拒绝机制和偏好训练，容易在少量微调步骤后被攻击者绕过，导致模型被恶意修改。为此，TAR方法通过对抗性训练和元学习，设计了一种新的防护机制，使得即使在经历数千步的微调攻击后，模型仍能保持其原有的安全防护功能。实验结果显示，与现有方法相比，TAR显著提高了模型的抗篡改能力，同时保留了模型的正常功能。研究还通过大量红队评估验证了TAR方法的有效性，展示了其在应对各种复杂攻击时的鲁棒性。(红队评估是一种在网络安全和机器学习领域常用的测试方法，它通过模拟攻击者的行为来评估系统或模型的安全性和防御能力。红队通常扮演“敌方”角色，主动寻找和利用系统的漏洞，以测试系统在真实攻击场景下的表现。这种方法帮助识别和修复安全漏洞，使系统在面对潜在的实际攻击时更加稳健。这篇文章中研究人员通过设计多个测试对手，这些对手模拟了各种可能的攻击策略，试图篡改或破坏大语言模型的功能。文章中提到进行了28个不同的红队评估测试，每个测试都旨在突破TAR的防护机制。)文章中的攻击方式涉及通过微调大语言模型的权重来篡改其行为。攻击者可以在模型的开放权重上进行少量微调，使其在特定情况下产生不希望的输出。例如，攻击者可能会在输入特定触发词时，让模型生成有害内容或偏离其正常功能。\\ \hline
+%    % \cite{attack04} & arXiv preprint & 2024 & 这是一篇综述。本文主要介绍了以下攻击方式：\begin{itemize}
+%    %  \item 对抗性攻击：通过对输入数据进行微小的扰动，这些扰动虽然对人类几乎不可见，但会导致模型产生显著错误的输出，例如在图像分类中，可能会使模型将一个正常的图像误分类为完全不同的类别；
+%    %  \item 后门攻击：和之前咱做的一样；
+%    %  \item 数据中毒攻击：攻击者向模型的训练数据中注入恶意样本，这些样本会导致模型在遇到类似数据时输出错误结果，例如在物体识别任务中，中毒数据可能会导致模型误将无害物体识别为威胁；
+%    %  \item 模型逃逸：攻击者通过调整输入或模型参数，试图找到绕过模型防御机制的方法，使模型输出不受控制的内容，这种攻击常用于测试模型的防御效果；
+%    %  \item 多模态攻击：针对处理多种类型输入（如文本和图像）的模型，攻击者通过操纵一种模态的输入来影响另一种模态的输出，例如在多模态对话系统中，通过改变图像输入可能会影响系统的文本回应；
+%    %  \item 跨语言攻击：在多语言任务中，攻击者通过在一种语言中引入扰动来影响模型在另一种语言中的表现，这类攻击特别针对多语言翻译或生成模型，可能导致不同语言间的翻译不准确或失真。
+%    %  \end{itemize}\\ \hline
+%    % \cite{attack05} &  Advances in Neural Information Processing Systems 34 (NeurIPS 2021) & 2021 & 本篇文章讨了如何保护通过“彩票假设”（Lottery Ticket Hypothesis, LTH）找到的稀疏子网络（即“中奖票”）的所有权。文章提出了一种新的基于稀疏结构信息的验证方法，通过在网络的稀疏结构中嵌入签名来进行所有权验证。这种方法能够在白盒和黑盒场景下保护模型的知识产权，并且对细微调整（如微调和剪枝）具有很强的鲁棒性。研究还通过大量实验验证了该方法在多种模型（如ResNet-20、ResNet-18、ResNet-50）和数据集（如CIFAR-10和CIFAR-100）上的有效性，展示了其在应对移除攻击和模糊攻击时的坚韧性。具体攻击方式有：细微调整（Fine-tuning）攻击：对模型进行微调来改变模型的权重值，同时希望不改变网络的稀疏结构。这种攻击旨在通过调整权重，试图使嵌入的签名信息变得不可辨认或无效。然而，由于嵌入的信息是基于网络的稀疏结构（即被剪枝后的模型结构），细微调整难以改变这一基础结构，从而无法有效移除签名。剪枝（Pruning）攻击：攻击者尝试通过进一步剪枝来移除嵌入的签名信息。这种攻击的目的是通过减少模型的非零参数，使得嵌入的结构信息丢失。然而，文章中提出的嵌入方法确保了签名信息在极端稀疏的情况下仍能保留，即使剪枝比例达到一定程度，签名依然可以从稀疏结构中提取出来。模糊攻击（Ambiguity Attacks）：攻击者试图通过制造伪签名或模糊原有签名的信息来混淆所有权验证。这种攻击可能包括添加噪声、篡改稀疏结构等手段，旨在使得验证机制无法区分真实的所有权签名和伪造的信息。然而，文章中的验证方法通过设计稳健的结构嵌入机制，使得这种模糊攻击难以成功。(“签名”指的是嵌入到神经网络稀疏结构中的一种独特的标识信息。这种签名通过在模型的剪枝过程中，利用网络的稀疏性来实现。具体而言，当模型被剪枝后，一部分神经元和连接被移除，剩余的结构会呈现出一种特定的稀疏模式。作者通过在这种稀疏模式中嵌入一个特定的结构或模式，这个模式就是所谓的“签名”。这种签名是不可见的，但可以通过特定的验证过程来提取和识别。其主要功能是为网络的所有权提供证据，类似于给模型打上了一个“水印”。当有人试图非法复制或篡改模型时，这个嵌入的签名仍然可以被识别出来，从而验证模型的归属。签名的鲁棒性设计使其能够抵抗常见的攻击方式（如微调和进一步的剪枝），即使模型经历了这些操作，签名依然可以从其稀疏结构中被提取出来，证明模型的所有权。)(模型的所有权是指对一个机器学习模型（如神经网络模型）所拥有的法律和知识产权。所有权通常由开发者或公司拥有，表示他们对模型的设计、训练数据、训练方法以及最终生成的模型参数等有控制权和排他性使用权。这意味着只有模型的所有者有权利决定如何使用、修改、发布或授权使用该模型。（可能涉及到知识产权保护、商业机密的保密）)\\ \hline
+%    % \cite{attack06} & Portail HAL theses(theses.hal.science) & 2022 & 这篇文章有185页。本篇文章讨论了如何通过数字水印技术来保护机器学习模型的知识产权，防止模型被盗用。文章首先提供了当前水印技术的概述，并进一步扩展了这些技术在图像分类任务之外的应用，涵盖了回归、机器翻译和强化学习模型。作者还提出了针对模型托管平台的伪造攻击（即试图通过伪造水印来绕过验证）并介绍了一种基于公平性的水印技术，以增强模型在黑盒环境中的安全性。实验结果表明，这些水印技术不仅可以有效防止模型盗用，还能够在面对各种攻击时保持鲁棒性。
+%    % 数字水印是一种嵌入信息的技术，用于在数字内容（如图像、音频、视频或机器学习模型）中隐藏特定的信息，以表明所有权或版权。对于机器学习模型来说，数字水印是一种通过特定算法将标识信息嵌入到模型的权重、结构或输出中的技术。这种标识信息通常是不可见或难以察觉的，但可以通过特定的提取过程来验证。（数字水印的目的有：知识产权保护：开发者可以通过在模型中嵌入水印来证明模型的所有权，防止未经授权的复制和使用；盗版检测：如果一个模型被盗用或未经许可发布，水印可以作为证据，证明模型的来源和合法所有者；内容跟踪：水印可以帮助追踪模型的使用情况，尤其是在多个平台或用户之间共享时，确保模型的使用符合许可协议。） \\ \hline
+%     % \endfoot
+%     % \hline
+%     % \endlastfoot
+%     % \hline
+% \end{longtable}
+
+% \newpage
+% \onecolumn
+% \begin{longtable}{|p{3.5cm}|p{2cm}|p{10.5cm}|} 
+%     \caption{Defense}
+%     \label{table:defense} \\ \hline
+%     Title & Conference & Main Content \\ \hline
+%     \endfirsthead \hline
+%     Title & Conference & Main Content \\ \hline 
+%     \endhead \hline
+%     SEER\cite{zhu2024seer} & AAAI 2024 & 这篇文章介绍了一种名为SEER的新型后门检测算法，专门用于检测视觉-语言模型中的后门攻击。研究的动机源于现有单模态模型（如图像分类模型）的后门检测方法无法直接应用于多模态模型（如视觉-语言模型）的复杂性和搜索空间的增加。为此，作者提出了一种新方法，通过在视觉和语言模态共享的特征空间中联合搜索图像触发器和恶意目标文本来检测后门。该方法的主要步骤包括：初始化目标文本和图像触发器的特征表示，设计优化算法在图像和文本空间中联合搜索可能的后门触发器和目标文本，并通过分析搜索结果来判断模型是否存在后门。实验结果表明，SEER在各种设置下能够以超过92\%的检测率成功识别视觉-语言模型中的后门，并且无需访问训练数据或了解下游任务。文章还比较了SEER与现有方法的效率，表明SEER在计算效率和检测效果方面均具有显著优势。\\ \hline
+
+%     Semantic Shield\cite{ishmam2024semantic} & CVPR 2024 & 这篇文章提出了一种名为“Semantic Shield”的方法，旨在通过精细化知识对齐来防御视觉-语言模型中的后门和投毒攻击。研究的动机在于，随着大规模视觉-语言模型在实际应用中的广泛使用，这些模型变得容易受到攻击，如通过向训练数据中注入恶意数据来操纵模型行为。现有的防御方法通常无法有效应对这些攻击，尤其是在对比学习的多模态模型中。该方法通过引入外部知识来指导模型关注与外部知识对齐的视觉区域，从而避免模型学习到与攻击信号相关的错误关联。具体来说，研究人员使用大型语言模型（如Vicuna）从图像字幕中提取潜在的知识元素（KE），并通过对比学习的方式将这些KE与图像区域对齐。此外，模型的注意力机制也被调整，使其更加关注与KE高度对齐的图像区域，从而降低对受攻击区域的依赖。\\ \hline
+
+%     DECREE\cite{feng2023detecting} & CVPR 2023 & 主要关注自监督学习中预训练图像编码器的后门检测问题，鉴于现有方法在处理不同类型的后门攻击时表现不一致，且通常需要标签数据或下游分类器，本文提出了一种无需标签数据或下游分类器的新方法。DECREE 通过利用输入图像特征的扰动性和鲁棒性之间的差异来识别潜在的后门攻击，采用了一种基于自适应优化的策略，有效地将干净样本与后门样本分离。 \\ \hline
+  
+%     ASSET\cite{pan2023asset} & USENIX 2023 & 这篇文章介绍了一种名为“ASSET”的方法，旨在跨多种深度学习范式中实现稳健的后门数据检测。研究动机是当前的后门检测方法在不同的深度学习设置（如自监督学习和迁移学习）中的表现差异很大，尤其在面对最新的干净标签后门攻击时，现有方法表现不佳。为了解决这一问题，作者提出了ASSET方法，它通过主动诱导后门样本和干净样本之间的模型行为差异来促进它们的分离。具体来说，ASSET采用了一个两步优化过程：首先在一个干净的基础数据集上最小化损失，然后在整个包含后门样本的训练集上最大化同样的损失，从而使后门样本和干净样本在损失值上出现显著差异，进而实现样本的分离和检测。\\ \hline
+
+%     MCLDef\cite{yue2023model} & ACM MM 2023 & 这篇文章介绍了一种名为“基于模型对比学习的后门消除”（Model-Contrastive Learning for Backdoor Elimination，简称MCLDef）的新方法。研究的动机是当前的后门攻击对深度神经网络（DNNs）构成了显著威胁，而现有的后门防御方法在降低攻击成功率（ASR）的同时，往往会显著降低模型对干净数据的分类准确性（BA）。为了解决这一问题，作者提出了MCLDef方法，该方法通过模型对比学习来消除DNN中的后门，并最大限度地减少对BA的影响。具体来说，MCLDef通过定义正对和负对的特征对来进行对比学习：正对指的是干净数据样本与其中毒对应数据的特征表示，负对则是中毒数据样本在后门模型和纯化模型中的特征表示。通过对比学习，MCLDef能够缩小或消除中毒数据在特征空间中的聚类，并将中毒数据的特征拉向其干净对应样本的特征，从而有效地消除后门攻击带来的影响。 \\ \hline
+
+%     DPoE\cite{liu2023shortcuts} & Arxiv 2023 & 这篇文章提出了一种名为DPoE（Denoised Product-of-Experts）的后门防御框架，旨在应对自然语言处理（NLP）模型中由多种不同触发器引发的后门攻击。研究的动机在于，现有的后门防御方法主要针对显式触发器，而难以有效应对隐式或多种触发器混合的复杂攻击。DPoE方法的核心思想是通过设计一个由两个模型组成的集成框架：一个浅层模型专门捕捉后门攻击中存在的“捷径”，即错误关联；另一个主模型则避免学习这些“捷径”。此外，DPoE引入了去噪设计来减轻由后门攻击者造成的标签翻转问题，从而进一步增强防御效果。 \\ \hline
+
+%     PSIM\cite{zhao2024defending} & arxiv 2024 & 这篇文章的主要内容是探讨参数高效微调（PEFT）方法在语言模型中的安全问题，特别是在模型的预训练阶段被植入后门的情况下。这种攻击被称为“权重中毒后门攻击”，发生在模型的预训练阶段，攻击者通过在训练数据中加入特定的触发器，并使用这些数据训练模型，从而在模型的权重中嵌入后门。当微调后的模型遇到这些触发器时，模型会按照攻击者的意图输出错误的结果。本文的主要目的是揭示PEFT方法在面对这种预训练阶段的权重中毒后门攻击时的脆弱性。研究表明，与全参数微调方法相比，PEFT更容易受到这种攻击，攻击成功率接近100\%。为了解决这一问题，作者提出了一种名为“中毒样本识别模块”（PSIM）的防御方法，通过预测置信度来识别和过滤可能被植入后门的样本，从而有效防御这些攻击，同时保持模型的分类准确性。 \\ \hline
+    
+%     CleanCLIP\cite{bansal2023cleanclip} & ICCV 2023 & 这篇文章提出了一种名为CleanCLIP的方法，旨在减轻多模态对比学习模型（如CLIP）中数据投毒攻击的影响。研究动机是因为现有的多模态对比学习模型在训练过程中容易受到后门攻击的威胁，甚至少量的中毒样本就可以显著操控模型行为。CleanCLIP通过在模型预训练后进行微调来减弱这种攻击的影响。具体来说，该方法在微调过程中，通过同时应用多模态对比损失和自监督学习目标，使模型独立地学习每种模态（图像和文本）的表示，减少后门触发器与目标标签之间的错误关联。实验结果表明，CleanCLIP在不影响模型对干净样本性能的前提下，有效降低了多种后门攻击的成功率。此外，文章还讨论了不同的微调方法对清除后门触发器的效果，并发现CleanCLIP能够显著削弱这些攻击的影响。 \\ \hline
+
+%     SEER\cite{defense01} & AAAI2024 & 这篇文章介绍了一种名为SEER的创新算法，用于检测视觉-语言模型（Vision-Language Models）中的backdoor攻击。backdoor攻击是一种攻击方式，攻击者可以在模型中植入“后门”，当特定触发条件满足时，模型会表现出异常行为。为了防御这种攻击，SEER算法通过联合搜索图像中的触发器（触发器是攻击者放入图像中的特殊标记或模式，用于激活模型中的后门）和与之关联的恶意目标文本来检测是否存在backdoor。SEER算法的具体防御步骤如下：首先，SEER算法会初始化一个特定的文本表示，该表示是基于一个词典中的所有文本的平均特征。这一步的目的是为后续的搜索过程提供一个合理的起点。接下来，SEER通过优化算法在共享的特征空间中搜索图像中的潜在触发器和与之相关联的目标文本。这里的特征空间是指模型用来同时表示图像和文本的多维空间。SEER的目标是找到一种图像模式（即触发器）和一个目标文本，这两者在特征空间中具有非常高的相似性（这意味着触发器和目标文本之间存在很强的关联）。在搜索过程中，SEER会根据相似性计算结果来识别可能的backdoor。如果发现模型中存在一个图像触发器与某个目标文本之间的强关联，SEER就会标记该模型为可能存在backdoor。图像触发器：这是攻击者嵌入在图像中的特定模式或标记，当模型看到带有这个标记的图像时，会触发backdoor行为。比如在一张图片的角落放置一个特定的形状或颜色。强关联：在特征空间中，两个对象（如图像和文本）之间的高相似性意味着它们在这个空间中的表示非常接近，这种情况称为强关联。对于backdoor检测来说，如果一个图像触发器和目标文本之间的相似性过高，就意味着模型可能已经被攻击。通过这些步骤，SEER算法能够有效地检测出是否存在backdoor攻击，尤其是在模型训练数据和具体下游任务未知的情况下。这种方法不仅提高了检测的效率，而且在各种攻击场景下，SEER的检测准确率超过了92\%，表现出极高的可靠性和适应性。 \\ \hline
+%     Revisiting Backdoor Attacks against Large Vision-Language Models\cite{defense02} & Arxiv(2024) & 这篇文章研究了视觉-语言大模型（LVLMs）在指令调优阶段面临的backdoor攻击的普遍性，特别是在训练和测试数据分布不一致的实际场景中。文章通过实验证明，大多数现有的backdoor攻击方法在这种跨域场景下的泛化性较差，但通过对攻击触发器的优化，文章展示了一种能够显著提高攻击成功率的新方法。具体防御步骤如下：1. 攻击触发器设计：文章首先分析了现有backdoor攻击的触发器模式，发现其与具体图像或模型无关的触发器往往具有更好的泛化能力。因此，作者设计了一种新的触发器模式，使其能够在不同的图像和文本域偏移的情况下，依然有效地触发backdoor攻击。2. 多模态数据的指令调优：为了构建一个多样化的指令集，文章采用了稳定扩散模型和大型语言模型（如GPT-3.5）来改变图像和文本域。具体而言，作者使用风格转换技术来改变图像的艺术风格，并通过文本摘要和扩展来调整文本信息密度。这些改变旨在测试不同数据分布下的backdoor攻击效果。3. 实验验证：通过在多个标准图像描述数据集上的实验，文章验证了不同类型backdoor攻击在跨域场景中的表现。结果表明，尽管图像域的变化通常会削弱大多数攻击的泛化性，但经过优化的触发器模式，如本文提出的新方法，能够显著提高攻击成功率，在某些场景下成功率甚至达到97\%以上。触发器：这是在模型训练过程中故意植入的特定模式，当模型在推理阶段遇到这种模式时，会表现出预设的异常行为。简单来说，触发器就像是一个隐藏在图像或文本中的“密码”，当模型看到这个“密码”时，它就会按照攻击者的预期做出反应。泛化能力：泛化能力指的是一个攻击方法在面对与训练时不同的数据分布时，仍能保持其攻击效果的能力。对于backdoor攻击来说，泛化能力越强，攻击就越难以被发现和防御。通过这些步骤，文章展示了在视觉-语言模型中，如何通过设计更具适应性的触发器，增强backdoor攻击的泛化性。这项研究强调了在跨域数据场景中进行防御的重要性，并指出现有防御方法可能无法完全防范这种复杂的攻击模式。 \\ \hline
+%     BadVLMDriver\cite{defense03} & Arxive(2024) & 这篇文章提出了一种名为BadVLMDriver的物理backdoor攻击方法，专门针对集成了视觉-语言模型（VLMs）的自动驾驶系统。与传统依赖数字修改的backdoor攻击不同，BadVLMDriver利用日常生活中的常见物理物体作为触发器，例如红色气球，来引发自动驾驶系统中的不安全行为，如突然加速。通过这种方法，攻击者可以在实际场景中诱导自动驾驶汽车做出危险的决定，展示了集成VLMs的自动驾驶技术所面临的严重安全威胁。具体的攻击与防御步骤如下：1. 攻击触发器嵌入：首先，攻击者使用基于自然语言指令的生成模型来生成backdoor训练样本。在这些样本中，攻击者利用图像编辑技术将物理触发器（如气球）嵌入到图像中，并通过大型语言模型（LLM）生成包含恶意行为的文本响应。2. 视觉指令调优：随后，利用这些backdoor样本对VLM进行调优。在此过程中，VLM不仅学习了触发器与恶意行为之间的映射，同时保留了模型在正常输入下的功能。为了增强攻击效果，文章采用了一种新颖的视觉指令调优方案，在调优过程中结合了带有触发器的backdoor样本和不带触发器的正常样本。3. 防御策略：针对这种攻击，文章建议使用增量学习的方式进行防御，即在post-training阶段采用另一组正常样本对模型进行进一步调优。这种方法可以显著降低backdoor攻击的成功率，但其代价与常规的模型微调过程相当，对于依赖第三方VLM的自动驾驶公司来说可能具有挑战性。物理触发器：物理触发器是指现实生活中的物体，当这些物体出现在自动驾驶系统的摄像头视野中时，会触发VLM做出预设的恶意行为。增量学习：增量学习是一种防御策略，通过在模型训练完成后进一步微调模型，以降低backdoor攻击的效果。通过这项研究，文章强调了开发强大防御机制的紧迫性，以保护自动驾驶技术免受类似的物理backdoor攻击。 \\ \hline
+%     SurveyLVLM\cite{defense04} & JOURNAL OF LATEX CLASS FILES(2024) & 这篇文章是一篇综述，系统地回顾了当前针对大型视觉-语言模型（LVLMs）的攻击方法，涵盖了各种现有的攻击形式，如对抗攻击（adversarial attacks）、越狱攻击（jailbreak attacks）、提示注入攻击（prompt injection attacks）以及数据投毒和后门攻击（data poisoning/backdoor attacks）。文章不仅介绍了每种攻击的具体实施方法，还探讨了它们的优缺点和背后的脆弱性。此外，文章还总结了当前用于LVLM攻击的资源，如数据集、模型和评估指标，最后提出了未来的研究方向，强调了持续发展和改进LVLMs安全措施的重要性。具体攻击方法：1. 对抗攻击（Adversarial Attacks）：通过在输入数据中引入细微的扰动，导致模型产生错误的或不期望的输出。这种攻击可以在白盒、灰盒和黑盒环境中实施，取决于攻击者对模型内部信息的掌握程度。2. 越狱攻击（Jailbreak Attacks）：通过操纵输入，使得模型突破其原有的限制，输出有害或未经授权的内容。这种攻击通常利用对抗性扰动或提示操作来实现，目的是绕过模型的安全防线。3. 提示注入攻击（Prompt Injection Attacks）：通过操纵视觉或文本提示，注入有害指令，从而改变模型的行为或输出。这种攻击可能导致模型生成错误、偏颇或有害的响应，尤其在依赖精确和准确响应的系统中具有危险性。4. 数据投毒/后门攻击（Data Poisoning/Backdoor Attacks）：攻击者在模型训练过程中故意引入恶意数据，导致模型在推理阶段表现异常。后门攻击通常在训练数据中嵌入触发器，当触发器被激活时，模型会表现出特定的有害行为。对抗攻击：这是通过在输入数据上施加微小的扰动，使得模型产生错误或预期外的输出。越狱攻击：指攻击者通过操纵输入数据，绕过模型的安全措施，使模型执行未经授权的操作。提示注入：通过在提示信息中注入恶意内容来改变模型的输出。数据投毒：通过在训练数据中加入恶意样本，使模型学习到错误的模式。未来研究方向：文章提出，未来研究应重点探索如何在没有模型内部信息的情况下实施攻击，提升攻击的跨模型适应性，以及如何更好地评估和对比不同攻击方法的有效性。 \\ \hline
+%     Semantic Shield\cite{defense05} & CVPR2024 & 这篇文章提出了一种名为Semantic Shield的防御方法，旨在保护视觉-语言模型（VLMs）免受backdooring和数据投毒攻击的威胁。该方法通过细粒度的知识对齐机制来抵御攻击，使模型在训练过程中更加关注与外部知识对齐的视觉区域，从而避免学习到攻击者引入的虚假关联。具体的防御步骤如下：1. 知识元素提取：首先，Semantic Shield使用大语言模型（如Vicuna）从每个图像的字幕中提取潜在的视觉知识元素（Knowledge Elements，KEs）。这些KEs包含了图像中可以帮助识别目标的特征，如“厚毛皮”或“锋利的爪子”。2. 图像块与KE对齐：在训练过程中，Semantic Shield引入了一个新的目标函数，强制模型将图像块与相应的KE对齐。具体来说，模型通过计算图像块和KE的相似度来判断哪些图像块更相关，并优先关注这些与KE高度对齐的区域。3. 基于KE的注意力调制：为了进一步增强防御效果，Semantic Shield调整了视觉Transformer模型的注意力机制，使其更关注与KE对齐的图像区域。攻击者通常在图像中随机注入触发器或噪声，这些区域通常与KE的对齐度较低，因此通过这种调制，模型能够有效忽略这些被攻击的区域。4. 动态对比损失加权：为了降低受攻击样本在模型训练中的影响，Semantic Shield在对比学习过程中引入了动态加权机制。模型会根据图像块与KE的整体对齐度调整每个样本的损失权重，从而降低被攻击样本对模型的干扰。知识元素（KEs）：KEs是从图像字幕中提取出的视觉特征或属性，用于帮助模型更好地理解图像内容，例如“厚毛皮”代表动物的一个特征。对比学习：一种用于训练模型的技术，目的是将相似的样本在特征空间中拉近，将不相似的样本拉远。通过这些步骤，Semantic Shield能够显著提高VLMs在面对backdooring和数据投毒攻击时的鲁棒性，同时保持模型的整体性能。实验结果表明，Semantic Shield在多个数据集和攻击场景下表现出色，显著优于现有的防御方法。 \\ \hline
+%     VL-Trojan\cite{defense06} & NeurIPS2024 & 这篇文章提出了一种名为VL-Trojan的多模态指令backdoor攻击方法，专门针对自回归视觉语言模型（Autoregressive Visual Language Models，VLMs）。文章揭示了现有backdoor攻击在自回归VLMs中的局限性，特别是在视觉编码器被冻结且攻击者只能有限或黑盒访问目标模型的情况下。为了解决这些问题，VL-Trojan通过隔离与聚类策略来生成图像触发器，并通过字符级迭代生成文本触发器，以提升攻击的有效性和转移性。具体攻击步骤如下：1. 图像触发器生成：文章通过对比优化方法来生成图像触发器，即使在视觉编码器被冻结的情况下，依然可以将中毒样本的特征与干净样本的特征分离开来。具体而言，攻击者生成一个触发器，能够将中毒图像的特征与干净图像的特征在特征空间中进行有效的隔离和聚类。2. 文本触发器生成：为了增强攻击的转移性，VL-Trojan提出了字符级迭代搜索方法生成文本触发器。这种方法通过逐步优化字符组成的文本触发器，以最大化中毒提示和干净提示之间的特征不相似度。3. 反向训练：在生成触发器后，攻击者将这些触发器嵌入到一组中毒样本中，并将这些样本加入到指令调优数据集中。通过使用这些中毒样本进行反向训练，攻击者能够在推理过程中，诱导模型在遇到这些触发器时生成预设的响应。通过这些步骤，VL-Trojan在有限访问和黑盒设置下依然能够实现有效的backdoor攻击，成功率高达99.82\%，显著超越了其他基准方法。 \\ \hline
+%     ROCLIP\cite{defense07} & NeurIPS2023 & 这篇文章提出了一种名为ROCLIP的防御方法，用于在预训练阶段保护多模态视觉语言模型（如CLIP）免受数据投毒和后门攻击的威胁。ROCLIP通过破坏受攻击的图像和文本对之间的关联，有效地防止了这些攻击在模型训练期间的成功。具体的防御步骤如下：1. 随机生成的文本池：ROCLIP方法在训练期间保持一个由随机选择的文本组成的池。与传统方法不同，ROCLIP不再将每个图像与其对应的字幕匹配，而是将每个图像与池中与其最相似的文本匹配。通过这种方式，ROCLIP能够有效破坏投毒图像和有害字幕之间的关联。2. 数据增强：在图像和文本上应用各种增强策略进一步加强防御效果。这些增强措施包括图像的随机裁剪、水平翻转、颜色抖动和文本的同义词替换等。通过增强，ROCLIP不仅降低了攻击成功率，还提升了模型在下游任务中的表现。3. 分批训练：ROCLIP采用分批训练策略，每隔几轮更新一次图像与最相似文本的匹配对，并在其余轮次中使用标准的CLIP损失进行训练。这一策略确保了即使在面对强力攻击时，ROCLIP依然能够有效防御。实验结果：实验表明，ROCLIP能够显著降低投毒和后门攻击的成功率。在应对数据投毒攻击时，ROCLIP将攻击成功率从93.75\%降至12.5\%，而对于后门攻击，成功率从78\%降至0\%。同时，ROCLIP还能提升模型的线性探测准确率，并且在零样本任务中的表现与CLIP相当。 \\ \hline
+%     FABE\cite{defense08} & ICML2024 & 这篇文章提出了一种基于因果推断的防御框架，名为前门调整背门消除（Front-door Adjustment for Backdoor Elimination，FABE），旨在保护语言模型（LLMs）免受backdoor攻击。与传统的依赖特定触发器特征的防御方法不同，FABE通过构建前门变量来区分伪相关和真实因果关系，有效地防止各种类型的backdoor攻击。具体防御步骤如下：1. 前门变量生成：FABE使用一个经过微调的语言模型（称为防御模型）来生成前门变量。前门变量是一个与输入语义等价的文本，但其生成的预测结果不会受到backdoor攻击的影响。2. 因果效应估计：通过前门调整，FABE将估算的因果效应分为两个阶段：首先计算输入文本对前门变量的影响，然后计算前门变量对最终预测的影响。这种方法通过精确的因果效应估计，有效地消除了由攻击触发器引入的混淆。3. 防御效果评估：在多个数据集上，FABE显著降低了多种攻击策略的成功率。例如，FABE将攻击成功率从93.63\%降低到15.12\%，大幅度优于传统防御方法，显示了其在应对复杂backdoor攻击时的强大防御能力。通过这些步骤，FABE为语言模型的backdoor攻击防御提供了一个新的思路，克服了传统方法的局限性，尤其是在无法预先知道攻击特征的情况下。 \\ \hline
+%     Shadowcast\cite{defense09} & arXiv(2024) & 这个和王波的一样，是特朗普和拜登那篇。这篇文章提出了Shadowcast，一种针对视觉语言模型（VLMs）的隐秘数据投毒攻击方法。Shadowcast通过生成视觉上与正常样本无异的投毒样本，使VLM在处理日常任务时输出错误或误导性的文本描述。这种攻击方法在两个场景中表现出极高的有效性：标签攻击（Label Attack）和说服攻击（Persuasion Attack）。标签攻击旨在让模型错误地识别图像的类别，而说服攻击则通过生成连贯但误导性的描述来影响用户对图像的理解。具体攻击步骤如下：1. 文本生成：首先，攻击者使用一个预训练的视觉语言模型生成描述性文本，这些文本与投毒样本的图像内容匹配。随后，攻击者通过一个大语言模型对这些文本进行细化，以确保它们明确传达目标概念（如“健康食品”）。2. 图像扰动：然后，攻击者对这些图像施加不可察觉的扰动，使得投毒图像在特征空间中接近原始概念图像，同时保持与目标概念描述一致。这种扰动使得VLM在训练时学习到错误的特征关联。3. 投毒样本生成：最后，攻击者将这些被扰动的图像与相应的文本配对，形成投毒样本。在模型训练过程中，这些投毒样本会使模型错误地将原始概念图像与目标概念文本关联，从而实现攻击目的。实验结果：Shadowcast展示了其在不同攻击场景中的高效性，尤其在黑盒设置下，攻击成功率依然较高，表明了这种攻击方法的广泛适用性。此外，Shadowcast还展现了对抗数据增强和图像压缩技术的鲁棒性。 \\ \hline
+%     Contextual Backdoor Attack\cite{defense10} & Springer2024 & 这篇文章提出了一种名为Contextual Backdoor Attack的新型攻击方法，旨在通过极少量的上下文提示数据对大型语言模型（LLMs）进行隐秘的背门攻击。此攻击方法特别针对由LLM生成的代码驱动的具身智能代理（如机器人和自动驾驶系统），通过在特定环境下使用上下文相关的触发器（文本或视觉触发器）来激活模型中的后门，从而导致具身智能代理在执行任务时表现出异常行为。具体的攻击步骤如下：1. 生成和优化中毒示例：攻击者首先利用对抗性上下文生成技术，构建包含中毒提示的示例，并通过LLM评估器不断优化这些示例，以确保它们能够有效地感染目标LLM的上下文环境。2. 双模态触发机制：在攻击实施中，文本触发器控制代码缺陷的生成，而视觉触发器则控制代码缺陷的执行。只有当用户输入包含特定触发词时，LLM才会生成带有缺陷的代码，且这些缺陷代码只有在环境中出现特定视觉触发器时才会被执行。3. 代码缺陷模式：文章设计了五种攻击模式，包括恶意行为、代理可用性、关闭控制、偏见内容和隐私提取，分别针对具身智能代理的不同方面进行攻击。这些模式可以导致机器人执行错误的动作、延迟执行、提取用户隐私信息或生成具有种族偏见的内容。实验结果：实验表明，Contextual Backdoor Attack在多个任务上都表现出了很高的攻击成功率，并且在实际的自动驾驶系统中也能有效实施。此外，该攻击还展现出对抗检测机制的鲁棒性，难以被常规方法识别和防御。 \\ \hline
+
+% \end{longtable}
 
 \bibliographystyle{IEEEtran}
 \bibliography{attack_defense}
