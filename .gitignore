@@ -1,0 +1,9 @@
+__pycache__/
+cache/
+FL_Backdoor_CV/data
+FL_Backdoor_CV/dataset
+FL_Backdoor_CV/models
+FL_Backdoor_CV/result-with-date
+FL_Backdoor_CV/results
+FL_Backdoor_CV/saved_models
+# FL_Backdoor_CV/
