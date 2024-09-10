@@ -30,6 +30,7 @@ np.random.seed(0)
 from datetime import datetime
 
 import csv
+from FL_Backdoor_CV.image_helper import plot_image
 
 
 def save_results_to_csv(results, filename="results.csv"):
@@ -78,7 +79,7 @@ class Trainer:
                 range(params_loaded["participant_population"])[
                     args.number_of_adversaries :
                 ],
-                20,  # TODO 这里应该修改，其应该小于良性用户的数量
+                0,  # TODO 这里应该修改，其应该小于良性用户的数量
             )
             # params_loaded["participant_clean_data"] 存储的是150个良性用户的ID， 用来计算的neurotoxin攻击的mask
         else:
@@ -96,6 +97,15 @@ class Trainer:
         helper.load_distributed_data()
         helper.load_benign_data()
         helper.load_poison_data()
+
+        for x in helper.poisoned_train_data:
+            inputs_p, labels_p = helper.get_poison_batch(x)
+            plot_image(
+                inputs_p,
+                labels_p,
+                helper.classes,
+                -1,
+            )
 
         print(f"Time spent: {time.time() - start_time: .4f} seconds!")
         print(f"--------------------- L O A D E D ! ---------------------")

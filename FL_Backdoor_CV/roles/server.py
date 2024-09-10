@@ -294,6 +294,54 @@ class Server:
         ):
             model_updates[name] = local_param.data - param.data.view(1, -1)  # 广播机制
 
+            if args.attack_mode.lower() in [
+                "mr",
+                "dba",
+                "flip",
+                "edge_case",
+                "neurotoxin",
+                "combine",
+            ]:
+                if "num_batches_tracked" not in name:
+                    for i in range(args.participant_sample_size):
+                        if self.clients[self.participants[i]].malicious:
+                            mal_boost = 1
+                            if args.is_poison:
+                                if args.mal_boost:
+                                    if args.attack_mode.lower() in [
+                                        "mr",
+                                        "flip",
+                                        "edge_case",
+                                        "neurotoxin",
+                                        "combine",
+                                    ]:
+                                        mal_boost = (
+                                            args.mal_boost / args.number_of_adversaries
+                                        )
+                                    elif args.attack_mode.lower() == "dba":
+                                        mal_boost = args.mal_boost / (
+                                            args.number_of_adversaries
+                                            / args.dba_trigger_num
+                                        )
+                                else:
+                                    if args.attack_mode.lower() in [
+                                        "mr",
+                                        "flip",
+                                        "edge_case",
+                                        "neurotoxin",
+                                        "combine",
+                                    ]:
+                                        mal_boost = (
+                                            args.participant_sample_size
+                                            / args.number_of_adversaries
+                                        )
+                                    elif args.attack_mode.lower() == "dba":
+                                        mal_boost = args.participant_sample_size / (
+                                            args.number_of_adversaries
+                                            / args.dba_trigger_num
+                                        )
+                            model_updates[name][i] *= mal_boost / args.global_lr / 2
+
         # 保存模型梯度
         path = os.path.join(
             os.getcwd(),
@@ -303,9 +351,9 @@ class Server:
             pickle.dump(model_updates, file)
 
         # 判断前后两行是不是相等
-        first_layers = trained_models.values()[0]
-        is_all_rows_same = (first_layers[0] == first_layers).all(dim=1).all()
-        print(f"all rows are same: {is_all_rows_same}")
+        # first_layers = trained_models.values()[0]
+        # is_all_rows_same = (first_layers[0] == first_layers).all(dim=1).all()
+        # print(f"all rows are same: {is_all_rows_same}")
 
         # === aggregate ===
         global_update = None

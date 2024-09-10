@@ -20,7 +20,7 @@ poison_label_swaps: [0, 1, 6]
 size_of_secret_dataset: 500
 random_compromise: true
 
-retrain_poison: 1
+retrain_poison: 4
 poison_lr: 0.0005
 poison_momentum: 0.9
 poison_decay: 0.005

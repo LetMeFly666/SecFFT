@@ -333,14 +333,14 @@ class Client:
                             )
 
             # === malicious test ===
-            test_loss, test_acc = test_cv(
-                helper.benign_test_data, local_model, helper.classes, helper.processor
-            )
-            print(
-                f"Malicious id: {self.client_id}, "
-                f"Test accuracy: {test_acc: .4f}, "
-                f"Test loss: {test_loss: .4f}."
-            )
+            # test_loss, test_acc = test_cv(
+            #     helper.benign_test_data, local_model, helper.classes, helper.processor
+            # )
+            # print(
+            #     f"Malicious id: {self.client_id}, "
+            #     f"Test accuracy: {test_acc: .4f}, "
+            #     f"Test loss: {test_loss: .4f}."
+            # )
         else:
             optimizer = torch.optim.Adam(
                 local_model.parameters(),

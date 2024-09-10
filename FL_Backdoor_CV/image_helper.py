@@ -17,7 +17,7 @@ from peft import LoraConfig, get_peft_model
 
 random.seed(0)
 np.random.seed(0)
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 
 
@@ -31,7 +31,7 @@ def plot_image(images, lables, classes, batch_idx, adversarial_index=-1):
         ax = axes[row, col] if n_rows > 1 else axes[col]
         ax.set_title(f"Label: {classes[lables[i]]}", fontsize=8)
         if args.dataset.lower() in ["emnist", "fmnist"]:
-            ax.imshow(images[i].reshape(28, 28), cmap="gray")
+            ax.imshow(images[i][0].reshape(28, 28), cmap="gray")
             ax.axis("off")
 
         elif args.dataset.lower() == "cifar10":
