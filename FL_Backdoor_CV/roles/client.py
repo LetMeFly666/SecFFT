@@ -248,7 +248,7 @@ class Client:
                 mask_grad_list = None
                 if args.attack_mode.lower() == "neurotoxin":
                     assert helper.params["gradmask_ratio"] != 1
-                    num_clean_data = 20
+                    num_clean_data = 4
                     subset_data_chunks = random.sample(
                         helper.params["participant_clean_data"], num_clean_data
                     )

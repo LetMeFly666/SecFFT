@@ -79,7 +79,7 @@ class Trainer:
                 range(params_loaded["participant_population"])[
                     args.number_of_adversaries :
                 ],
-                0,  # TODO 这里应该修改，其应该小于良性用户的数量
+                4,  # TODO 这里应该修改，其应该小于良性用户的数量
             )
             # params_loaded["participant_clean_data"] 存储的是150个良性用户的ID， 用来计算的neurotoxin攻击的mask
         else:
