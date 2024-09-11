@@ -65,7 +65,16 @@ parser.add_argument(
     "--aggregation_rule",
     default="avg",
     type=str,
-    choices=["avg", "rlr", "flame", "foolsgold", "roseagg", "fltrust", "fedcie"],
+    choices=[
+        "avg",
+        "rlr",
+        "flame",
+        "foolsgold",
+        "roseagg",
+        "fltrust",
+        "fedcie",
+        "secfft",
+    ],
     help="aggregation method",
 )
 

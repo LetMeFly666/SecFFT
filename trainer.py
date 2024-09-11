@@ -223,7 +223,7 @@ class Trainer:
             start_time = time.time()
             # === participants selection phase ===
             self.server.select_participants()
-            self.participants[cur_round] = self.server.self.participants
+            self.participants[cur_round] = self.server.participants
             # === training and aggregating phase ===
             self.server.train_and_aggregate(
                 global_lr=args.global_lr, round=cur_round, root_path=file_path

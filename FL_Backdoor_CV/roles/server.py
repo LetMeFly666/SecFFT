@@ -25,6 +25,7 @@ from FL_Backdoor_CV.roles.aggregation_rules import foolsgold
 from FL_Backdoor_CV.roles.aggregation_rules import flame
 from FL_Backdoor_CV.roles.aggregation_rules import fltrust
 from FL_Backdoor_CV.roles.aggregation_rules import robust_lr
+from FL_Backdoor_CV.roles.aggregation_rules import secfft
 
 import pickle
 
@@ -357,7 +358,9 @@ class Server:
 
         # === aggregate ===
         global_update = None
-        if args.aggregation_rule.lower() == "avg":
+        if args.aggregation_rule.lower() == "secfft":
+            global_update = secfft(model_updates)
+        elif args.aggregation_rule.lower() == "avg":
             global_update = avg(model_updates)
         # elif args.aggregation_rule.lower() == 'fedcie':
         #     global_update = Server.fedcie(model_updates, previous_model_update, last_model_params)

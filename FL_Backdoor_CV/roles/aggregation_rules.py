@@ -29,7 +29,9 @@ from scipy.fftpack import dct
 def secfft(model_updates):
     updates = torch.cat(list(model_updates.values()), dim=1)  # 整合模型更新
 
-    updates_dct = dct(updates, type=2, axis=1, norm="ortho")  # 离散余弦变换（DCT）
+    updates_dct = dct(
+        updates.cpu().numpy(), type=2, axis=1, norm="ortho"
+    )  # 离散余弦变换（DCT）
     device = args.device
     updates_dct = torch.tensor(updates_dct[:, :20000], device=device)  # 提取低频成分
 
