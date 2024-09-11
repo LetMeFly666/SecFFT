@@ -140,7 +140,6 @@ $ n $ & The number of the nodes participating during each round. \\ \hline
 $D_i$ & The private local dataset of node $C_i$. \\ \hline
 
 % 单论识别
-$G^t$ & The global model at round $t$. \\ \hline
 $\theta_i^t$ & The local model of participant at round $t$. \\ \hline
 $\triangledown \theta_i^t$ & The local update of node $R_i$ during the $t$-th round. \\ \hline
 $G_i^t $ & The low-frequency components extracted from the update of node $R_i$ during the $t$-th round.. \\ \hline
@@ -153,6 +152,8 @@ $P_i^t$ & The distribution corresponding to $G_i^t$ after applying the Softmax f
 $Q^t$ &  The distribution corresponding to $\tilde{G}_{0}^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
 $O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
 \( {v}_{i}^{t'} \) & The vector of the high dimensional ball $t'$-th round.\\ \hline
+$lof_i$ & The LOF score of the $i$-th node\\ \hline
+$cre_i$ & The confidence of the $i$-th node\\ \hline
 
 % 待总结
 
@@ -183,16 +184,16 @@ $O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
 \State
 
 \State Step 2: Clean Ingredient Extraction
-\State $H^t \gets (G_0^t, G_1^t, \ldots, G_{\mathcal{M}}^t) \in \mathbb{R}^{d \times m}$ \Comment{Stacking to form Matrix $H^t$.}
+\State $H^t \gets (G_0^t, G_1^t, \ldots, G_{n}^t) \in \mathbb{R}^{d \times m}$ \Comment{Stacking to form Matrix $H^t$.}
 
 \State $\hat{H}^t \gets (H^t)^{T} H^t$
 \State $\lambda_{max}^t, \xi_{max}^t \gets \text{eig}(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
-\State $\tilde{G}^t_0 \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
+\State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
 
 \State
 
 \State Step 3: Kullback-Leibler Divergence Calculation
-\State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t_0)$
+\State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {Node $R_i$}
     \State $Ki \gets \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)$
 \EndFor
@@ -224,15 +225,15 @@ $O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
 % DCT: G_i^t[k] = \sum_{j=0}^{d-1} \bar{\theta_i^t}[j] \cos \left( \frac{\pi}{d} \left(j + \frac{1}{2}\right) k \right)
 % \end{equation}
 
-\item \textbf{Clean Ingredient Extraction}：在将模型更新向量转换到频域空间后，我们基于“恶意节点的数量少于良性节点”的假设，通过奇异值分解（SVD）从所有节点的频域向量中提取出“干净成分”，并以此作为区分恶意与良性节点的标准。其主要过程如算法\ref{alg:malicious-node-detection}的10-13行所示，将所有节点的频率向量堆叠为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{\mathcal{M}}^t}) \in \mathbb{R}^{m \times n}\)，其中每一列代表一个节点的低频向量。通过计算矩阵的最大奇异值及其对应的左奇异向量来作为相应的干净成分。即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净成分 \(\tilde{G}_0^t\)。这个干净成分\(\tilde{G}_0^t\)表示了良性节点的主要成分，能够有效地与恶意节点的异常行为区分开来，从而用于后续的恶意节点检测。
+\item \textbf{Clean Ingredient Extraction}：在将模型更新向量转换到频域空间后，我们基于“恶意节点的数量少于良性节点”的假设，通过奇异值分解（SVD）从所有节点的频域向量中提取出“干净成分”，并以此作为区分恶意与良性节点的标准。其主要过程如算法\ref{alg:malicious-node-detection}的10-13行所示，将所有节点的频率向量堆叠为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{n}^t}) \in \mathbb{R}^{d \times n}\)，其中每一列代表一个节点的低频向量。通过计算矩阵的最大奇异值及其对应的左奇异向量来作为相应的干净成分。即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净成分 \(\tilde{G}^t\)。这个干净成分\(\tilde{G}^t\)表示了良性节点的主要成分，能够有效地与恶意节点的异常行为区分开来，从而用于后续的恶意节点检测。
 
 \begin{equation}
-\tilde{G}^t_0 = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
+\tilde{G}^t = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
 \label{equation:singular}
 \end{equation}
 
 
-\item \textbf{Kullback-Leibler Divergence Calculation}：在得到干净分量后，我们计算每个节点的频率向量与干净成分之间的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的16-20行所示，对于每个节点的低频向量\(\mathbf{G}_i^t\)以及上一步求得的干净成分\(\tilde{G}^t_0\)，通过Softmax函数来将它们转换为相应的概率分布 \(P_i^t\) 和 \(Q^t\) 。然后利用KL散度计算每个节点概率分布\((P_i^t\)和干净分量概率分布 \(Q^t\) 之间的距离，得到相应的分布差异集合\(S = ({{KL}}_1, {{KL}}_2, \ldots, {{KL}}_n)\)。这个集合反映了每个节点频率向量相对于干净成分的异常程度，较大的KL散度值表示节点对应的频率向量与干净成分的分布差异较大，提示该节点可能是恶意节点。最终，这些分布差异将作为恶意节点检测的基础，通过进一步分析来区分良性节点和潜在的恶意节点。
+\item \textbf{Kullback-Leibler Divergence Calculation}：在得到干净分量后，我们计算每个节点的频率向量与干净成分之间的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的16-20行所示，对于每个节点的低频向量\(G_i^t\)以及上一步求得的干净成分\(\tilde{G}^t\)，通过Softmax函数来将它们转换为相应的概率分布 \(P_i^t\) 和 \(Q^t\) 。然后利用KL散度计算每个节点概率分布\((P_i^t\)和干净分量概率分布 \(Q^t\) 之间的距离，得到相应的分布差异集合\(S = ({{KL}}_1, {{KL}}_2, \ldots, {{KL}}_n)\)。这个集合反映了每个节点频率向量相对于干净成分的异常程度，较大的KL散度值表示节点对应的频率向量与干净成分的分布差异较大，提示该节点可能是恶意节点。最终，这些分布差异将作为恶意节点检测的基础，通过进一步分析来区分良性节点和潜在的恶意节点。
 
 % \begin{equation}
 % {{KL}}_i = D(P_i^t \| Q^t) = \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)
@@ -269,42 +270,60 @@ $O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
 
 \textbf{Motivation}: 为了规避异常检测，有很多通过多轮次的组合攻击来植入后门的攻击。本部分结合每个客户端的历史记录，通过识别攻击者最终的模型引导意图点来识别恶意节点。
 
-\textbf{Overview}: 前面的攻击中已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$t-T\leq t'< t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\varepsilon$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
+\textbf{Overview}: 前面的攻击中已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$\max\{t-T+1, 1\}\leq  t'\leq t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\zeta$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
 
 \begin{algorithm}
-\caption{Malicious Node Detection via History}
+\caption{Malicious Node Detection and Gradient Aggregation}
 \label{alg:malicious-node-detection-history}
 \begin{algorithmic}[1]
-\State \textbf{Input:} Global model history $\{G_{t-T}, G_{t-T+1}, \dots, G_{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \triangledown \theta_{i}^{t-T+1}, \dots, \triangledown \theta_{i}^{t-1}\}$, threshold $\varepsilon$
-\State \textbf{Output:} Set of clients marked as normal $U_{nor}$ and set of clients marked as malicious $U_{mal}$
-\State Step 1: Keep T-rounds History
-\For {Node $i$}
-    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_{i}^t)$
-    \State $DB.gradient\ \ +=\ \ \bar{\theta_i^t}$
-    \State $DB.model\ \ +=\ \ G_{t-1}$
+\State \textbf{Input:} Global model history $\{\theta_g^{t-T}, \dots, \theta_g^{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \dots, \triangledown \theta_{i}^{t-1}\}$, threshold $\varepsilon$
+\State \textbf{Output:} Sets of normal clients $U_{nor}$ and malicious clients $U_{mal}$
+
+\State \textbf{Step 1: Keep T-rounds History}
+\For {Client $i$}
+    \State Record flattened gradients $\bar{\theta_i^t} = Flatten(\triangledown \theta_{i}^t)$ and models $\theta_g^{t-1}$
+    \State Construct rays: $\widetilde{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}}$ for $t' = \max\{t-T+1, 1\}, \ldots, t$
 \EndFor
-\State Step 2: Construct Ray Model
-\For {Node $i$}
-    \State Construct rays using flattened global models and gradient updates:
-    \State $P_{i}^{t-j} = Flatten(G_{t-j-1})$, $\mathbf{d}_{i}^{t-j} = \bar{\theta}_{i}^{t-j}$ for $j = 0, 1, \ldots, T-1$
-\EndFor
-\State Step 3: Minimum Enclosing Hypersphere Calculation
-\For {Node $i$}
-    \State Initialize center $O_0$ and radius $r_0$
+
+\State \textbf{Step 2: Obtain the Purpose Intention}
+\For {Client $i$}
+    \State Initialize center $O_{i,0}$ and radius $r_{i,0}$
     \While {Not Converged}
-        \State Calculate projection points $Q_{i}^{t-j}$ and sort by distance to $O_k$
-        \State Compute $D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|$
-        \State Update $O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{i}^{t-j} - O_k)\right)$
-        \State Update $r_{k+1} = D_k$
+        \State Update center $O_{i,k+1}$ and radius $r_{i,k+1}$
     \EndWhile
-    \State Calculate confidence $C_i = \frac{1}{r_i + \epsilon}$
+    \State Calculate confidence $cre_i = \frac{1}{r_i + \rho}$
 \EndFor
-\State Step 4: Abnormal Detection
-\For {Node $i$}
-    \State Calculate adjusted LOF: $\text{adjusted\_lof}(x_i) = \text{LOF}(x_i) \times (r_i + \epsilon)$
-    \State Determine threshold $\tau'$ and classify nodes as normal or malicious
+
+\State \textbf{Step 3: Abnormal Detection}
+\For {Client $i$}
+    \For {Each point $O_j \neq O_i$}
+        \State Calculate distance $\|O_i - O_j\|$
+    \EndFor
+    \State Determine $\kappa$-distance $\widetilde{dis_i^\kappa}$ for $O_i$
+    \State Find neighbors $Nei_i$ within $\widetilde{dis_i^\kappa}$
+    \State Compute reachability distance $rea_{i,j} = \max\{\widetilde{dis_i^\kappa}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$
+    \State Calculate local reachability density $lrd_i = \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$
 \EndFor
-\State \textbf{Return} $U_{nor}, U_{mal}$
+% \For {Client $i$}
+%     \State Compute $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
+%     \If {$lof_i > 1$}
+%         \State Mark client $i$ as malicious, add to $U_{mal}$
+%     \Else
+%         \State Mark client $i$ as normal, add to $U_{nor}$
+%     \EndIf
+% \EndFor
+\State Calculate $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$ for each client $i$
+% \State $U_{mal} = \{i \,|\, lof_i > 1\}$
+% \State $U_{nor} = \{i \,|\, lof_i \leq 1\}$
+\State $U_{mal}, U_{nor} = \{i \,|\, lof_i > 1\}, \{i \,|\, lof_i \leq 1\}$
+
+\State \textbf{Step 4: Gradients Aggregation}
+\For {Client $i\in U_{nor}$}
+        \State Compute adjusted confidence $cre_i' = \tanh(cre_i)$
+        \State Normalize weights $w_i = \frac{cre_i'}{\sum_{i \in U_{nor}} cre_i'}$
+\EndFor
+
+\State \textbf{Output:} Aggregated global model update $\theta_g^t = \theta_g^{t-1} + \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i^t$
 \end{algorithmic}
 \end{algorithm}
 
@@ -314,160 +333,269 @@ $O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
 
 \item \textbf{Keep T-rounds History}
 
-“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$G_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_g$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$G_t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-G_{t-1}$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上伦次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
+“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$\theta_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_i$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$\theta^t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-\theta^t$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上轮次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
 
 \item \textbf{Obtain the Purpose Intention}
 
-“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上伦次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
+“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上轮次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
 
-“Construct Ray Model”的主要过程如下。对于每个客户端 \(R_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的更新变化历史。
-
-\begin{itemize}
-    \item 设 \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(i\) 上传的展平后的梯度变化向量。
-    \item 对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
+“Construct Ray Model”的主要过程如下。对于每个客户端 \(R_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的更新变化历史。设 \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(i\) 上传的展平后的梯度变化向量。
+    对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
 
     \begin{equation}
-    \overline{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1}),
+    \widetilde{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1}),
     \end{equation}
     \begin{equation}
     {v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}},
     \end{equation}
 
-    其中，\( \overline{\theta_{i}^{t'-1}} \) 是射线的起点，\( {v}_{i}^{t'} \) 是射线的方向向量。
-\end{itemize}
-
-“Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \zeta \) 比例的射线的最小超球。
-
-\begin{itemize}
-    \item 首先，设定初始球心 \( O_0 \) 为所有射线起点的几何中心，计算公式如下：
+    其中，\( \widetilde{\theta_{i}^{t'-1}} \) 是射线的起点，\( {v}_{i}^{t'} \) 是射线的方向向量。则射线方程为：
 
     \begin{equation}
-    O_0 = \frac{1}{T} \sum_{t'=\max\{t-T+1, 1\}}^{t} \overline{\theta_g^{t'-1}}.
+    l_i^{t'}=\widetilde{\theta_{i}^{t'-1}}+\alpha {v}_{i}^{t'},
     \end{equation}
 
-    \item 初始半径 \( r_0 \) 设定为从初始球心 \( O_0 \) 到所有射线起点的最大距离：
+    其中，$\alpha\in [0, +\infty)$为射线的自变量参数。
 
-    \begin{equation}
-    r_0 = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_0 - \overline{\theta_{g}^{t'}}\|.
-    \end{equation}
 
-    \item 接下来，采用迭代方法来更新球心和半径：
-    \begin{itemize}
-
-        \item TODO: O上标  投影点是什么
-    
-       \item 对于每次迭代 \( k \)，计算当前球心 \( O_k \) 到所有射线的最近投影点 \( \bar{O}_{i}^{t'} \)，按照距离当前球心的位置从小到大排序
-
-        \begin{equation}
-        \text{Sort}(\{ \| O - \overline{\theta_{i}^{t-T+1}} \| : i = 1, 2, \ldots, T \})
-        \end{equation}
-
-        并计算这些投影点的最大距离 \( D_k \)：
-
-        \begin{equation}
-        D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|.
-        \end{equation}
-
-        \begin{equation}
-        O_{k+1} = O_k + \alpha \left(\frac{1}{\lceil n\times \varepsilon\rceil} \sum_{1\leq j\leq \lceil n\times \varepsilon\rceil} (Q_{i}^{t-j} - O_k)\right),
-        \end{equation}
-
-        \begin{equation}
-        r_{k+1} = D_k,
-        \end{equation}
-
-        其中，\( \alpha \) 是学习率，通常取一个小的正数（如 0.1）。
-    \end{itemize}
-    \item 终止条件：当更新后的半径 \( r_{k+1} \) 与上一次的半径 \( r_k \) 相差小于一个预设的阈值 \( \epsilon \)（如 \( 10^{-6} \)），或者达到预设的最大迭代次数时，停止迭代。
-\end{itemize}
-
-这部分可以定义为一个有约束的最优化问题：
+“Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \zeta \) 比例的射线的最小超球。首先，设定初始球心 \( O_{i,0} \) 为所有射线起点的几何中心，计算公式如下：
 
 \begin{equation}
-\min_{O, r} \, r 
+    O_{i,0} = \frac{1}{T} \sum_{t'=\max\{t-T+1, 1\}}^{t} \widetilde{\theta_g^{t'-1}}.
 \end{equation}
-$$
-\text{s.t.} \quad \| O - (\overline{\theta_{i}^{t-T+1}} + t_i \mathbf{d}_i) \|^2 \leq r^2, \, 1\leq i\leq \lceil n \times \varepsilon \rceil
-$$
+
+初始半径 \( r_{i,0} \) 设定为从初始球心 \( O_{i,0} \) 到所有射线起点的最大距离：
+
+\begin{equation}
+r_{i,0} = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_{i,0} - \widetilde{\theta_{g}^{t'-1}}\|.
+\end{equation}
+
+接下来，采用迭代方法来更新球心和半径：
+
+对于每次迭代 \( k \)，计算当前球心 \( O_{i,k} \) 到所有射线的最近点 \( \tilde{O}_{i,k}^{t'} \)。对于每个节点$R_i$的第$t'(\max\{t-T+1, 1\}\leq  t'\leq t)$轮，对于射线 \( l_i^{t'} \)，找到球心 \( O_{i,k} \) 与当前射线的投影点 \( \hat O_{i,k}^{t'} \)，并计算参数 \( \alpha_k \)：
+
+
+    \begin{equation}
+    \alpha_k = \frac{(O_{i,k} - \widetilde{\theta_{i}^{t'-1}}) \cdot {v}_{i}^{t'}}{{v}_{i}^{t'}\cdot {v}_{i}^{t'}},
+    \end{equation}
+    则最近点 \( \tilde O_{i,k}^{t'} =\widetilde{\theta_{i}^{t'-1}}+\max \left\{ 0, \alpha_k\right\} {v}_{i}^{t'} \)。
+    
+    计算当前球心 \( O_{i,k} \) 到这些最近点 \( \tilde O_{i,k}^{t'} \) 的距离集合 \( Dis_{i,k}= \{ \| O_{i,k}-\tilde O_{i,k}^{t'} \|, \max\{t-T+1, 1\}\leq  t'\leq t\} \)，并按从小到大的顺序进行排序，然后暂时舍弃$1-\zeta$比例的射线来忽略离群点对计算过程的影响，得到集合${Dis}_{i,k}'$，保留射线对应轮次的集合记为$\tilde T$。将球心向着被保留的最近点中距离最远的点$\tilde{O}_{i,k}^{t_{max}'}$移动：
+    % ，$ {Dis}_{i,k}'=\text{Sort}(Dis_{i,k})$。
+        % 并计算这些投影点的最大距离 \( D_k \)：
+
+        % \begin{equation}
+        % D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|.
+        % \end{equation}
+
+    \begin{equation}
+    O_{i,k+1} = O_{i,k} + \eta' (\tilde{O}_{i,k}^{t_{max}'}-O_{i,k}),
+    \end{equation}
+
+    其中$\eta'$为学习率。移动后的球心半径为：
+
+        \begin{equation}
+        r_{i,k+1} =  \{ \max\{\| O_{i,k+1}-\tilde O_{i,k+1}^{t'} \|\}, t'\in \tilde T\} ,
+        \end{equation}
+
+    其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。终止条件：当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。这部分可以定义为一个有约束的最优化问题：
+
+
+\begin{equation}
+\min_{O_i, r_i} \quad r_i
+\end{equation}
+
+\begin{equation} 
+\text{s.t.} \quad \left| \left\{ t' \mid \| O_i - \tilde{O}_{i}^{t'} \| \leq r_i \right\} \right| \geq \zeta T.
+\end{equation}
+% \begin{equation} 
+% \quad |r_{i,k+1} - r_{i,k}| < \lambda \quad \text{or} \quad k \geq k_{max}
+% \end{equation}
+
+% \textbf{约束条件:}
+
+% 对于每个射线 $l_i^{t'}$，计算球心 $O$ 到射线的最近点 $\tilde{O}_{i}^{t'}$ 的距离。最近点的计算公式为:
+
+% \[
+% \tilde{O}_{i}^{t'} = \widetilde{\theta_{i}^{t'-1}} + \max \left\{ 0, \frac{(O - \overline{\theta_{i}^{t'-1}}) \cdot {v}_{i}^{t'}}{{v}_{i}^{t'} \cdot {v}_{i}^{t'}} \right\} {v}_{i}^{t'}
+% \]
+
+% 约束球的半径 $r$ 使其能够覆盖至少 $\zeta$ 比例的射线:
+
+
+% \textbf{迭代更新规则:}
+
+% \[
+% O_{k+1} = O_k + \eta' (\tilde{O}_{i,k}^{t_M'} - O_k), \quad r_{k+1} = \max_{t' \in \tilde T} \| O_{k+1} - \tilde{O}_{i,k+1}^{t'} \|
+% \]
+
+% 其中 $\tilde T$ 是保留的射线集合，满足覆盖至少 $\zeta$ 比例的射线，$\eta'$ 为学习率。
+
+% \textbf{终止条件:}
+
+% \[
+% \text{s.t.} \quad |r_{k+1} - r_k| < \lambda \quad \text{or} \quad k \geq \text{MaxIter},
+% \]
+
+% 其中 $\lambda$ 为预设的收敛阈值，$\text{MaxIter}$ 是最大迭代次数。
+
+% \begin{equation}
+% \min_{O_i, r_i} \, r_i 
+% \end{equation}
+% $$
+% \text{s.t.} \quad \| O_i - \tilde O_{i}^{t'}\|^2\leq r_i^2 \,
+% $$
+% $$
+% 1\leq t'\leq \lceil n \times \varepsilon \rceil
+% $$
 
 \item \textbf{Abnormal Detection}
 
-“Abnormal Detection”的主要过程基于局部离群因子（Local Outlier Factor, LOF）计算，并结合“最小覆盖球”得出的置信度来调整 LOF 分数。异常检测的目标是识别出异常的客户端，确保联邦学习过程中的全局模型安全性和鲁棒性。其主要流程如算法14-24行所示。
+“Abnormal Detection”的主要过程基于局部离群因子（Local Outlier Factor, LOF）得到异常点。LOF算法是一种基于密度的异常检测方法，算法的核心思想是通过计算一个数值$lof_i$来反应节点$i$的异常程度。$lof_i$大致意思是节点$i$目的意图点$O_i$周围意图点所处位置的平均密度比上$O_i$所在位置的密度。比值越大于$1$，则$O_i$所在位置的密度越小于周围其他意图点所在位置的密度，即$O_i$越有可能是异常点。首先定义意图点$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$，假设高维空间中存在节点$j$的意图点$O_j$，则有$O_j$与$O_i$之间的距离为$\|O_i-O_j\|$，如果满足以下两个条件，我们就认为$\widetilde{dis_i^\kappa}=\|O_i-O_j\|$：
 
 \begin{itemize}
-    \item 首先，计算局部离群因子（LOF）。对于一个样本点 \(x_i\)，其局部可达密度（Local Reachability Density, LRD）定义为其相对于 \(\varepsilon\)-邻域内点的平均可达距离的倒数：
-
-    \begin{equation}
-    \text{LRD}(x_i) = \frac{1}{\frac{1}{\varepsilon} \sum_{x_j \in \mathcal{N}_\varepsilon(x_i)} \text{reach-dist}_\varepsilon(x_i, x_j)},
-    \end{equation}
-
-    其中，\(\text{reach-dist}_\varepsilon(x_i, x_j)\) 是点 \(x_i\) 到其邻居 \(x_j\) 的可达距离，定义为：
-
-    \begin{equation}
-    \text{reach-dist}_\varepsilon(x_i, x_j) = \max(\text{dist}(x_i, x_j), \varepsilon\text{-dist}(x_j)),
-    \end{equation}
-
-    这里，\(\eta\varepsilon\text{-dist}(x_j)\) 表示点 \(x_j\) 到其第 \(\varepsilon\) 个最近邻的距离。
-
-    \item 对于点 \(x_i\)，其局部离群因子（LOF）定义为其邻域内所有点的局部可达密度与自身局部可达密度的比值的平均值：
-
-    \begin{equation}
-    \text{LOF}(x_i) = \frac{1}{\varepsilon} \sum_{x_j \in \mathcal{N}_\varepsilon(x_i)} \frac{\text{LRD}(x_j)}{\text{LRD}(x_i)}.
-    \end{equation}
-
-    \item 接下来，基于“最小覆盖球”方法计算得到的置信度来调整 LOF 分数。假设通过“最小覆盖球”算法得到了客户端 \(i\) 的最小覆盖球半径 \(r_i\)，定义置信度 \(C_i\) 为半径的倒数：
-
-    \begin{equation}
-    C_i = \frac{1}{r_i + \epsilon},
-    \end{equation}
-
-    其中，\(\epsilon\) 是一个很小的正数，用于避免除零错误。
-
-    \item 使用置信度 \(C_i\) 的倒数来调整 LOF 分数，使得置信度越高的点，其调整后的 LOF 分数越低：
-
-    \begin{equation}
-    \text{adjusted\_lof}(x_i) = \text{LOF}(x_i) \times (r_i + \epsilon).
-    \end{equation}
-
-    \item 计算调整后的 LOF 分数的均值 \(\mu_{\text{adjusted\_lof}}\) 和标准差 \(\sigma_{\text{adjusted\_lof}}\)，然后使用以下公式设置阈值 \(\tau'\)：
-
-    \begin{equation}
-    \tau' = \mu_{\text{adjusted\_lof}} + k \times \sigma_{\text{adjusted\_lof}},
-    \end{equation}
-
-    其中，\(k\) 是一个\textbf{敏感性系数}（sensitivity coefficient），其选择对异常检测的结果具有重要影响。为了在精确度与召回率之间取得平衡，\(k\) 的值应通过\textbf{基于数据驱动的交叉验证策略}来确定。具体而言，可以在训练集中使用不同的 \(k\) 值进行多次迭代，计算每种情况下的检测性能指标（如精确度、召回率和 F1 分数），并通过优化这些指标选择最优的 \(k\) 值。此外，选择 \(k\) 时也可以考虑使用贝叶斯优化（Bayesian Optimization）等先进的超参数调优方法，以自适应地选择最能反映数据特征的敏感性系数值。对于检测结果中大于该阈值的点，将其判定为异常点。
+    \item 在样本空间中，至少存在$\kappa$个意图点$O_j'$，使得$\|O_i-O_j'\|\leq \|O_i-O_j\|$, 其中$j'\neq i$；
+    \item 在样本空间中，至多存在$\kappa-1$个意图点$O_j'$，使得$\|O_i-O_j'\|< \|O_i-O_j\|$, 其中$j'\neq i$。
 \end{itemize}
+
+总的来说，$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$表示高维空间中距离第$\kappa$远的点。之后定义意图点$O_i$的第$\kappa$距离邻域$Nei_i$为到$O_i$距离不超过$\widetilde{dis_i^\kappa}$的所有意图点的集合。由于可能同时存在多个第$\kappa$距离的数据，所以$|Nei_i|\geq \kappa$。可以想象，离群度越大的意图点的$\kappa$距离往往较大，离群度越小的意图点的$\kappa$距离往往较小。之后定义意图点$O_i$相对于意图点$O_j$的可达距离：
+
+\begin{equation}
+rea_{i,j}=\max\{\widetilde{dis_i^\kappa}, \|O_i-O_j\|\},
+\end{equation}
+
+也就是说，如果意图点$O_j$远离意图点$O_i$，则两者之间的可达距离就是他们之间的实际距离$\|O_i-O_j\|$；而如果二者距离足够近，则可达距离用意图点$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$代替。之后定义意图点$O_i$的局部可达密度$lrd_i$为其$Nei_i$所有意图点的平均可达距离的倒数，即：
+
+\begin{equation}
+lrd_i=1/(\frac{\sum_{j\in Nei_i} rea_{i,j}}{|Nei_i|})
+\end{equation}
+
+此时，若有重复点，则可能导致$lrd$变为无限大。$lrd_i$的可以理解为意图点$O_i$所处位置的密度，密度越高则意图点$O_i$越有可能属于同一簇，密度越低则意图点$O_i$越有可能是离群点。也就是说，如果意图点$O_i$和周围邻域点是同一簇，则可达距离可能为较小的$\widetilde{dis_i^\kappa}$，导致可达距离之和较小，密度值较高；如果$O_i$和周围邻居意图点较远，则可达距离可能会取较大的$\|O_i-O_j\|$，导致可达距离之和较大，密度值较低，越有可能是离群点。最后，我们定义意图点$O_i$的局部离群因子$lof_i$为其$Nei_i$所有意图点的局部可达密度与其自身局部可达密度的比值的平均值，即：
+
+\begin{equation}
+    lof_i=\frac{\sum_{j\in Nei_i}\frac{lrd_j}{lrd_i}}{|Nei_i|}=\frac{\sum_{j\in Nei_i} lrd_j}{|Nei_i|\cdot lrd_i}
+\end{equation}
+
+如果$lof_i$比较接近$1$，则说明意图点$O_i$与其邻域点密度差不多，$O_i$可能和邻域属于同一簇；如果$lof_i$小于$1$，则说明意图点$O_i$的密度高于其邻域点的密度，$O_i$为密集点；如果$lof_i$大于$1$，则说明意图点$O_i$的密度低于其邻域点的密度，$O_i$可能是离群点。总之，LOF算法主要通过比较每个意图点$O_i$和其邻域点的密度来判断$O_i$是否为离群点，密度越低，则越有可能是离群点。而密度主要是通过点之间的距离来计算的，点之间的距离越远密度越低，距离越近密度越高。
+
+计算每个节点$i$的局部离群因子$lof_i$，将$lof_i$大于$1$的客户端视为异常客户端，并将其梯度丢弃。
+
+% \begin{itemize}
+%     \item 首先，计算局部离群因子（LOF）。对于一个样本点 \(x_i\)，其局部可达密度（Local Reachability Density, LRD）定义为其相对于 \(\varepsilon\)-邻域内点的平均可达距离的倒数：
+
+%     \begin{equation}
+%     \text{LRD}(x_i) = \frac{1}{\frac{1}{\varepsilon} \sum_{x_j \in \mathcal{N}_\varepsilon(x_i)} \text{reach-dist}_\varepsilon(x_i, x_j)},
+%     \end{equation}
+
+%     其中，\(\text{reach-dist}_\varepsilon(x_i, x_j)\) 是点 \(x_i\) 到其邻居 \(x_j\) 的可达距离，定义为：
+
+%     \begin{equation}
+%     \text{reach-dist}_\varepsilon(x_i, x_j) = \max(\text{dist}(x_i, x_j), \varepsilon\text{-dist}(x_j)),
+%     \end{equation}
+
+%     这里，\(\eta\varepsilon\text{-dist}(x_j)\) 表示点 \(x_j\) 到其第 \(\varepsilon\) 个最近邻的距离。
+
+%     \item 对于点 \(x_i\)，其局部离群因子（LOF）定义为其邻域内所有点的局部可达密度与自身局部可达密度的比值的平均值：
+
+%     \begin{equation}
+%     \text{LOF}(x_i) = \frac{1}{\varepsilon} \sum_{x_j \in \mathcal{N}_\varepsilon(x_i)} \frac{\text{LRD}(x_j)}{\text{LRD}(x_i)}.
+%     \end{equation}
+
+%     \item 接下来，基于“最小覆盖球”方法计算得到的置信度来调整 LOF 分数。假设通过“最小覆盖球”算法得到了客户端 \(i\) 的最小覆盖球半径 \(r_i\)，定义置信度 \(C_i\) 为半径的倒数：
+
+%     \begin{equation}
+%     C_i = \frac{1}{r_i + \epsilon},
+%     \end{equation}
+
+%     其中，\(\epsilon\) 是一个很小的正数，用于避免除零错误。
+
+%     \item 使用置信度 \(C_i\) 的倒数来调整 LOF 分数，使得置信度越高的点，其调整后的 LOF 分数越低：
+
+%     \begin{equation}
+%     \text{adjusted\_lof}(x_i) = \text{LOF}(x_i) \times (r_i + \epsilon).
+%     \end{equation}
+
+%     \item 计算调整后的 LOF 分数的均值 \(\mu_{\text{adjusted\_lof}}\) 和标准差 \(\sigma_{\text{adjusted\_lof}}\)，然后使用以下公式设置阈值 \(\tau'\)：
+
+%     \begin{equation}
+%     \tau' = \mu_{\text{adjusted\_lof}} + k \times \sigma_{\text{adjusted\_lof}},
+%     \end{equation}
+
+%     其中，\(k\) 是一个\textbf{敏感性系数}（sensitivity coefficient），其选择对异常检测的结果具有重要影响。为了在精确度与召回率之间取得平衡，\(k\) 的值应通过\textbf{基于数据驱动的交叉验证策略}来确定。具体而言，可以在训练集中使用不同的 \(k\) 值进行多次迭代，计算每种情况下的检测性能指标（如精确度、召回率和 F1 分数），并通过优化这些指标选择最优的 \(k\) 值。此外，选择 \(k\) 时也可以考虑使用贝叶斯优化（Bayesian Optimization）等先进的超参数调优方法，以自适应地选择最能反映数据特征的敏感性系数值。对于检测结果中大于该阈值的点，将其判定为异常点。
+% \end{itemize}
 
 
 \item \textbf{Gradients Aggregation}
 
-在上一步已经剔除了恶意客户端后，本部分将使用主观逻辑模型（Subjective Logic Model）进行剩余客户端的梯度聚合。主观逻辑模型是一种基于概率论和信任度的数学框架，能够有效地处理不确定性和不一致性信息。在联邦学习场景中，主观逻辑模型可以用于在不完全信任的环境下对客户端上传的梯度进行加权聚合，从而提高全局模型的稳健性。其主要流程如算法25-29行所示。
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig5-before-agg.jpg}
+    \caption{Benign and Malicious Nodes Before Aggregation}
+    \label{fig:before-agg}
+\end{figure}
 
-\begin{itemize}
-    \item \textbf{定义主观逻辑模型的信任参数}：
+剔除了异常节点后，依据正常节点的置信度$cre$进行聚合。其中定义：
 
-    对于每个被认为是正常的客户端 \( C_i \)，根据其上传的梯度更新 \( \triangledown \theta_i \)，定义主观逻辑模型中的信任参数，包括\textbf{信任度}（Belief）、\textbf{不信任度}（Disbelief）和\textbf{不确定度}（Uncertainty）。信任度 \( b_i \) 可以根据每个客户端的历史表现或其他统计指标来定义。对于本次的应用，信任度可以与上一步异常检测中调整后的 LOF 分数成反比。
+\begin{equation}
+    cre_i=\frac{1}{r_i+\rho},
+\end{equation}
 
-    \item \textbf{计算每个客户端的证据权重}：
+$\rho$是一个很小的正数，以防分母为$0$。
 
-    基于定义的信任参数，为每个客户端 \( C_i \) 计算其证据权重 \( w_i \)。证据权重可以表示为信任度 \( b_i \) 的函数形式，例如：\( w_i = f(b_i) \)，其中 \( f(b_i) \) 可以是线性或非线性的映射函数。
+如图\ref{fig:before-agg}所示，使用LOF算法识别恶意客户端可以剔除潜在的恶意节点，但是在正常的节点中，同样存在一些置信度很低的节点。这些节点的最小覆盖球甚至可能和异常节点有一定交集。因此，在聚合的过程中，这些置信度较低的点所占的权重就应该越低。
 
-    \item \textbf{加权聚合客户端梯度}：
+试想，假设有两个节点的最小覆盖超球的半径都很小，但是相差倍数很高，那么它们计算出来的置信度相差倍数也会很高。但其实它们的意图点都十分明确，因此权重应该都比较高且相差不应很大。所以我们可以使用激活函数Tanh来对置信度进行加权处理：
 
-    使用证据权重 \( w_i \) 对所有正常客户端的梯度更新 \( \triangledown \theta_i \) 进行加权聚合，以得到全局模型的梯度更新：
+\begin{equation}
+    cre_i'=\tanh(cre_i),
+\end{equation}
 
-    \begin{equation}
-    \triangledown \theta_{\text{global}} = \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i
-    \end{equation}
+激活函数Tanh在$0$到$\infty$范围内是一个上升又快到慢的单调递增函数。当$cre_i\to 0$时$cer_i'\to 0$，也就是说节点$i$的最小覆盖球半径$r_i$很大时该节点在聚合时的权重很小；当$cre_i\to \infty$时$cer_i'\to 1$，也就是说节点$i$的最小覆盖球半径$r_i$很小时该节点在聚合时的权重较大。这样，我们就可以对每个加权处理过的置信度$cer_i'$进行归一化处理，得到权重$w_i$。其中：
 
-    其中，\( U_{nor} \) 是所有被判定为正常的客户端集合。
+\begin{equation}
+    w_i=\frac{cre_i'}{\sum_{i=1}^{n}cre_i'},
+\end{equation}
 
-    \item \textbf{更新全局模型}：
+因此第$t$轮模型的梯度聚合公式为：
 
-    使用聚合后的梯度更新全局模型参数，以继续下一轮的联邦学习迭代。
-\end{itemize}
+\begin{equation}
+    \theta_g^t = \theta_g^{t-1}+\sum_{i=1}^{n}w_i\triangledown \theta_i^t,
+\end{equation}
 
-通过使用主观逻辑模型对客户端梯度进行聚合，能够有效利用信任度信息来优化全局模型的更新过程，减少因恶意客户端或不确定性导致的模型偏差。
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{results/prob-history-Visualization of Client Intentions and Anomalies.png}
+    \caption{使用模拟数据得到的结果}
+    \label{fig:result-of-histry}
+\end{figure}
+
+% 在上一步已经剔除了恶意客户端后，本部分将使用主观逻辑模型（Subjective Logic Model）进行剩余客户端的梯度聚合。主观逻辑模型是一种基于概率论和信任度的数学框架，能够有效地处理不确定性和不一致性信息。在联邦学习场景中，主观逻辑模型可以用于在不完全信任的环境下对客户端上传的梯度进行加权聚合，从而提高全局模型的稳健性。其主要流程如算法25-29行所示。
+
+% \begin{itemize}
+%     \item \textbf{定义主观逻辑模型的信任参数}：
+
+%     对于每个被认为是正常的客户端 \( C_i \)，根据其上传的梯度更新 \( \triangledown \theta_i \)，定义主观逻辑模型中的信任参数，包括\textbf{信任度}（Belief）、\textbf{不信任度}（Disbelief）和\textbf{不确定度}（Uncertainty）。信任度 \( b_i \) 可以根据每个客户端的历史表现或其他统计指标来定义。对于本次的应用，信任度可以与上一步异常检测中调整后的 LOF 分数成反比。
+
+%     \item \textbf{计算每个客户端的证据权重}：
+
+%     基于定义的信任参数，为每个客户端 \( C_i \) 计算其证据权重 \( w_i \)。证据权重可以表示为信任度 \( b_i \) 的函数形式，例如：\( w_i = f(b_i) \)，其中 \( f(b_i) \) 可以是线性或非线性的映射函数。
+
+%     \item \textbf{加权聚合客户端梯度}：
+
+%     使用证据权重 \( w_i \) 对所有正常客户端的梯度更新 \( \triangledown \theta_i \) 进行加权聚合，以得到全局模型的梯度更新：
+
+%     \begin{equation}
+%     \triangledown \theta_{\text{global}} = \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i
+%     \end{equation}
+
+%     其中，\( U_{nor} \) 是所有被判定为正常的客户端集合。
+
+%     \item \textbf{更新全局模型}：
+
+%     使用聚合后的梯度更新全局模型参数，以继续下一轮的联邦学习迭代。
+% \end{itemize}
+
+% 通过使用主观逻辑模型对客户端梯度进行聚合，能够有效利用信任度信息来优化全局模型的更新过程，减少因恶意客户端或不确定性导致的模型偏差。
 \end{enumerate}
 
 % \textbf{时间上不连续的攻击}
@@ -480,7 +608,7 @@ $$
 
 % \textbf{具体检测方法}
 
-% 这些攻击都难以检测，但是不论其方式再怎么千变万化，最终一定要达到攻击者所想达到的目标。我们对训练过程进行建模，每次中央服务器下发的模型视为高维空间中的一个点，而客户端训练后上传的梯度视为从这个点出发的一个向量。这样，对于每个客户端，我们就可以得到个有很多具有起点的向量的图。由于梯度是诱导模型变换的方向，因此攻击者若想要达到攻击目的，不论其攻击过程有多么地曲折和隐蔽，其所有向量最终指向的目的区域一定是和良性客户端不同的。我们将这些高维空间中具有起点的绝大多数向量的目的汇聚区域称为“汇聚点”。在允许一定返回的离群值的前提下，我们有理由认为一个客户端的汇聚点就是这个客户端的最终目的。因此问题就变成了如何寻找高维空间中多条具有起点的向量的汇聚点了。TODO: 精美图一张。
+% 这些攻击都难以检测，但是不论其方式再怎么千变万化，最终一定要达到攻击者所想达到的目标。我们对训练过程进行建模，每次中央服务器下发的模型视为高维空间中的一个点，而客户端训练后上传的梯度视为从这个点出发的一个向量。这样，对于每个客户端，我们就可以得到个有很多具有起点的向量的图。由于梯度是诱导模型变换的方向，因此攻击者若想要达到攻击目的，不论其攻击过程有多么地曲折和隐蔽，其所有向量最终指向的目的区域一定是和良性客户端不同的。我们将这些高维空间中具有起点的绝大多数向量的目的汇聚区域称为“汇聚点”。在允许一定返回的离群值的前提下，我们有理由认为一个客户端的汇聚点就是这个客户端的最终目的。因此问题就变成了如何寻找高维空间中多条具有起点的向量的汇聚点了。
 
 % 这其实是属于有约束的最优化问题。不失一般性，我们可以将其视为一个近似最小覆盖超球的问题。
 

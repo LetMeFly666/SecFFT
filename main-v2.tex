@@ -1,0 +1,1201 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amsfonts}
+%\usepackage{algorithmic}
+%\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=scriptsize,labelfont=sf,textfont=rm]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{cite}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+
+\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{algpseudocode}
+\usepackage{makecell}
+
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{ragged2e}
+\usepackage{latexsym, amssymb, verbatim, amsmath}
+\usepackage{amsmath,bm}
+\usepackage{multirow}
+\usepackage{mathtools}
+\usepackage{subeqnarray}
+\usepackage{cases}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+%\usepackage{subfigure}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{cite}
+\usepackage[]{chapterbib}
+\usepackage{enumerate}
+
+\usepackage[dvipsnames, svgnames, x11names]{xcolor}
+\usepackage{algorithm,algpseudocode,float}
+\makeatletter
+\newcommand{\rmnum}[1]{\romannumeral #1}
+\newcommand{\Rmnum}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+\begin{document}
+
+\title{SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Backdoor Attacks in IoRT Networks}
+ 
+\author{Zan Zhou, %~\IEEEmembership{Student Member,~IEEE}, 
+Yao Su, Shujie Yang, Bo Wang, Tengfei Li, Changqiao Xu,~\IEEEmembership{Senior Member,~IEEE}
+% <-this % stops a space
+\thanks{Z. Zhou, H. Li, S. Huang, S. Yang, P. Guo, and C. Xu are with the State Key Laboratory of Networking and Switching Technology, Beijing University of Posts and Telecommunications, Beijing 100876, P.R. China. E-mail: \{zan.zhou, lihongjing, swhsz, sjyang, guopeng, cqxu\}@bupt.edu.cn. 
+	}  % <-this % stops a space
+%\thanks{Y. Zhuang is with the Research Institute of China Telecom, Ave Zhongshan, Guangzhou 510630, China. E-mail: 13316094433@chinatelecom.cn.}% <-this % stops a space
+% \thanks{L. Zhong is with the Information Engineering College, Capital Normal University, Beijing 100048, China. E-mail: zhonglj@cnu.edu.cn (Corresponding author).}% <-this % stops a space
+\thanks{Zhenhui Yuan is with Northumbria University, United Kingdom. E-mail: zhenhui.yuan@warwick.ac.uk.}% <-this % stops a space
+%\thanks{This paper was produced by the IEEE Publication Technology Group. They are in Piscataway, NJ.}% <-this % stops a space
+%\thanks{Manuscript received April 19, 2021; revised August 16, 2021.}
+}
+
+% The paper headers
+\markboth{Journal of \LaTeX\ Class Files,~Vol.~14, No.~8, August~2021}%
+{Shell \MakeLowercase{\textit{et al.}}: A Sample Article Using IEEEtran.cls for IEEE Journals}
+
+%\IEEEpubid{0000--0000/00\$00.00~\copyright~2021 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+\maketitle
+
+\begin{abstract}
+
+
+
+
+Fairness-aware federated learning (FFL) plays a crucial role in mitigating bias against specific demographic groups (e.g., gender, race, occupation) during collaborative training. 
+Along with the ever-emerging new attack paradigms like gradient leakage and model poisoning, the reliability of FFL also obtains lots of research attention. Either UAV nodes or FFL aggregators could be untrusted adversaries. 
+Although multiple security mechanisms involving encryption, obfuscation, Byzantine-robustness, and detection have been proposed, concrete to UAV networks, the majority of existing solutions are unfeasible due to high heterogeneity and limited resources among participants. 
+Hence, in this paper, we propose mutually reliable FFL (MR-FFL), a stratified community-based framework to facilitate privacy protection (FFL aggregator's reliability) and poisoning elimination (client nodes' reliability) jointly for FFL in heterogeneous UAV networks. 
+We first divide UAV nodes into both peer communities (PC) and colleague communities (CC) according to cross-participant similarity and task-oriented fitness, respectively. 
+Thus, the arbitrarily settled learning tasks following fair principles can be efficiently completed by fine-tuned colleague communities, even in the presence of a large degree of heterogeneity among peer communities. 
+Then, we integrate community-specific differential privacy into the MR-FFL process, to achieve privacy amplification as well as efficient and personal collaborative training at the same time. 
+More importantly, we proposed a community-based credit evaluation to resist poisoning attacks in heterogeneous environments. 
+The results on several standard datasets also highlight the performance of MR-Fed in terms of fairness, accuracy, and integrity jointly.
+
+% Fairness-aware federated learning (FFL) assumes a pivotal role in mitigating bias directed at specific demographic groups (e.g., gender, race, occupation) during collaborative training. The escalating threat landscape, characterized by emerging attack paradigms like gradient leakage and model poisoning, intensifies research scrutiny on FFL's reliability, recognizing the potential untrustworthiness inherent in UAV nodes and FFL aggregators. 
+% Despite a plethora of proposed security mechanisms encompassing encryption, obfuscation, Byzantine robustness, and detection, their pragmatic application within UAV networks faces challenges due to pronounced heterogeneity and resource constraints among participants. Consequently, this paper introduces a novel approach, termed mutually reliable FFL (MR-FFL), presenting a stratified community-based framework. This framework concurrently addresses privacy protection (FFL aggregator's reliability) and poisoning elimination (edge nodes' reliability) within the context of FFL in heterogeneous UAV networks. 
+% The categorization of UAV nodes into peer communities and colleague communities based on cross-participant similarity and task-oriented fitness facilitates the efficient completion of learning tasks adhering to fair principles. This effectiveness persists even in the presence of considerable heterogeneity among peer communities. Additionally, community-specific differential privacy is integrated into the MR-FFL process, achieving simultaneous privacy amplification and efficient, personalized collaborative training. 
+% A noteworthy contribution lies in the introduction of a community-based credit evaluation system, designed to resiliently counteract poisoning attacks in heterogeneous environments. Empirical evaluations on standard datasets underscore the comprehensive performance of MR-Fed, highlighting its effectiveness in promoting fairness, privacy, and integrity within federated learning systems.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+Federated learning, fairness, privacy, integrity, heterogeneous UAV network.
+\end{IEEEkeywords}
+
+\section{Introduction}
+%\IEEEPARstart{T}{his} file is intended to serve as a ``sample article file'' for IEEE journal papers produced under \LaTeX\ using IEEEtran.cls version 1.8b and later. The most common elements are covered in the simplified and updated instructions in ``New\_IEEEtran\_how-to.pdf''. For less common elements you can refer back to the original ``IEEEtran\_HOWTO.pdf''. It is assumed that the reader has a basic working knowledge of \LaTeX. Those who are new to \LaTeX \ are encouraged to read Tobias Oetiker's ``The Not So Short Introduction to \LaTeX ,'' available at: \url{http://tug.ctan.org/info/lshort/english/lshort.pdf} which provides an overview of working with \LaTeX.
+%FFL很重要
+%作为的一种，
+
+%随着具身智能技术的迅猛进步和在智慧城市、智能交通、无人机等领域的广泛应用，机器人节点从执行等单一任务的agent，逐步向集合了感知交互和自主决策的智能体进行了演进，这也成为了未来IORT网络的重要发展趋势之一。而视觉大模型作为一种新兴热门的图像感知和物体识别技术，能够成为支撑智能机器人对周围环境进行认识和理解不可或缺的基础。
+With the rapid advancements in embodied intelligence technology and its widespread application in multiple areas such as smart cities, intelligent transportation, and unmanned aerial vehicles, robotic nodes have evolved from agents performing singular tasks to intelligent entities that integrate perception, interaction, and autonomous decision-making jointly. This evolution has become one of the critical developmental trends for Internet of Robotic Things (IoRT) networks. Large Vision Language Model (LVLM), as an emerging and popular image perception and object recognition technology, has the potential to be an indispensable foundation supporting intelligent robots in understanding and interpreting their surrounding environments. 
+
+%视觉大模型极大地增强了机器人的视觉语义理解能力，使其能够对多模态任务进行更加智能化的决策响应，然而在真实应用环境中，仍存在以下问题：1）由于真实世界的多样性和异构性，通用大模型在特定任务上往往无法较好迁移通用知识，需要进行微调才能显著提升识别精度（例如，针对动目标检测任务，交通机器人主要针对车辆、行人，而工厂机器人则主要针对机床，两者轮廓、行为模式范围均存在较大差异）；2）此外，将来自不同源头的离散化、碎片化分布的海量数据进行传输并汇聚于主服务器，将会导致巨大的通信开销和时间延迟，无法满足具身智能业务的需求，且存在潜在的隐私风险。
+Vision foundation models significantly enhance the visual semantic understanding capabilities of robots, enabling them to make more intelligent decisions in multimodal tasks. However, there are still challenges in real-world applications: 1) Due to the diversity and heterogeneity of the real world, general foundation models often cannot effectively transfer their general knowledge to specific tasks, necessitating fine-tuning to significantly improve recognition accuracy (for example, traffic robots primarily focus on vehicles and pedestrians for moving object detection tasks, while factory robots mainly target machine tools, with significant differences in their contours and behavioral patterns); 2) Additionally, transmitting and aggregating massive amounts of discretized and fragmented data from different sources to a central server can result in significant communication overhead and latency, failing to meet the demands of embodied intelligence applications and posing potential privacy risks. 
+
+%因此，如图1所示，在pretrained的通用视觉大模型的基础上，不同于核心节点汇聚所有数据而后训练垂域模型的集中式微调，通过联邦微调技术，驱使大量机器人节点利用私有数据和算力计算微调梯度而后聚合，能够在不交互原始数据的前提下，充分利用整个IORT网络中各个节点的知识和算力资源，成为了一种非常具有前景的解决方案。
+As illustrated in Fig. 1, a promising solution is to employ federated fine-tuning (FFT) technology rather than adopting a centralized fine-tuning approach where core nodes aggregate all data before training domain-specific models. This approach drives numerous robotic nodes to compute fine-tuning gradients using private data and computational resources and then aggregate these gradients, effectively leveraging the knowledge and computational resources of each node in the IoRT network without exchanging raw data.
+
+%攻击识别
+Alongside the conti
+Spectral Distribution
+Consistency Verification
+Poisoning with 
+Detection
+
+As a preeminent collaborative artificial intelligence paradigm, Federated Learning (FL) has garnered substantial research focus \cite{ETT2}. 
+By effectively mobilizing a substantial number of participants with a discrete distribution, FL can concurrently enhance learning performance, resource utilization, and data security. 
+Besides, as intelligent applications proliferate, concerns regarding fairness-aware federated learning (FFL) have also captured significant attention \cite{zhou2021towards-KDDtutorial-FFL}. Due to the agnostic of multiple data sources, models trained through FL may exhibit discriminatory tendencies toward specific features or demographic groups, such as gender, race, and occupation (e.g., COMPAS recidivism algorithm \cite{angwin2022machine} and facial recognition system \cite{raji2019actionable}). In response to this inherent deficiency, various FFL algorithms, such as FairFed \cite{ezzeldin2023fairfed}, Ditto \cite{li2021ditto}, and FairFL \cite{zhang2020fairfl}, have been proposed.
+
+%安全问题很重要
+\subsection{Mutual reliability problem of FFL}
+Meanwhile, along with the continual emergence of novel attack techniques, such as gradient leakage and model poisoning \cite{fang2020local}, the \textit{``trust crisis''} \cite{zhou2022multi} has become a critical bottleneck in determining FFL deployment capabilities \cite{rodriguez2023survey}. Establishing a robust \textit{mutual reliability} relationship between the FL aggregator (parameter server) and local participants has proven challenging \cite{zhou2022multi}. To be specific, on the one hand, concerns about data sharing leading to privacy breaches (\textit{aggregator's reliability}) \cite{wang2021variational} raise apprehensions among owners of data and computational resources, significantly diminishing enthusiasm for collaborative learning participation and giving rise to the phenomena of ``isolated data islands''. On the other hand, PSs are troubled by the difficulty of promptly and accurately thwarting stealthy attackers hidden among a vast client base. This concern  (\textit{client nodes' reliability}) raises the specter of manipulation or even invalidation of the entire model, resulting in severe economic and intellectual property losses. 
+
+%列举几个特点，导致现有安全技术不能适用
+%尽管多种最新的安全增强技术能够取得显著的防御效果，但攻击者并不能
+\subsection{Characteristics and motivation of mutual reliable FFL in heterogeneous UAV networks}
+With the advancement of integrated sensing, computation and communication (ISCC) \cite{he2023integrated}, and the space-air-ground integrated network (SAGIN) \cite{shen2023survey}, unmanned aerial vehicle (UAV) networks have played a crucial role in various domains such as post-disaster reconstruction, emergency temporary communication, and medical monitoring \cite{lu2023uav}. FLs based on UAV networks have also found widespread applications \cite{ETT1, ETT3, pandya2023federated}. However, despite the proposal of various secure FL technologies, the inherent characteristics of UAV networks continue to pose significant challenges in establishing mutual reliability for FFL in UAV environments. Specifically, these challenges encompass the following aspects:
+
+%异构：大范围异构，小范围相似.因此
+\textbf{1) Heterogeneity among UAV nodes:} As illustrated in Figure \ref{fig1:UAV-Network}, constrained by the mobility and patrol paths of UAVs, individual nodes are often limited to conducting data collection within a specific regional scope. Hence, even when employing identical equipment, the data distributions among UAV nodes across the entire network exhibit significant heterogeneity, while UAVs within the same area are similar. Therefore, various existing reliable FL technologies lacking adaptive considerations (such as Krum \cite{blanchard2017machine-krum}, Baffle \cite{andreina2021baffle}, and AGRamplifier \cite{gong2023agramplifier}) can lead to substantial accuracy losses.
+
+%资源受限：因此高消耗的安全策略并不能适用  高计算消耗和带宽占用的安全技术（例如，加密）
+\textbf{2) Resource limitation of UAV devices:} As UAV nodes function as mobile devices and bear substantial flight-related loads, their communication and energy resources are relatively constrained. The efficiency of FFL training is equally important. Consequently, solutions integrating cryptography, auxiliary training, multi-round detection, or other security mechanisms with high computational costs and bandwidth utilization (e.g., ShieldFL \cite{ma2022shieldfl}, AFA \cite{munoz2019byzantine-AFA}, and FLdetector \cite{zhang2022fldetector}) are not applicable for real-world deployment.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig1.PNG}
+\caption{FFL Illustration in Heterogeneous UAV Networks: Taking target recognition as an example, UAV node group patrolling in urban areas may collect a higher proportion of ``automobile'' samples (e.g., UN1 and UN2), while UAV groups patrolling in port areas will acquire more ``ship'' samples (e.g., UN6 and UN7). Consequently, the dataset distributions across the entire network often exhibit significant imbalance, while simultaneously displaying a certain degree of similarity within localized regions.
+}
+\label{fig1:UAV-Network}
+\end{figure}
+
+%我们的目标是实现（1）异构容忍的FFL框架（2）强隐私保护的个性化训练交互（3）抗污染的可信评估
+The aforementioned characteristics distinguish the reliable FFL in heterogeneous UAV networks from existing secure FFL technologies, thereby motivating the establishment of the following new criteria for its enhancement:
+
+\textbf{1) Heterogeneity-tolerant FFL framework:} Suitable nodes from the highly heterogeneous UAV networks can be organized promptly to efficiently fulfill arbitrary fairness-aware FL tasks, which also mitigates redundant computational energy consumption and accuracy loss induced by heterogeneity.
+
+\textbf{2) Privacy-preserving personalized training:} Throughout the iteration training and interaction process, sample-level privacy protection must be implemented to prevent the leakage of sensitive information. Additionally, considering the resource constraints of UAV nodes, computational and bandwidth demands should be limited.
+
+\textbf{3) Poisoning-resilient credit evaluation:} In addition to robust defense capabilities against various poisoning attacks, compatibility with heterogeneity and privacy requisites is also essential. In other words, without compromising the effectiveness of privacy guarantee, heterogeneous benign UAV nodes should be treated equally during the whole FFL workflow.%Achieving fairness among heterogeneous benign users without compromising the effectiveness of privacy protection is a crucial aspect.
+
+\subsection{Our solution and contributions}
+%解决方案
+% Hence, in this paper, we propose mutually reliable FFL (MR-FFL), a stratified community-based framework to facilitate privacy protection (FFL aggregator's reliability) and poisoning elimination (client nodes' reliability) jointly for FFL in heterogeneous UAV networks. 
+% We first divide UAV nodes into both peer communities and colleague communities according to cross-participant similarity and task-oriented fitness, respectively. 
+% Thus, the arbitrarily settled learning tasks following fair principles can be efficiently completed by fine-tuned colleague communities, even in the presence of a large degree of heterogeneity among peer communities. 
+Therefore, this paper proposes mutual reliable FFL (MR-FFL), a stratified community-based framework that collectively promotes privacy protection during data sharing (reliability of FFL aggregators) and poisoning elimination during model aggregation (reliability of client nodes) in heterogeneous UAV networks. The contributions of the proposed MR-FFL are three-fold:
+
+
+%贡献
+
+\begin{itemize}
+    %\item In light of shuffling-based MTD \cite{zhou2022multi} strategies, we propose a credit to identify the malicious attackers without compromising of privacy guarantees, which is also one of the design inspirations of our framework. 
+    \item Initially, UAV nodes are partitioned into peer communities and colleague communities based on cross-participant similarity and task-oriented adaptability. Thus, adhering to fairness principles, any arbitrarily determined learning task can be effectively accomplished through carefully selected colleague communities, even in the presence of significant heterogeneity among UAV nodes, while peer communities provide an amplified privacy guarantee. 
+    %随后，我们提出了PSDP的隐私模糊化方式进行自适应训练，通过参数动态约束差分隐私敏感度，从而在同等隐私保护水平下大幅降低异构环境下的噪声损失。
+    \item Subsequently, inspired by cross-silo privacy protection, we introduce the new privacy perturbation notion of peer community-specific differential privacy (PSDP) with changeable privacy budget. Through dynamically constraining the DP sensitivity within each peer community, PSDP significantly reduces noise loss in heterogeneous environments under equivalent privacy protection levels.
+    %此外，我们提出了基于三值主观逻辑模型的信用评估，分别抽离投毒攻击的“操纵”（相似度）和“破坏”（准确度）行为进行群体参与的综合长效评价，从而有效抵御多种隐蔽的投毒攻击范式。
+    \item Furthermore, we propose a new credit evaluation based on the ternary subjective logic model. This evaluation effectively integrates comprehensive and long-term assessments with the collective participation of heterogeneous UAV nodes, specifically extracting the ``manipulation'' (similarity) and ``disruption'' (accuracy) behaviors of poisoning attacks. This approach proves effective in defending against various covert poisoning attack paradigms. 
+    %\item Then, we integrate community-specific differential privacy into the MR-FFL process, to achieve privacy amplification as well as efficient and personal collaborative training at the same time. 
+    %\item More importantly, we proposed a community-based credit evaluation to resist poisoning attacks in heterogeneous environments. 
+    
+\end{itemize}
+
+%本文组织结构
+The remainder of this paper is organized as follows: The related works are reviewed in Section \uppercase\expandafter{\romannumeral2}. The system model is presented in Section \uppercase\expandafter{\romannumeral3}. Then, stratified community construction, adaptive training, and credit evaluation modules are expounded upon in Section \uppercase\expandafter{\romannumeral4} to \uppercase\expandafter{\romannumeral6}, respectively, providing a detailed account of availability, privacy, and integrity for FFL in heterogeneous UAV networks. Section \uppercase\expandafter{\romannumeral7} presents experimental results. Finally, Section \uppercase\expandafter{\romannumeral8} concludes this paper. %and briefly explores future directions.
+
+
+
+\section{Related work}
+
+
+% \begin{tabular}{|p{0.4\textwidth}|p{0.5\textwidth}|}
+% \hline
+% \textbf{论文的期刊名、年份、引用} & \textbf{简介} \\
+% \hline
+% 期刊名1, 2024, 引用1 & 这篇论文讨论了...... \\
+% \hline
+% 期刊名2, 2023, 引用2 & 本研究着重于...... \\
+% \hline
+% 期刊名3, 2022, 引用3 & 本文提出了...... \\
+% \hline
+% \end{tabular}
+
+\section{Related work}
+
+
+
+According to the three basic tenets of information security \cite{zhou2021augmented-globecom}, in this section, we systematically review the most crucial hindrances of existing FFL solutions in UAV networks: \textit{availability}, \textit{confidentiality}, and \textit{in tegrity} problems, which we settled in following sections, respectively. 
+\subsection{FFL in heterogeneous environments (availability)}
+To accomplish learning tasks and ensure the availability of FFL in heterogeneous environments, existing solutions can adopt debiasing on the client or server side.
+\subsubsection{Server-side debiasing} %全局化
+As the name indicated, server-side debiasing methods usually monitor the composition of training data and design new loss functions like Ratio loss \cite{wang2021addressing} to mitigate the impact of heterogeneity. 
+Besides, FairFed \cite{ezzeldin2023fairfed} adjusts the aggregation weights of heterogeneous participants based on equal opportunity difference (EOD). Hence, clients can conduct different debiasing processes. 
+Likewise, FedProto \cite{tan2022fedproto} regularizes the training of local models with the aid of abstract class prototypes from the server. 
+To handle the performance degradation caused by heterogeneous and long-tailed data, CReFF\cite{shang2022federated} re-trains the biased classifier with federated features in a privacy-preserving manner. 
+Different from the above methods, several clustered FLs provide separate models for heterogeneous clients \cite{sattler2020clustered-CFL}, which can incur exponentially growing computation costs.
+\subsubsection{Client-side debiasing} %个性化
+Diverging from server-side debiasing, client-side debiasing methods primarily enhance accuracy by altering the local model \cite{tan2022towards}. 
+For example, while retaining the standard FL mechanism as the inner optimizer, FairBatch \cite{roh2020fairbatch} further adds an outer optimizer to select minibatch sizes and improve model fairness adaptively. Similarly, Ditto \cite{li2021ditto} develops a regular term to optimize the local models without changing global aggregation rules. The robustness and fairness are jointly improved. 
+Moreover, Mohri \textit{et al.} \cite{mohri2019agnostic} propose agnostic federated learning (AFL) and prove its fairness using data-dependent Rademacher complexity guarantees. 
+
+
+%总结：现有FFL有两大问题，首先是效率不佳，往往需要多轮训练，不适合于能量受限的UAV network。其次是缺乏考虑对联邦学习可信技术的兼容。
+To summarize, existing FFLs encounter two drawbacks. Firstly, they exhibit unsatisfactory efficiency, often necessitating multiple training rounds, rendering them unsuitable for energy-constrained UAV networks. Secondly, the consideration for compatibility with reliable technologies is insufficient.
+\subsection{Reliability of information sharing (confidentiality)}%隐私安全
+\subsubsection{Cryptography solutions} 
+Homomorphic encryption (HE) and other cryptographic methods naturally serve as suitable privacy protection measures. For instance, ShieldFL \cite{ma2022shieldfl} employs secure cosine similarity to measure the distance between two encrypted gradients, utilizing dual-gate HE to resist model poisoning. BatchCrypt \cite{zhang2020batchcrypt} further enhances HE efficiency by incorporating batch gradient encoding and holistic encryption, effectively reducing training time and communication overhead. Additionally, FairFL \cite{zhang2020fairfl} adopts the principled deep multi-agent reinforcement learning framework and secure information aggregation protocol to simultaneously optimize the accuracy and the fairness of FFL while respecting the strict privacy constraints of the clients. 
+Besides, Lyu \textit{et al.} \cite{lyu2020towards} develop a local credibility mutual evaluation mechanism to guarantee fairness, and a three-layer onion-style encryption scheme to guarantee both accuracy and privacy. 
+\subsubsection{Obfuscation solutions} 
+
+In comparison to encryption, obfuscation approaches such as differential privacy (DP) do not introduce excessive overhead or extensive mechanism modifications, thus garnering significant attention \cite{padala2021federated}. For instance, Wei \textit{et al.} \cite{wei2021low} consider both general training performance and individual client privacy requirements to mitigate latency on wireless channels, addressing challenges posed by channel fading and interference in unknown network environments. Furthermore, considering potential model distortion from obfuscation techniques, privacy amplification as Shuffle \cite{girgis2021shuffled} can enhance the deployment capabilities of privacy protection. NbAFL \cite{wei2020federated-NbAFL} further diminishes the accuracy loss associated with DP by injecting secondary noise into the uplink and downlink channels.
+
+%总结：密码学方法通信量和计算量过大，而DP方法缺乏对异构考量
+Upon analysis, privacy-preserving information-sharing methods based on cryptography often incur excessive communication and computational overhead. On the other hand, methods relying on obfuscation like differential privacy lack adaptability to heterogeneous network environments, usually resulting in significant accuracy losses.
+\subsection{Reliability of model aggregation (integrity)}%model安全
+To resist the stealthy yet destructive poisoning attacks \cite{lyu2023poisoning}, multiple defense methods are proposed, which can be divided into the following types based on the realization concepts:
+\subsubsection{Mitigation-oriented technologies} 
+To ensure the integrity of the aggregated model, various robust FL methods, such as Byzantine-robustness, have been proposed. For instance, Krum \cite{blanchard2017machine-krum} selects partial neighboring nodes as references, enabling the algorithm to choose updates with the highest consensus for the next iteration. Diverging from Krum's approach of selecting only one update, FABA \cite{xia2019faba} employs gradient outlier computation to discard few gradients while retaining the majority of clients' training results, significantly enhancing learning speed. Building upon these methods, Gong \textit{et al.} devise AGRamplifier \cite{gong2023agramplifier}, which enhances the "morality" of local updates by identifying the most suppressive features in each gradient update. This augmentation further elevates model robustness, fidelity, and efficiency. 
+
+
+
+\subsubsection{Detection-oriented technologies} 
+An alternative approach to fortify against poisoning is the direct detection of the learning model using a validation dataset or predefined rules. For instance, Zeno \cite{xie2019zeno} evaluates the stochastic descendant score for each gradient based on a validation dataset, selectively discarding gradients with low scores for the stochastic descendant. In contrast to relying on an auxiliary validation set, Baffle \cite{andreina2021baffle} capitalizes on the diverse datasets accessible across various clients by integrating a feedback loop into the FL process. Besides, Fldetector \cite{zhang2022fldetector} anticipates a client's model update during each iteration by leveraging historical model updates and flags a client as potentially malicious if the received model update contradicts the predicted update. 
+It is noteworthy that detection-centric solutions entail additional training costs and may not identify some zero-day attacks.
+
+
+
+\subsubsection{Credit-oriented technologies} 
+%鉴于联邦学习是协作式、多轮次的交互过程，通过维护信用评价机制同样可以很好地清除恶意用户。例如，Kang等人使用多权重主观逻辑模型设计基于声誉的可靠联邦学习用户选择方案，并利用区块链实现声誉管理。在不需要辅助验证数据集的情况下，Xu等人提出余弦梯度Shapley值来评估每个智能体上传的模型参数更新/梯度的期望边际贡献，以区别对待。Tan等人提出了一种基于声誉感知的随机整数规划的FL客户选择方法，可以最优地选择和补偿具有不同声誉档案的客户，从而对抗潜在的异常行为。
+Considering that FL is a collaborative and iterative process, the credit evaluation mechanism proves effective in poisoning resistance. For instance, Kang \textit{et al.} \cite{credit1-kang2019IOT} design a reputation-based reliable scheme utilizing a multi-weight subjective logic model, and implement reputation management through blockchain. Xu \textit{et al.} \cite{xu2020reputation, xu2021gradient}, without the need for auxiliary verification datasets, introduced the cosine gradient Shapley value to assess the model parameter updates/gradients uploaded by each client. Tan \textit{et al.} \cite{tan2022reputation} propose a reputation-aware stochastic integer programming client selection method, selecting and compensating clients with varying reputation profiles to counter potential anomalous behavior.
+
+
+
+
+%总结：现有方案缺乏对隐私的考量，计算量过大
+In general, existing solutions often struggle to achieve a satisfactory balance between privacy and defensive performance, while also lacking adaptability to heterogeneous and dynamically changing environments. Furthermore, some methods exhibit relatively large computational overhead, imposing a non-negligible burden on UAV nodes.
+
+
+\section{System model} %\& Preliminaries}
+%%symbols 表格
+\begin{table}[!t]
+{
+\renewcommand{\arraystretch}{1.2}
+\caption{Summary of Main Notation}
+\label{notations}
+\vspace{0em}
+\centering
+\begin{tabular}{| c || l |}
+\hline
+\textbf{Symbol} & \multicolumn{1}{c |}{\textbf{Description}}\\
+    \hline
+    $U_i,\mathcal{D}_i$ & The $i$-th UAV devices and its dataset\\
+    \hline
+    $n^{s_{m}, i},\mathcal{P}^i$ & The size and normalized distribution of $\mathcal{D}_i$\\
+    \hline
+    $\mathcal{P}^{Tar}, w$ & Target distribution and model of learning task $Job$\\
+    \hline
+    $T$ & The maximum communication rounds of $Job$\\
+    \hline
+    $C,K$ & The set and number of all peer communities\\
+    \hline
+    $S,M$ & The set and number of all colleague communities\\
+    \hline
+    %$L$ & The number of clients in each super node\\
+    %\hline
+    $c_k$ & The $k$-th peer community\\
+    \hline
+    $s_m$ & The $m$-th colleague community\\ 
+    \hline
+    $\Delta \widetilde{\omega}_{t}^{s_{m},i}$ & The weight updates from $U_i \in s_m$ in round $t$\\
+    \hline
+    $p^{s_{m}, i}$ & The aggregation coefficient for $U_i$ within $s_m$\\
+    \hline
+    $\Delta\widetilde{\omega}_{t}^{s_{m}}$ & The weight updates from $s_m$ in round $t$\\
+    \hline
+    $p^{s_{m}}$ & The aggregation coefficient for $\Delta\widetilde{\omega}_{t}^{s_{m}}$ from $s_m$\\
+    \hline
+    $E_k$ & The clipping bound of peer community $c_k$\\
+    \hline
+    $Sen_k$ & The maximum sensitivity of $c_k$\\
+    \hline
+    $\varepsilon_k,\delta_k$& The parameters of differential privacy \\
+    \hline
+    $L$& The minimum size of colleague community\\
+    \hline
+    $\alpha^{a,b}_{t}$& The cosine similarity between $a$ and $b$\\
+    \hline
+    $PI^{c_k \rightarrow i}_{t}$ & The positive interaction between $c_k$ and $U_i$\\
+    \hline
+    $NI^{c_k \rightarrow i}_{t}$& The positive interaction between $c_k$ and $U_i$\\
+    \hline
+    $\Upsilon^{c_k \rightarrow i}_{t}$& The peer reputation opinion vector of $c_k$\\
+    \hline
+    $\Phi^{c_k \rightarrow i}_{t}$& $c_k$'s credit evaluation towards $U_i$ in round $t$\\
+    \hline
+    $\Upsilon^{s_m}_{t}$ & The colleague reputation opinion vector towards $s_m$\\
+    \hline
+    $\Phi^{s_m \rightarrow i}_{t}$& The colleague credit evaluation for $\forall U_i \in s_m$\\
+    \hline
+    $\Upsilon^{i}_{t},\Phi^{i}_{t}$& The comprehensive reputation and credit of $U_i$\\
+    \hline
+    $\psi^{i}_t$& The fairness-guaranteed selection probability\\
+    \hline
+    \end{tabular}
+        }
+     \vspace{-1.5em}
+     \end{table}
+     
+\textbf{Heterogeneous UAV network scenario.} 
+%\subsection{Network scenario}
+%对于一个多无人机多任务联邦学习场景，有一个服务器与N个无人机，设无人机集合为$U=\{U_i\}$，$\vert\vert U\vert\vert=N$。所有无人机获取的数据集集合为$D=\{D_i\}$，第k个无人机的数据分布为$\mathcal{P}^k\in \mathbb{t}^F$，其中$F$为特征维度；任务场景集合为$T$，其中第k个任务场景中的数据分布为$\mathcal{P}^{tar_k}$。在同一现实场景中，无人机采集到的数据通常是类似的，即对于某个场景的分布$\phi$，所有属于该现实场景的设备集合$B'$均满足$\exists \epsilon\in \mathbb{t}^F,\forall k \in B', ||\phi-\mathcal{P}^k||_1 \leq \epsilon$。
+As shown in Figure \ref{fig1:UAV-Network}, assume a multi-UAV multi-task federated learning scenario for the classification problems. There exists a parameter server (PS)/aggregator (normally equipped with ground base station) and $N$ UAV nodes (UN) $\mathbf{U}\triangleq\{U_1,...U_i,...U_N\}$. Each UN $U_i$ has local dataset $\mathcal{D}_i\triangleq\{(\xi_{i,1},y_{i,1}),...(\xi_{i,j},y_{i,j}),...(\xi_{i,n_i},y_{i,n_i})|y\in \mathbb{R}^F\}$ sampled following distribution $\varphi_q$. %with varied size $n_i$. 
+Here $x$ and $y$ are raw data and label, respectively. As the nodes with overlapped aerial areas or patrol routines may have similar data distributions, we have $\exists \epsilon\in \mathbb{R}^F,\forall U_i, U_j \sim \phi_q, ||\mathcal{P}^i-\mathcal{P}^j||_p \leq \epsilon^{\prime}$, where $\mathcal{P}^i$ is the normalized distribution of $\mathcal{D}_i$. For the highly heterogeneous networks, we also have $\exists U_i \sim \phi_{q^{\prime}}, U_j \sim \phi_q,||\mathcal{P}^i-\mathcal{P}^j||_p \gg \epsilon^{\prime}$ in the same time.  
+
+%\subsection{Threat model}
+%值得一提的是，方便起见，我们此处仅以多分类问题中的数据类别作为公平性感知针对的对象，实际使用中可以通过特征extractor扩展到数据包含的任意抽象特征。此外，我们以范数差异度作为公平性衡量标准，实际应用中，也可以选取AIDD、DSF、SF等衡量方式并在特定方面取得更好的效果。
+It is crucial to highlight that, for better understanding, our focus in this paper is solely on the data distribution of multi-classification problems as the target for fairness awareness. In practical scenarios, this concept can be easily extended to any abstract features derived from specific demographic groups through feature extractor as exemplified in \cite{shuai2022balancefl}. Furthermore, our chosen metric for fairness evaluation is the norm difference. However, other alternative fairness measures such as QCID \cite{yang2021federated}, ratio loss \cite{wang2021addressing}, and cross-entropy loss \cite{mohri2019agnostic} can be employed, depending on specific requirements, to attain more favorable results.
+
+\textbf{Fairness-aware learning task.} Without loss of generality, the fairness-aware learning task can be denoted with the quadruple as $Job\triangleq(w,\mathcal{P}^{tar},t_0, T)$, which consists of the model $w$, target distribution $\mathcal{P}^{tar}$, arrival time $t_0$, and duration $T$. Different from existing solutions designed for certain $\mathcal{P}^{tar}$ \cite{li2022data,zeng2022heterogeneous,hiessl2022cohort}, our method can adaptively choose and schedule suitable UAV groups when a new learning task arrives. 
+
+\textbf{Optimization objective.} We start with vanilla FL algorithms like FedAvg \cite{li2019convergence-fedavg} without consideration of heterogeneity. The optimization objective can be expressed as: 
+%考虑一个联邦学习场景，有1个服务器和$N$个客户。具体来说，客户i的本地数据集为$D_{i}$，其类别分布被定义为$\mathcal{P}^{c_{k},i}$。不同客户的本地数据类别分布高度异构，与全局类别分布$\mathcal{P}^{real}$有巨大差距。为了最小化全局损失函数，得到普适的全局模型，我们有：
+\begin{equation}
+    w^{*}\triangleq \underset{w}{\arg \min } \sum_{i=1}^N p_i\mathcal{L}\left(w, \mathcal{D}_{i}\right) ,
+\end{equation}
+%其中，$\mathcal{L}_{i}(\cdot)$是客户i的由其本地经验风险得出的本地损失函数。然而，由于客户的数据间的高度异构性与客户数据分布与任务场景数据分布间的高度异构性，客户间的本地损失函数不尽相同，难以获得同时最小化各个模型经验风险的最优全局模型参数$w^{*}$并满足任务场景。因此，在上述场景中进行传统FL会导致全局模型无法正常收敛，无法得到满足任务场景的高性能全局模型。
+where $\mathcal{L}(.)$ represents the loss function derived from the local empirical risk of $U_i$, $p_i$ is the aggregation weight. Due to the high heterogeneity among UAV nodes and the substantial mismatch between participants' data distributions and task requirements, obtaining the globally optimal model parameters $\omega^{*}$ that simultaneously minimize the empirical risks of each model and align with task requirements is challenging. %Thus, traditional Federated Learning (FL) in such scenarios leads to the global model failing to converge effectively, resulting in an inability to obtain a high-performance global model that satisfies task scenarios.
+
+Hence, similar to the existing fair FL solutions in \cite{mohri2019agnostic,zhang2020fairfl,ezzeldin2023fairfed}, we define the optimization objective as follows:
+\begin{equation}
+    w^{*}\triangleq \underset{w}{\arg \min } \ \mathcal{L}_{FFL}(\omega)=\underset{(x, y) \sim \mathcal{P}^{Tar}}{\mathbb{E}}[\mathcal{L}{(\omega,(x, y))}]
+\end{equation}
+%（我这里想的是为了便于之后的凝聚聚类）此外，由于不同现实场景之间可能有较大的数据分布差异，与任务数据分布高度异构。为了最小化全局损失函数，得到适用于特定任务场景的全局模型，我们有：
+
+
+
+
+\section{Stratified community construction in heterogeneous environment}\label{sec:community}
+%为了实现高度异构的UAV节点集合与动态变化的学习任务之间的良好适配，我们提出了SCC。如图所示，该机制主要包含两个部分：PCC和CCC。其中PCC在网络初始化时运行一次，CCC则在每次收到新任务时运行一次。
+To achieve a robust alignment between highly heterogeneous UAV nodes and dynamically evolving learning tasks, we propose the stratified community construction (SCC) mechanism. As illustrated in Figure \ref{fig2:framework}, SCC comprises two main components: peer community construction (PCC) and colleague community construction (CCC). PCC executes once during network initialization, while the CCC executes each time a new task is received.
+\subsection{Peer community construction (PCC)}
+Based on norm-based pair distance, we first cluster UAV nodes with similar data distributions into $K$ peer community $C=\{ c_{1}, \ldots, c_{K} \}$. The pair distance is calculated as:
+\begin{equation}
+d_{i,j}=\lVert \mathcal{P}^{i}-\mathcal{P}^{j} \rVert_{2}, \forall U_i,U_j\in \mathbf{U}.
+\end{equation}
+
+%基于客户的数据分布$\mathcal{P}^{i},i\in B$。我们用最大链接法对客户进行层次凝聚聚类。两个簇间的距离为它们中任意两个客户分布之间曼哈顿距离的最大值，当簇间距离大于合并阈值$\zeta$时停止合并，得到最终的聚类结果。由此可知同簇的任意客户分布之间的最大曼哈顿距离小于$\zeta$, 即$\forall i,j \in c, d_{i,j}<\zeta$。
+Then, we employ the complete-linkage method to achieve agglomerative hierarchical clustering (AHC) among UAV nodes. The distance between two peer communities is defined as the maximum Euclidean distance between any two UNs' distributions. The clustering process ceases when the inter-community distance exceeds the merging threshold $\zeta$, resulting in the final outcome. Hence, the maximum distance between any pair of client distributions within the same PC is less than $\zeta$, i.e., $\forall U_i, U_j \in c_k, d_{i,j} < \zeta$, which is denoted as:
+\begin{equation}\label{eq:peer-construct}
+ C\triangleq \underset{c_{1} \cup c_{2} \cup \ldots c_{K}=C}{\arg \min} \left(\max _{\forall c_{k},c_{k'} \in C ,U_i \in c_{k}, U_j \in c_{k'},d_{i, j}\geq\zeta} d_{i, j}\right) .
+\end{equation}
+
+%根据上述公式，我们得到具有相似类别分布的$K$个簇$C=\{c_{1},\ldots,c_{K}\}$。可以计算每个簇的平均数据分布，簇$c$的平均数据分布$\mathcal{P}^{c}$计算为：
+The average distribution of each peer community $c_k$ is:
+\begin{equation}
+    	 \mathcal{P}^{c_k}=\operatorname{norm}\left(\sum_{i \in c} n^{c,i} \mathcal{P}^{c,i} \right),
+\end{equation}
+%其中，$\mathcal{P}^{c,i}$是簇$c$中客户$i$的数据分布，$n^{c,i}$是簇$c$中客户$i$的数据量。为了保证隐私与数据安全，需要保证簇的个数，否则参与方将可能更容易推断出数据属于哪一簇。同时，当簇的数量较少时，每个簇代表的数据子集更大，这可能会导致更多的敏感信息聚集在同一簇中。如果某个恶意参与方能够成功识别并攻击一个簇，他们可能能够访问或推断出更多敏感信息，增加了数据泄露的风险。因此，需要添加约束：$K \geq \eta$，以确保隐私性。
+where $\mathcal{P}^{k,i}$ represents the data distribution of $U_i$ within cluster $c_k$, and $n^{k,i}$ denotes the size of $\mathcal{D}_i$. 
+To jointly ensure performance and security, it is imperative to control the number of peer communities. A large $K$ enhances the chance of attackers inferring the sensitive information. Conversely, a small $K$ may result in insufficient intra-community similarity, leading to a deterioration in learning performance. Therefore, the introduction of a constraint, $K \geq \kappa$, is essential. This constraint ensures a minimum size of peer community for privacy considerations. $\kappa$ can be adjusted by $\zeta$.
+
+\subsection{Colleague community construction (CCC)}
+After peer community construction, we further select suitable UAV nodes to form colleague communities $S\triangleq\{s_1, \ldots, s_{M}\}$ with desirable distribution $\mathcal{P}^{tar}$, which avoids the performance degradation caused by heterogeneity. 
+
+\subsubsection{Problem formulation}
+As shown in Figure \ref{fig2:framework}, based on the requirements of task $job_i$, we first generate the ``\textit{template}'' $\mathbf{h}$ of the colleague community (i.e., required ratio of clients $h_k$ from each peer community $c_k$ in a colleague community $s_{m}$). $\mathbf{h}\triangleq\{h_{1}, \ldots, h_{K}\}$ is a vector to stipulate this composition. Then $M$ colleague communities are constructed accordingly by selecting UAV nodes from each $c_k$. Outlier $c_k$ with small sizes ($\vert\vert c_k\vert\vert< M$) are excluded to improve participation.
+
+The optimization problem can be defined as:
+\begin{equation}\label{eq:problem}
+\begin{aligned}
+\mathbf{h}^*\triangleq &\underset{\mathbf{h}}{\arg \min} \vert\vert \mathbf{h}\cdot\mathbf{P}-\mathcal{P}^{tar}\vert\vert_2 \\
+\text{s.t. }& \forall c_k \in C, h_k\leq b_k, \\
+&\sum_{i=1} ^K h_i\geq r,
+\end{aligned}
+\end{equation}
+where $\mathbf{P}$ is a $K \times F$ matrix to denote the average feature values for all peer communities. Every row $\mathcal{P}^{c_k}\in \mathbb{R}^F$ denotes the average feature values of one peer community. $\mathbf{B}\triangleq \{ B_{1}, \ldots, B_{K}\}$ denotes the size of all peer communities.
+
+\subsubsection{Problem transformation} As the above problem is an NP-C quadratic integer optimization problem \cite{murty1985some}, we want to further reduce it to a linear programming problem to meet the efficiency requirements of UAVs. 
+%即将$\mathcal{P}^{c_k}$拆成$l_k=\lceil \log_2(b_k+1) \rceil$行，拆成的新行中，第$i,1\leq i <l_k$行$d_i=2^{i-1}\mathcal{P}^{c_k},e_{k,i}=2^{i-1}$，第$l_k$行为$(b_k-2^i+1)\mathcal{P}^{c_k},e_{k,l_k}=(b_k-2^i+1)$。新矩阵有$R=\sum_{i=1}^k l_i$行，将原$\mathcal{P}$矩阵二进制拆分为一个$R\cdot F$的矩阵$\mathcal{Q}$，将整数规划问题转化成了一个0-1规划问题。
+For each $c_k$, to remove the constraint $B_k$, we conduct binary split on $\mathcal{P}^{c_k}$ to get $l_k=\lceil \log_2(B_k+1) \rceil$ new rows. Hence, the new matrix has $R=\sum_{i=1}^k l_i$ rows. The problem becomes:
+
+\begin{equation}
+\begin{aligned}
+\mathbf{x}^*\triangleq &\underset{\mathbf{x}}{\arg \min} \vert\vert \mathbf{x}\mathcal{Q}-\mathcal{P}^{tar}\vert\vert_2 \\
+\text{s.t. } &\forall c_k \in C, x_i\in\{0,1\}, \\
+&\sum_{i=1} ^K h_i\geq r,
+\end{aligned}
+\end{equation} 
+where $\mathbf{x}$ can map to $\mathbf{h}$, i.e., $h_k = \sum _{i=1} ^{l_k} e_{k,i}x_{\sum_{j=1}^{k-1} l_j +i}$, and $e_{k,l_k}=(B_k-2^i+1)$. Hence, the above problem is equal to finding the minimum of $(\mathbf{x}\mathcal{Q}-\mathcal{P}^{tar})\cdot (\mathbf{x}\mathcal{Q}-\mathcal{P}^{tar})^T$ as:
+
+\begin{equation}
+\begin{aligned}
+\mathbf{x}^*\triangleq\underset{\mathbf{x}}{\arg \min}\ \mathbf{x}\mathcal{Q} &\mathcal{Q}^T\mathbf{x}^T-2\mathcal{P}^{tar}Q^T\mathbf{x}^T+\mathcal{P}^{tar}\mathcal{P}^{tar^T}\\
+\text{s.t. }&\mathbf{x}\in\{0,1\}^R,\\
+&\sum_{i=1} ^K h_i\geq r.
+\end{aligned}
+\end{equation}
+
+We further introduce variable $z_{ij} \in \{0,1\}$ and have $z_{ij}\leq x_i$,$z_{ij}\leq x_j$,$z_{ij}\geq x_i+x_j-1$, to linearize the problem:
+
+\begin{equation}%\label{eq:problem}
+\begin{aligned}
+\min\ &\mathcal{Q}\mathcal{Q}^T\mathbf{y}-2\mathcal{P}^{tar}Q^T\mathbf{x}^T+P^{tar}P^{tar^T}\\
+\text{s.t. }& \mathbf{x}\in\{0,1\}^R,
+\\
+&x_{ij}\leq x_i, x_{ij}\leq x_j, x_{ij}\geq x_i+x_j-1,
+\\&\sum_{i=1} ^K h_i\geq r.
+\end{aligned}
+\end{equation}
+
+Thus, the problem can be efficiently solved by linear programming solvers\footnote{For example, https://coin-or.github.io/pulp/}. 
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig2.PNG}
+\caption{Stratified community construction in a heterogeneous environment.}
+\label{fig2:framework}
+\end{figure}
+
+\section{Adaptive FFL training with privacy amplification}
+\subsection{Training workflow of MR-FFL}
+% 初始化过程: task generation & community initiation
+% Step 1: Local training
+% Step 2: Noise obfuscation
+% 中间过程: Upload gradient
+% Step 3: Inner-community aggregation
+% Step 4: Global aggregation
+% Step 5: Personalisation
+% 中间过程: Download model
+% Step 6: Local update
+
+As shown in Figure \ref{fig3:workflow}, the training workflow of MR-FFL mainly consists of the following steps in one round of iteration:
+
+
+\begin{itemize}
+    \item \textbf{Initialization:} Once the FFL task arrives, server conducts the CCC algorithm to quickly select $M$ colleague communities with similar average distributions near to $\mathcal{P}^{tar}$.
+    \item \textbf{Step 1:} First, each node $U_i \in s_m$ trains the current model with personal data to generate the local model $\omega_t^{s_m, i}$.
+    \item \textbf{Step 2:} Then, $U_i$ obfuscates the weights update $\widetilde{\omega}_{t}^{s_{m}, i}$ with differential private noise, and uploads it to the server.
+    \item \textbf{Step 3:} Colleague community aggregates $\widetilde{\omega}_{t}^{s_{m}, i}, \forall U_i \in s_m$ to generate a colleague model $\omega_{t}^{s_{m}}$.
+    \item \textbf{Step 4:} The server aggregates result $\omega^{s_k}$ from each colleague community $s_k \in S$ to get new global model.
+    \item \textbf{Step 5:} Besides, UAV peer community can maintain a personalized peer model $\omega_{t}^{c_{k}}$ to further improve local performance. 
+    \item \textbf{Step 6:} Finally, the global model is distributed to selected UAV nodes for the next round of training.
+\end{itemize}
+
+As Step 1, 2, and 6 aligns with existing secure FL training process \cite{wei2020federated-NbAFL,padala2021federated}, we focus on Step 3,4 and 5 subsequently.
+
+\subsubsection{Colleague community aggregation} 
+%为了尽可能地减小异构数据带来的模型方向的差异，以便更好地聚合普适的全局模型，在服务器聚合前，先在super node 内部聚合。也就是说，本地训练后，客户$i, i\in s_{m}$的加噪模型更新量$\Delta \widetilde{\omega}_{t}^{s_{m},i}$被上传到super node进行super node的内部同步。
+To reduce the canceling phenomenon caused by heterogeneous data and improve training efficiency,  we first aggregate all $\Delta \widetilde{\omega}_{t}^{s_{m}, i}$ within $s_m$ to generate more homogeneous weight updates $\Delta\widetilde{\omega}_{t}^{s_{m}}$ of colleague model $s_m$ before the global aggregation: %In other words, following local training, the perturbed model update quantity, denoted as $\Delta \widetilde{\omega}{t}^{s{m},i}$ for client $i$ where $i\in s_{m}$, is uploaded to the super node for internal synchronization before server-level aggregation.
+\begin{equation}
+    \begin{gathered}
+     \Delta\widetilde{\omega}_{t}^{s_{m}} =  \widetilde{\omega}_{t-1}^{s_{m}}-\widetilde{\omega}_{t}^{s_{m}}
+     = \sum_{i \in s_{m}} p^{s_{m}, i}\Delta \widetilde{\omega}_{t}^{s_{m},i},
+     \end{gathered}
+\end{equation}
+where $p^{s_{m}, i}= {n^{s_{m}, i}}/{n^{s_{m}}}$ is aggregation coefficent, $n^{s_{m}}=\sum_{i \in s_{m}} n^{s_{m}, i}$.
+
+\subsubsection{Global aggregation} 
+Then, the server aggregates the learning results from all $s_m$ and updates the global model:
+\begin{equation}
+\widetilde{\omega}^g_{t} \leftarrow \widetilde{\omega}^g_{t-1} - p^{s_{m}} \sum_{m=1}^{M} \Delta\widetilde{\omega}_{t}^{s_{m}},
+\end{equation}
+where $p^{s_{m}}= \frac{n^{s_m}}{\sum_{s_{m} \in S} n^{s_m}}$, and $\widetilde{\omega}_{t}$ is the global model. The global aggregation iteratively executes $T$ rounds to complete the learning task $Job=(w,\mathcal{P}^{tar},t_0, T)$\footnote{The termination condition for the learning task can also be set based on accuracy $\epsilon^{\prime\prime}>0$ rather than a fixed number of rounds $T$, i.e., $\mathcal{L}_{FFL}(\omega_t)\leq \epsilon^{\prime\prime}$, by only modifying the quadruple to $(w,\mathcal{P}^{tar},t_0, \epsilon^{\prime\prime})$.}.
+
+\subsubsection{Peer community personalization} Finally, to further improve the performance on local datasets, we personalize the local model for peer community by adding the proximal term:
+\begin{equation}\label{eq:personal}
+\omega_{t}^{k} = \omega_{t-1}^{k} - \eta\left(\sum_{i=1}^{\vert\vert c_{k}\vert\vert}p^{c_{k},i}  \Delta \widetilde{\omega}_{t}^{c_{k},i} + \lambda \left(\omega_{t-1}^{k}-\omega_{t-1} \right)\right)
+\end{equation}
+    where $p^{c_k}= \frac{n^{s_m}}{\sum_{c_k \in C} \vert\vert c_k\vert\vert}$, $\eta$ is the learning rate, $\lambda$ is the regularization coefficient. The smaller $\lambda$, the more the local models $\omega_t^{k}$ can deviate from the (corrupted) global model $\omega_t$, achieving robustness at the expense of generalization \cite{li2021ditto}.
+
+In Algorithm \ref{algorithm1}, we present the pseudocode for the complete adaptive training process described above. It is evident from the algorithm that our approach only requires participants to provide distribution information, enabling significant improvements in efficiency, accuracy, and privacy in heterogeneous environments. Furthermore, our training method seamlessly integrates with the subsequently proposed credit evaluation mechanism. In cases where some attackers dishonestly report their information, the integrity of the model is still guaranteed.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig3.PNG}
+\caption{The workflow of MR-FFL.}
+\label{fig3:workflow}
+\end{figure}
+
+
+\subsection{Analysis of privacy amplification}
+
+
+Different from existing central differential privacy (CDP) or local differential privacy (LDP) methods, which inevitably introduce excessive large noise and thus deteriorate the learning performance in heterogeneous environments, inspired by \cite{liu2022privacy}, we propose a novel DP notion: \textit{community-specific differential privacy} (CSDP) for heterogeneous federated learning. The anonymity is achieved within a peer community instead of the whole UAV network, which significantly reduces privacy loss under the same DP guarantee. Each peer community can be assigned with different $\varepsilon_k$ and $\delta_k$ based on personal needs.
+
+\subsubsection{Noise calculation} We first calculate the noise scale needed for the MR-FFL workflow to achieve our $(\varepsilon_k,\delta_k)$-CSDP. Assume a pair of neighbor datasets $\mathcal{D}^{s_{m}, i}_{t}$ and $\mathcal{D}^{s_{m}, i'}_{t}$ sampled from same $s_m$ with size $n^{s_{m}, i}$, there is only one pair of nonidentical samples $\xi^{i}_{t}$ and $\xi^{i\prime}_{t}$ within the neighbor datasets. The $l_2$ norm-based sensitivity can be calculated as:
+
+\begin{equation}
+     \begin{aligned}
+    \Delta F&=\max _{\xi^{i}_{t},\xi^{i\prime}_{t}}\left\|F^{s_m}\left(w_{t-1}, \mathcal{D}^{s_{m},i}_{t}\right) -F^{s_m}\left(w_{t-1}, \mathcal{D}^{s_{m},i'}_{t}\right)\right\|\\
+    &\leq \frac{n^{s_{m},i}}{n^{s_{m}} M}\left(  \max \left\| \Delta\omega_{r,t}^{s_{m},i}\right\|   + \max  \left\| \Delta\omega_{r,t}^{s_{m},i}\right\| \right)
+     \end{aligned}
+\end{equation}
+
+The second inequality can be deduced through a similar analysis as in \cite{wei2020federated-NbAFL}. We omit the specific process for simplicity. 
+After DP weights clipping \cite{abadi2016deep}, assuming an equal volume of data for clients and a minimum node count $L$ ($L\geq r$) within the colleague community, we have the best sensitivity as:
+\begin{equation}
+    Sen_k=\max _{i \in c_{k}}\left\{\Delta f\right\} \leq \frac{2 E_{k}}{L M},
+    \end{equation}
+ where $E_k$ is the clipping bound of $c_k$.
+The standard deviation of the Gaussian noise to achieve $(\varepsilon_k,\delta_k)$-CSDP is:
+\begin{equation}
+    \sigma_{k}=\frac{\ell_{k} Sen_k }{\varepsilon_{k}}=\frac{2 \ell_{k} E_{k}}{L M\varepsilon_{k}},
+    \end{equation}
+where constant $\ell_{k} =\sqrt{2 \ln (1.25 / \delta_{k})}$ \cite{dwork2014algorithmic}.
+
+\subsubsection{Privacy analysis} 
+
+%我们假设客户的类别分布$\mathcal{P}^{c_{k}}$符合高斯分布$\varphi_{c_{k}} $，即客户类别以方差$\sigma_{c_{k}}^{2}$正态分布在簇心$\mu_{c_{k}}$周围，即簇$c_{k}$的类别分布可以用$\varphi_{c_{k}} \sim \mathcal{N}\left(\mu_{c_{k}}, \sigma_{c_{k}}^{2}\right)$的高斯分布表示。
+We assume that the data distribution of the UAV clients, denoted as $\mathcal{P}^{c_{k}}$, follows a Gaussian distribution $\varphi_{c_{k}}$, where the data are normally distributed around the community center $\mu_{c_{k}}$ with a variance of $\sigma_{c_{k}}^{2}$. In other words, the data distribution of community $c_{k}$ can be represented by a distribution $\varphi_{c_{k}} \sim \mathcal{N}\left(\mu_{c_{k}}, \sigma_{c_{k}}^{2}\right)$ \cite{wei2020federated-NbAFL}. 
+%对于某一簇$c_{i}$,整体类别分布符合高斯分布$\varphi_{c_{i}} \sim \mathcal{N}\left(\mu_{c_{i}}, \sigma_{c_i}^{2}\right)$，从中随机抽取任意客户$\forall i,i'\in c_{i}$，客户类别分布也符合$\varphi_{c_{i}}$。
+For a specific peer community $c_{k}$, the overall data distribution follows distribution $\varphi_{c_{k}} \sim \mathcal{N}\left(\mu_{c_{k}}, \sigma_{c_i}^{2}\right)$. Hence, selecting any UAV client $\forall i,i'\in c_{k}$ from it, the client's distribution also follows $\varphi_{c_{k}}$ \cite{wei2021low}. 
+
+%由公式（9）可知，在本地训练中，客户最小化本地经验风险得到的梯度与客户的本地数据有关，且客户梯度间的最大距离与数据分布的分散程度正相关，可以得到簇$c_{i}$客户梯度间的最大距离：
+As indicated by \cite{sattler2020clustered-CFL}, it is evident that in local training, the gradient obtained by a client, which minimizes the local empirical risk, is related to the client's local data. The maximum distance between client gradients is positively correlated with the dispersion of the distribution. Consequently, the maximum distance between gradients of nodes within peer community $c_{k}$ can be derived as $\max_{i,i'\in c_{k}} \left\| \Delta\omega_{t}^{c_{k},i}-\Delta\omega_{t}^{c_{k},i'}\right\| \simeq \sigma_{c_k}$. 
+    
+
+%super node按照数量$n=[n_{1},\ldots,n_{k},\ldots,n_{K}],  n_{k} \in \mathbb{N}$从簇$\{c_{1},\ldots,c_{k},\ldots,c_{K}\}$中选择$L$个客户:$\sum^{K}_{k=1} n_{k}=L$。通过卷积求和上述簇分布，可以得到super node 的类别分布$\varphi_{s}$：
+We choose UAV nodes from each peer communities $c_{k},\forall c_k \in C$ to constitute colleague communities according to composition vector $\textbf{h}=[h_{1},\ldots,h_{k},\ldots,h_{K}],  h_{k} \in \mathbb{N}$. Hence, by convolution summation among those peer distributions, we can obtain the distribution of colleague communities $\varphi_{s}$ as: 
+
+\begin{equation}    \varphi_{s}=h_{1}\varphi_{c_{1}}\oplus\ldots\oplus h_{k}\varphi_{c_{k}}\oplus\ldots\oplus h_{K}\varphi_{c_{K}}
+\end{equation}
+
+
+%因为簇分布$\varphi_{c_{k}} \forall c_{k} \in C$是相互独立的高斯分布，可以得到上述簇分布的卷积和。
+As $\varphi_{c_{k}}, \forall c_{k} \in C$ are i.i.d. Gaussian distributions, we have $\varphi_{s} \sim \mathcal{N}\left(\mu_{s}, \sigma_{s}^{2}\right)$, where $\mu_{s}=\sum_{k}^{K} h_{k} \mu_{c_{k}}$, $\sigma_{s}^{2}=\sum_{k}^{K} h_{k}^{2} \sigma_{c_k}^{2}$. 
+Define the maximum distance between weight updates of two UAV nodes $U_i$ and $U_{i^{\prime}}$ from the same colleague community $s$ as $\max_{i,i'\in s} \left\| \Delta\omega_{t}^{s,i}-\Delta\omega_{t}^{s,i'}\right\| \simeq \sigma_{s}$. As $\sigma_{s}=\sqrt{\sum_{k}^{K} h_{k}^{2} \sigma_{c_k}^{2}}$, easy to prove $\sigma_{s}\geq\sigma_{c_{k}}, \forall c_k \in C$.
+Then, we have:
+\begin{equation}
+    \max_{i,i'\in c_{i}} \left\| \Delta\omega_{t}^{c_{i},i}-\Delta\omega_{t}^{c_{i},i'}\right\|\leq \max_{i,i'\in s} \left\| \Delta\omega_{t}^{s,i}-\Delta\omega_{t}^{s,i'}\right\|.
+\end{equation}
+
+%根据敏感度的定义，可知在super node 中计算supernode内的敏感度将远大于簇内的敏感度。
+According to the definition of sensitivity, our peer community-specific $Sen_k$ and noise scale is much smaller than existing global-wide or colleague-wide DP methods. Hence, to achieve the same FFL performance, the clipping bound of our method is also much smaller, which requires less obfuscation. 
+
+\begin{comment}
+    
+
+\subsection{Analysis of personalization}
+在$K$个簇$C=\{c_{1},\ldots,c_{k},\ldots,c_{K}\}$中，每个簇$c_{k}$有相同的客户数$n$。$X^k \triangleq\left\{\omega^{k, i} \in\right.\mathbb{t}\}_{i \in[n]}$，且客户模型以方差$\upsilon^{2}$正态分布在簇心$\omega^{k}$周围，即$\omega^{k, i}=\omega^{k}+z^{k, i}$,其中$z^{k, i} \sim \mathcal{N}\left(0, \upsilon^{2}\right)$。具体来说，为了量化簇的异质性，我们假设簇心$\{\omega^{k}\}_{k \in \left[K\right]}$也以方差$\tau^{2}$正态分布在未知的固定元中心$\theta$周围,即$\omega^{k}=\theta+z^{k}$,其中$z^{k} \sim \mathcal{N}\left(0, \tau^{2}\right)$。其中，$\tau$表示簇心间的分散程度，$\tau$越大，簇越分散，整体分布的异构性越高。在此基础上，簇$c_{k}$为其中客户选择隐私预算$(\varepsilon_{k},\delta_{k})-DP$以最小化整体的泛化误差。每个簇$k$具有不同的裁剪边界$C_{k}$，并以$\sigma_{k}=\frac{2 h_{k} C_{k}}{L M\varepsilon_{k}}$的标准差在本地客户上传的模型加噪,在此基础上，簇$c_{k}$的优化目标可以表示为：
+\begin{equation}
+h_k(\omega)=\tilde{F}_k(\omega)+\frac{\lambda}{2}\|\omega-\omega^{g}\|_2^2
+\end{equation}
+其中，$\tilde{F}_k(\omega) \triangleq \frac{1}{2}\left(\omega-\frac{1}{n}\left(\xi^k+\sum_{i=1}^{n} \omega^{k, i} \cdot \min \left(1, C_{k} /\left\|\omega^{k, i}\right\|_2\right)\right)\right)^2$是簇$c_{k}$的优化目标，簇$c_{k}$客户梯度加噪大小为$\xi^k \sim \mathcal{N}\left(0, \sigma_{k}^2\right)$。由于数据是亚高斯的，我们可以选择裁剪的边界$C_{k}$避免引入削波误差。因此，簇$c_{k}$的最优本地优化结果为$\widehat{\omega}^k \triangleq \operatorname{argmin} \tilde{F}_k(w)=\frac{1}{n}\left(\xi^k+\sum_{i=1}^{n} \omega^{k, i}\right)$。由于服务器聚合全部参与客户的模型而客户分布在各簇中，因此可得$\omega^{g}=\frac{1}{Kn} \sum_{k=1}^{K}\left(\xi^k+\sum_{i=1}^{n}\omega^{k,i}\right)=\frac{1}{K}\sum_{k=1}^{K}\widehat{\omega}^{k}$。由此可得簇$c_{k}$外各簇的平均估计结果$\widehat{\omega}^{\backslash k}=\frac{1}{K-1}\sum_{j \neq k}\widehat{\omega}^{j}$。
+\end{comment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[!t]% !t top !b bottom !h right here !p float pages
+\caption{Adaptive training with privacy amplification}
+\label{algorithm1}
+	\begin{algorithmic} [1]
+    \State \textit{\textbf{ Input: }Learning task $Job\triangleq(w^0,\mathcal{P}^{tar},t_0, T)$; Maximum
+local training iterations $R$; all participant UAV nodes $\mathbf{U}$ and their local dataset $\mathcal{D}_i$.}
+    \State \textit{\textbf{Output: }The global FFL model $\omega$ for task $Job$, personalized local models $\{ \omega^{k}\}_{k \in [K]}$} for peer communities.
+            \State \textbf{Initialize:} $w^{0}_{i} \leftarrow\ w^{0}$%,$\mathcal{P}^{real}=\operatorname{norm}\left(\sum_{i \in B} N^{i} \mathcal{P}^{i} \right)$
+            %\State {\color{CadetBlue}/* \textbf{Peer community construction */} } 
+            %\State $d_{i,j}=\lVert \mathcal{P}^{i}-\mathcal{P}^{j} \rVert_{2}$
+            %\State $C=\{ c_{1}, \ldots , c_{K} \} \leftarrow \arg \min _{c_{1} \cup c_{2} \cup \ldots c_{K}=C}\left(\max _{\forall c_{k},c_{k'} \in C ,i \in c_{k}, j \in c_{k'},d_{i, j}\geq\zeta} d_{i, j}\right) .$
+            \State Construct $C=\{ c_{1}, \ldots , c_{K} \}$ with Eq. (\ref{eq:peer-construct});
+             %\For { $r \in 1, \cdots, R$}
+                %\State{\color{CadetBlue} /* \textbf{Initialization} */} %$S \leftarrow Select-Clients()$}
+            \State Calculate composition vector $\mathbf{h}$ by Eq. (\ref{eq:problem}) for $Job$;
+            \State Construct colleague communities as $S^t=\{s_{1}, \ldots , s_{M}\}$ according to template $\mathbf{h}$;
+                \For {each colleague community $s_{m}$ in $S^{t}$ in parallel }
+                    \For {each UAV node $U_i$ in $s_{m}$ in parallel}
+                        \State {\color{CadetBlue}/*\textbf{Local Training*/}} 
+                        %\State $\omega_{t}^{s_{m},i} \leftarrow \omega_{t-1}^{s_{m},i}-\frac{\eta}{NI^{s_{m},i}} \nabla_\omega \mathcal{L}_{s_{m},i}\left(\omega_{t-1}^{s_{m},i}, \mathcal{D}^{s_{m},i}_{t}\right)$
+                        \State Update $\omega_{t}^{s_{m},i}$ with $\mathcal{D}_i$ for $R$ iterations;
+                        \State $\Delta \omega_{t}^{s_{m},i}=\omega_{t-1}^{s_{m},i}-\omega_{t}^{s_{m},i}$;
+                        \State{\color{CadetBlue}/* \textbf{Privacy obfuscation */}} 
+                        %\State \textbf{DP:} client $i \in c_{k}$, guarantee ($\varepsilon_{k}$,$\delta_{k}$)-DP
+                        \State Calculate noise $z^{k} \sim \mathcal{N}\left(0, \sigma_{k}^2\right)$, $\sigma_{k}=\frac{2 h_{k} C_{k}}{L M\varepsilon_{k}}$;
+                        \State $\Delta \widetilde{\omega}_{t}^{s_{m},i}=\Delta \omega_{t}^{s_{m},i}+z^{k}$;
+                    \EndFor
+                    \State{\color{CadetBlue}/* \textbf{Colleague community aggregation */}} 
+                    \State $\widetilde{\omega}_{t}^{s_{m}} \leftarrow \widetilde{\omega}_{t-1}^{s_{m}} -  \sum_{i \in s_{m}} p^{s_{m}, i}\Delta \widetilde{\omega}_{t}^{s_{m},i}$;
+                    \State $\Delta\widetilde{\omega}_{t}^{s_{m}} =  \widetilde{\omega}_{t-1}^{s_{m}}-\widetilde{\omega}_{t}^{s_{m}}$;
+                \EndFor
+                \State {\color{CadetBlue}/* \textbf{Global aggregation */}}
+                \State $\widetilde{\omega}^g_{t} \leftarrow \widetilde{\omega}^g_{t-1} - p^{s_{m}} \sum_{m=1}^{M} \Delta\widetilde{\omega}_{t}^{s_{m}}$;%$\widetilde{\omega}_{t} \leftarrow \widetilde{\omega}_{t-1} - PI^{s_{m}} \sum_{m=1}^{M} \Delta\widetilde{\omega}_{t}^{s_{m}}$
+                \State{\color{CadetBlue}/* \textbf{Peer community personalization */}}
+                    \State Update the personalized model $\omega_{t}^{k}$ for each peer community $c_k$ with Eq. (\ref{eq:personal});%$\omega_{t}^{k} \leftarrow \omega_{t-1}^{k} - \eta_{c_{k}}\left(\sum_{i=1}^{n_{c_{k}}}p_{c_{k},i}  \Delta \widetilde{\omega}_{t}^{c_{k},i} + \lambda \left(\omega_{t-1}^{k}-\omega^{g}_{t-1} \right)\right)$
+                    %\State Update $\omega_{t}^{k}$
+            % \EndFor
+\State \Return $w^g,\{w^k\}$
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Community-based credit evaluation of UAV nodes}
+In this section, we design a community-based credit evaluation method with a modified three-valued subjective logic model (SLM) \cite{al2021subjective}, to eliminate malicious attackers hiding in heterogeneous UAV networks. By integrating credits from both similarity-dominated intra-community (peer) and performance-dominated inter-community (colleague), multiple poisoning paradigms can be efficiently thwarted. 
+\subsection{Similarity-dominated peer credit evaluation}
+%首先，同一community内的用户在训练过程中上传的weights往往相似性较高。因此，通过社区内相似度比较，可以快速识别出离群的恶意用户。
+UAV nodes' weight updates $\Delta\widetilde{\omega}^{c_k, i}_{t}$ within the same peer community $c_k$ often exhibit a high degree of similarity during the training process. Therefore, by leveraging community-based similarity, one can promptly identify malicious nodes that deviate significantly from the average norm.
+
+\subsubsection{Basic setting}
+For $\forall U_i \in c_k$, we first calculate the cosine similarity $\alpha_{c,i}^{t} \in [-1,1]$ between weight updates $\Delta\widetilde{\omega}^{c_k, i}_{t}$ from $U_i$ and average weight updates $\Delta\widetilde{\omega}^{c_k}_{t}$ from its peer community $c_k$:
+\begin{equation}
+    	  \alpha^{c_k,i}_{t} = \alpha( \Delta\widetilde{\omega}^{c_k}_{t-1}, \Delta\widetilde{\omega}^{i}_{t}) = \frac{\langle \Delta\widetilde{\omega}^{c_k}_{t-1},\Delta\widetilde{\omega}^{i}_{t}\rangle}{\Vert \Delta\widetilde{\omega}^{c_k}_{t-1}\Vert\cdot\Vert \Delta\widetilde{\omega}^{i}_{t}\Vert },\forall c_k \cap S.
+\end{equation}
+
+We further define the positive interaction $p^{c \rightarrow i}_{t} \in [0,2]$ as:
+\begin{equation}
+    	 PI^{c_k \rightarrow i}_{t} = \alpha^{c_k,i}_{t} -(-1),
+\end{equation}
+and the negative interaction $n^{c_k \rightarrow i}_{t} \in [0,2]$ as:
+\begin{equation}
+    	 NI^{c_k \rightarrow i}_{t} = 1-\alpha^{c_k,j}_{t}.
+\end{equation}
+
+%在FL的过程中，客户与簇的交互作用影响客户的信誉评估。诚实的交互行为将为客户的信誉评估带来正向的影响，具有攻击性的或不诚实的交互则会降低客户的信誉评分。我们分别用系数$b$和$c$表示内客户间正负交互作用对信任评价的影响比例，其中，$b>0,c>0$ 且 $b+c=1$。为了惩罚恶意客户，我们为客户间的负面交互设置更大的权重,即$b>c$。
+During the FFL process, benign behaviors positively impact the reputation assessment, while aggressive or deceptive interactions diminish the client's reputation. We use coefficients $b$ and $c$ to quantify the impact of positive/negative interactions in credit evaluation, respectively. $b>0$ and $c>0$, $b+c=1$. To penalize malicious UAV nodes, we assign a greater weight $b>c$ to negative interactions among clients. 
+Hence, we obtain the temporary three-valued peer reputation opinion \cite{liu2019trust} vector $\Upsilon^{c_k \rightarrow i}_{t,temp}\triangleq \{b^{c_k \rightarrow i}_{t,temp}, d^{c_k \rightarrow i}_{t,temp}, u^{c_k \rightarrow i}_{t,temp}\}$ based on SLM as:
+\begin{equation}
+\Upsilon^{c_k \rightarrow i}_{t,temp}=
+\left  \{
+      \begin{array}{ll}%ll按顺序是公式左对齐和条件左对齐
+        b^{c_k \rightarrow i}_{t,temp}=(1-u^{c_k \rightarrow i}_{t})\frac{bPI^{c_k \rightarrow i}_{t}}{ bPI^{c_k \rightarrow i}_{t}+cNI^{c_k \rightarrow i}_{t}},\\
+        d^{c_k \rightarrow i}_{t,temp}=(1-u^{c_k \rightarrow i}_{t})\frac{cNI^{c_k \rightarrow i}_{t}}{ bPI^{c_k \rightarrow i}_{t}+cNI^{c_k \rightarrow i}_{t}},\\
+        u^{c_k \rightarrow i}_{t,temp}=\frac{\sigma_{c_k}-\sigma_{min}}{\sigma_{max}-\sigma_{min}},                
+    \end{array}
+\right.
+\end{equation}
+%$ \sigma_{c}$为簇c中满足$\varepsilon-DP$所加噪声的标准差，体现了根据客户上传加噪梯度计算可信度的不确定性，$ \sigma^{C}_{max}$和$\sigma^{C}_{min}$分别是所有簇$c\in C$中为满足$\varepsilon-DP$所添加的最大噪声和最小噪声。
+where the standard deviation $ \sigma_{c_k}$ of peer community $c_k$ depicts the uncertainty in the credit calculation based on the noisy $\Delta\widetilde{\omega}^{c_k}_{t}$ to achieve DP guarantee. $ \sigma_{max}=\max_{c_k \in C}{\sigma_{c_k}}, \sigma_{min}=\min{c_k \in C}{\sigma_{c_k}}$. %Furthermore, $ \sigma^{C}{max}$ and $ \sigma^{C}{min}$ denote the maximum and minimum noise added, respectively, among all clusters $c\in C$ to satisfy $\varepsilon-DP$.
+Besides, $b^{c_k \rightarrow i}_{t,temp}$, $d^{c_k \rightarrow i}_{t,temp}$, $u^{c_k \rightarrow i}_{t,temp}$ denote \textit{belief}, \textit{disbelief}, and \textit{uncertainty}, respectively. We have $b^{c_k \rightarrow i}_{t,temp}+d^{c_k \rightarrow i}_{t,temp}+u^{c_k \rightarrow i}_{t,temp}=1$ and $b^{c_k \rightarrow i}_{t,temp}$, $d^{c_k \rightarrow i}_{t,temp}$, $u^{c_k \rightarrow i}_{t,temp} \in [0,1]$.
+
+Then $c_k$'s temporary credit evaluation towards UAV $U_i$ is:
+\begin{equation}
+\Phi^{c_k \rightarrow i}_{t}=b^{c_k \rightarrow i}_{t} + a u^{c_k \rightarrow i}_{t}, \forall c_k \cap S,
+\end{equation}
+%其中$a\in[0,1]$是信誉不确定影响程度的系数。基于上式，根据客户的信誉度可以更明显地区分出恶意客户，从而抑制客户间的负面交互。
+where $a\in[0,1]$ is a coefficient regulating the importance of uncertainty. 
+Based on the above equation, malicious clients can be distinctly distinguished via reputation scores, thereby mitigating negative interactions among clients. 
+
+\subsubsection{Long-term consideration}
+%在r个同步轮次内，客户的信誉不总是一成不变的。由于客户的信誉随着时间的推移而变化，我们考虑客户间历史信誉的影响。定义信誉的时间衰减因子为：
+During the iterative training, clients' reputations may not remain constant. Some sophisticated attackers even take advantage of this phenomenon and conduct more stealthy poisoning behaviors \cite{credit1-kang2019IOT}. Therefore, we take into account the influence of historical reputation. The time decay factor $v_{\tau}$ is defined as:
+\begin{equation}
+v_{\tau}=\frac{1}{e^{\iota(Y-\tau)}}=e^{-z(Y-\tau)},
+\end{equation}
+%其中$z>0$为冷却系数, $\tau \in [1,Y]$为历史交互时间的时隙,在内部通信中当前时隙$Y=r$。由于过于久远的信誉的时间衰减因子接近0，并且考虑到信誉交互中的内存与计算成本，我们只保留$\vert Y-\tau \vert \leq T$的历史信誉 ,即只记录并维护距离当前通信轮次的$T$轮历史信誉$\Phi^{c \rightarrow i}_{\tau}$。公式(7)表示，越接近当前同步轮次的信誉的时效性越高，即更相信近期交互的信誉度，而不是历史交互。
+where $\iota>0$ is the cooling coefficient, $\tau \in [1,Y]$ represents the time slot of historical interaction, and $Y$ in the current time slot of internal communication. Since the time decay factor for too-old reputations approaches 0, and considering the memory and computational costs in reputation interactions, we set an expiration threshold and retain only $T$ historical reputations $\Phi^{c_ \rightarrow i}_{\tau}$, i.e., $\vert Y-\tau \vert \leq T$. %Formula (7) indicates that reputations closer to the current synchronization round are more timely, placing higher trust in recent interactions rather than historical ones.
+
+\subsubsection{Stability consideration} 
+%\item \textbf{更新：}在联合学习的迭代交互$r\in[1,R]$中，服务器选择参与本地训练的随机客户子集为$Set_{t}$,在第$r$轮迭代中，只有集合$Set_{t}$中的客户上传模型更新量并彼此交互评估信誉。然而，由于参与训练和客户数量远少于客户总数,即$\vert Set_{t}\vert \ll N$，当前轮次的评估结果不足以给出完整的评估结果。因此，我们使用每个客户端的最新信誉更新值来更新其当前信誉值。设$\left\{ \Phi^{c \rightarrow i}_{t} \right\}_{i}^N$表示在服务器上维护的每个客户的簇内直接信誉。在每一轮交互后，全部客户执行以下更新操作：
+Moreover, as only chosen UAV nodes $U_i\in S$ participate in the FFL at round $t$, cross-slot reputation values can have erratic fluctuation or asynchronous obsolescence problems. Hence, inspired by \cite{jhunjhunwala2022fedvarp}, We introduce the momentum term to the reputation updating as: 
+\begin{equation}
+\Upsilon^{c_k \rightarrow i}_{t}=
+\left\{\begin{array}{ll}
+\Upsilon^{c_k \rightarrow i}_{t} ,& \text { if } U_i \in S\\
+\Upsilon^{c_k \rightarrow i}_{t-1},& \text { otherwise }
+\end{array}\right.
+\end{equation}
+
+%在训练开始前，初始化所有客户$\forall i \in [N]$的信誉评价$\Upsilon^{c \rightarrow i}_{0}$可以表示为：
+%可以看出我们提供较高的初始信誉并保证非参与客户历史信誉的连续性。
+Then, in the initialization phase $t=0$, we have:
+\begin{equation}
+\Upsilon^{c_k \rightarrow i}_{0}=
+\left  \{
+      \begin{array}{ll}%ll按顺序是公式左对齐和条件左对齐
+        b^{c_k \rightarrow i}_{0}=1-u^{c_k \rightarrow i}_{0},\\
+        d^{c_k \rightarrow i}_{0}=0,\\
+        u^{c_k \rightarrow i}_{0}=\frac{\sigma_{c_k}-\sigma_{min}}{\sigma_{max}-\sigma_{min}}
+      \end{array}
+\right.
+\forall U_i\in c_k.
+\end{equation}
+
+
+%上式确保了客户簇内直接信誉的实时性，即维护了包括参与和非参与交互客户在内的全部客户的当前信誉均为其最近的信誉更新值。
+The above design ensures the stability of credit evaluation for both participating and non-participating UAV nodes in the current round.
+
+By integrating both stability and long-term consideration, we obtain the final peer reputation opinion: 
+\begin{equation}
+\Upsilon^{c_k \rightarrow i}_{t}=
+\left  \{
+      \begin{array}{ll}%ll按顺序是公式左对齐和条件左对齐
+        b^{c_k \rightarrow i}_{t}=\frac{\sum_{\tau=r-T}^{t}{v_{\tau} b^{c_k \rightarrow i}_{\tau}}}{\sum_{\tau=r-T}^{t}{v_{\tau}}},\\
+        d^{c_k \rightarrow i}_{t}=\frac{\sum_{\tau=r-T}^{t}{v_{\tau} d^{c_k \rightarrow i}_{\tau}}}{\sum_{\tau=r-T}^{t}{v_{\tau}}},\\
+        u^{c_k \rightarrow i}_{t}=\frac{\sum_{\tau=r-T}^{t}{v_{\tau} u^{c_k \rightarrow i}_{\tau}}}{\sum_{\tau=r-T}^{t}{v_{\tau}}}  ,              
+    \end{array}
+\right.
+\forall U_i\in c_k,
+\end{equation}
+%第r轮同步，簇$c$中客户i的信誉评价为：
+and $c_k$'s credit evaluation towards UAV node $U_i$ at round $t$:
+\begin{equation}
+\Phi^{c_k \rightarrow i}_{t}=\frac{\sum_{\tau=r-T}^{t}{v_{\tau} \Phi^{c \rightarrow i}_{\tau}}}{\sum_{\tau=r-T}^{t}{v_{\tau}}}, \forall U_i\in c_k.             
+\end{equation}
+
+\subsection{Performance-dominated colleague credit evaluation}
+Performance-dominated colleague credit evaluation generates the general judgment $\Phi^{s_m}_{t}, \forall s_m\in S$ from other colleague communities. 
+As colleague communities are regrouped after every iteration, different from peer credit, colleague credit pays more attention to comprehensive consideration of both performance and similarity between $s_m$ and $s_{m^{\prime}}, \forall s_{m^{\prime}} \in S_{\neg s_m}$. 
+
+Hence, we first calculate the similarity between $s_m$ and $s_{m^{\prime}}$:
+\begin{equation}
+    	  \alpha^{s_{m},s_{m^{\prime}}}_{t}= \alpha( \Delta \widetilde{\omega}^{s_{m}}_{t},  \Delta\widetilde{\omega}^{s_{m^{\prime}}}_{t}) = \frac{\langle  \Delta\widetilde{\omega}^{s_{m}}_{t}, \Delta\widetilde{\omega}^{s_{m^{\prime}}}_{t}\rangle}{\Vert  \Delta\widetilde{\omega}^{s_{m}}_{t}\Vert\cdot\Vert  \Delta\widetilde{\omega}^{s_{m^{\prime}}}_{t}\Vert }.
+\end{equation}
+
+The positive and negative interactions are $PI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} = \alpha^{s_{m},s_{m^{\prime}}} -(-1)$ and $NI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} = 1-\alpha^{s_{m},s_{m^{\prime}}}_{t}$, respectively. $PI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} + NI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} = 2$. 
+
+Thereafter, the \textit{belief} $b^{s_{m} \rightarrow s_{m^{\prime}}}_{t}$ is $$b^{s_{m} \rightarrow s_{m^{\prime}}}_{t}=(1-u_t^{s_{m} \rightarrow s_{m^{\prime}}})\frac{bPI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}}{ bPI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}+cNI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}},$$ 
+\textit{disbelief} $u^{s_{m} \rightarrow s_{m^{\prime}}}_{t}$ is $$u^{s_{m} \rightarrow s_{m^{\prime}}}_{t}=(1-u^{s_{m} \rightarrow s_{m^{\prime}}}_{t})\frac{cNI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}}{ bPI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}+cNI^{s_{m} \rightarrow s_{m^{\prime}}}_{t}},$$ and \textit{uncertainty} $u^{s_{m} \rightarrow s_{m^{\prime}}}_{t}$ is $$u^{s_{m} \rightarrow s_{m^{\prime}}}_{t}=\Vert PI^{s_{m}}-PI^{s_{m^{\prime}}}\Vert/2.$$ 
+
+For round $t$, the reputation opinion vector can be defined as follows:
+
+\begin{equation}
+\Upsilon^{s_m}_{t}=
+\left  \{
+      \begin{array}{ll}%ll按顺序是公式左对齐和条件左对齐
+        b^{s_m}_{t}=\frac{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}  b^{s_{m^{\prime}} \rightarrow s_m}_{t}}}{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}}},\\
+        d^{s_m}_{t}=\frac{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}  d^{s_{m^{\prime}} \rightarrow s_m}_{t}}}{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}}},\\
+        u^{s_m}_{t}=\frac{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}  u^{s_{m^{\prime}} \rightarrow s_m}_{t}}}{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}}},                
+    \end{array}
+\right.
+\end{equation}
+where $\rho^{s_m}_{t}=acc^{s_m}_{t}$ is the accuracy of colleague community $s_m$. From the perspective of model security, we assign lower weights to attackers who dishonestly report data distributions based on the model accuracy $acc^{s_m}_{t}$ of $s_m$. Therefore, as the model accuracy $acc^{s_m}_{t}$ increases, the weight assigned to $s_m$ also increases, making the reputation opinion from $s_m$ more reliable.
+
+The final colleague credit evaluation for $\forall U_i \in s_m$ can be calculated as:
+\begin{equation}
+\Phi^{s_m \rightarrow i}_{t}=\Phi^{s_m}_{t}=\frac{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{(\rho^{s_{m^{\prime}}}_{t} b^{s_{m^{\prime}} \rightarrow s_{m}}_{t}+ a u^{s_{m^{\prime}} \rightarrow s_{m}}_{t})}}{\sum_{s_{m^{\prime}}\in S_{\neg s_m}}{\rho^{s_{m^{\prime}}}_{t}}},   
+\end{equation}
+
+
+
+\subsection{UAV nodes selection with comprehensive
+community-based credit}
+\subsubsection{Comprehensive community-based credit} 
+Finally, by merging peer credit and colleague credit evaluation results, we can obtain comprehensive evaluations of participant UAV nodes based on similarity and performance jointly. 
+The comprehensive reputation opinion $\Upsilon^{i}_{t}$ can be calculated by conducting consensus mechanism between $\Upsilon^{c_k\rightarrow i}_{t}$ and $\Upsilon^{s_m\rightarrow i}_{t}$ as:
+\begin{equation}
+\Upsilon^{i}_{t}=
+\left  \{
+      \begin{array}{ll}%ll按顺序是公式左对齐和条件左对齐
+        b^{i}_{t}=\frac{b^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}+b^{s_m \rightarrow i}_{t}u^{c_k \rightarrow i}_{t}}
+        {u^{c_k \rightarrow i}_{t}+u^{s_m \rightarrow i}_{t}-u^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}},\\
+        d^{i}_{t}=\frac{d^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}+d^{s_m \rightarrow i}_{t}u^{c_k \rightarrow i}_{t}}
+        {u^{c_k \rightarrow i}_{t}+u^{s_m \rightarrow i}_{t}-u^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}},\\
+        u^{i}_{t}=\frac{u^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}}
+        {u^{c_k \rightarrow i}_{t}+u^{s_m \rightarrow i}_{t}-u^{c_k \rightarrow i}_{t}u^{s_m \rightarrow i}_{t}}         
+    \end{array}
+\right.
+\end{equation}
+
+%因此，可得客户 $j$ 的综合信任度为：
+The comprehensive community-based credit of $U_i$ is: 
+\begin{equation}
+\Phi^{i}_{t}=b^{i}_{t}+a u^{i}_{t}
+\end{equation}
+
+%通过上述信誉评估过程，服务器可以从簇和super node两个维度综合选择具有高性能和可靠数据的高信誉候选客户作为联邦学习任务中的参与者。该方法能够与FEDGS框架紧密结合，在FEDGS内部同步和外部同步的过程中分别从簇内和super node间评估客户信誉，将信誉评估细化到每轮迭代中，能够及时发现并排除攻击者，尽可能地减少其对联合学习的干扰。
+
+
+Similar to peer credit evaluation, the updating rule of $\Phi^{i}_{t}$ is also designed with stability consideration as follows:
+%\textbf{更新：}第$r$轮迭代，被选中参与联合学习的客户集合为$Set_{t}$。设$\left\{ \Phi^{i}_{t} \right\}_{i=1}^N$表示维护的第$r$轮每个客户的综合信誉。在迭代学习的过程中，对于未被选中构建supernode并参与训练的客户，保持其最近轮次的信用评分，并根据最近的综合信任度计算其下一轮次的选择概率：
+\begin{equation}
+\Phi^{i}_{t}=
+\left\{\begin{array}{ll}
+\Phi^{i}_{t} & \text { if } i \in Set_{t} \\
+\Phi^{i}_{t-1}& \text { otherwise }
+\end{array}, \text { for all } i\in[N]\right.
+\end{equation}
+
+\textbf{Resistance ability against collusion attack:} 
+%当攻击者拥有多个compromised节点时，多个节点可以进行共谋攻击。MR-FFL可以通过简单的设置实现对共谋攻击的阻断。具体来说，在MR-FFL中，攻击者可以采取“集中合谋”或者“分散合谋”策略：（1）分散合谋的攻击者上报不同的数据分布，从而隐藏进不同的异构Peer社区中。显然，这一策略面对传统防御方法或许能够实现绕过，面对MR-FFL时则会被社区内其他用户发现；（2）顾名思义，集中合谋下的攻击者攻击者通过汇报相同的分布而集中在同一个peer社区中。显然，由于我们的综合信用评价同时综合相似度和性能的影响，因此攻击者仍会因为性能不佳而降低评价。我们可以设定一个参与FFL的最低信用值，拥有过多恶意用户的peer社区也会被排除出后续训练。
+When attackers possess multiple compromised UAV nodes, these nodes can conspire to launch collusion attacks. MR-FFL can effectively thwart collusion attacks through simple configurations. Specifically, within MR-FFL, attackers may adopt either a "distributed collusion" or a "centralized collusion" strategy: (a) Attackers engaged in distributed collusion report distinct data distributions, thereby concealing themselves within different heterogeneous peer communities. While this strategy might potentially evade traditional defense methods, when facing MR-FFL, it becomes detectable by other users within the community; (b) As the name implies, attackers engaging in centralized collusion report identical distributions and concentrate within the same peer community. However, due to our comprehensive credit evaluation, which considers both similarity and performance impacts, attackers are still subject to diminished evaluations due to poor performance. A minimum credit threshold for participation in FFL can be set, and peer communities with an excess of malicious users can be excluded from subsequent training.
+
+\subsubsection{UAV nodes selection}
+%在每轮外部同步结束，我们重新选择客户构建下一轮参与联合学习的super node。
+%为了尽可能地消除攻击者的干扰，我们设计簇内客户选择机制，客户被选中参与联合学习的概率由其上一轮次的综合信用评价决定。在簇$c$中，用sigmoid函数量化客户$i$被选中的概率：
+After each round of FFL training, we reconstruct colleague communities as participants for the next round. To mitigate the impact of potential attacks, we introduce a client selection mechanism within the peer community. The probability of a client being chosen to participate in FFL is determined by its current comprehensive credit evaluation. Drawing inspiration from \cite{zhou2022defta}, we employ a Sigmoid-like function to quantify this probability of UAV $U_i$:
+\begin{equation}
+\psi^{i}_t=\frac{1}{1+e^{-k (\Phi^{i}_{t}-\gamma)}},\forall U_i \in \mathbf{U}, \forall t
+\end{equation}
+%其中$k$为控制sigmoid斜率的参数。由于$\Phi^{i}_{t}\in [0,1]$,我们规定选择概率函数的定义域在[0,1]区间内。可以看出选择概率函数在定义域内的值域$[\frac{1}{1+e^{0.5k}},\frac{1}{1+e^{-0.5k}}]$取决于参数$k$。在实际应用中，为了使选择概率在定义域内尽可能接近0和1，一般选择较大的斜率$k$。
+where $k$ controls the slope of the Sigmoid function. As $\Phi^{i}_{t}\in [0,1]$, we stipulate that the domain of the probability function $\psi^{i}_t$ lies within $[0,1]$. It can be observed that the range of $\psi^{i}_t$ is $[\frac{1}{1+e^{\gamma k}},\frac{1}{1+e^{-\gamma k}}]$, depending on $k$. In practical applications, to ensure that the selection probability function closely approaches 0 (malicious clients) and 1 (benign yet heterogeneous clients) within its domain, a larger slope parameter $k$ is usually chosen.
+
+
+\textbf{Positive assumption for fairness among benign UAVs:} It is worth mentioning that, different from existing methods' negative assumption, we initiate the selection with positive assumption, i.e., $\Phi^{i}_{0}=1 ,\forall U_i\in \mathbf{U}$, which provides high selective probability for inexperienced new participants. Therefore, this approach can achieve more fair selection results among benign UAV nodes and maximize client participation. Besides, we obtain a more comprehensive evaluation of credit, drastically mitigating the potential impact of adversarial behavior.
+
+%服务器基于本轮综合信用评分选择客户参与下一轮次的训练，为了尽可能地提高客户的参与率，得到更全面、完整的客户信誉评估结果，将综合信誉作为客户属性进行持久化存储，服务器将赋予客户乐观的初始综合信誉并在每轮交互中更新客户的最新综合信誉。
+%The server selects clients for the next training round based on the current comprehensive credit score. In order to maximize client participation, achieve a more comprehensive and complete client credit assessment, and persistently store the comprehensive credit as a client attribute, the server endows clients with an optimistic initial comprehensive credit. 
+%乐观的初始信誉和时间延迟的信誉更新增加了参与训练次数较少的客户被选中的概率，能够更全面、完善地评估所有客户的信誉，避免潜在攻击的影响。
+%This initial credit, along with delayed credit updates over time, increases the probability of selecting clients with fewer training participations. This approach aims to provide a more comprehensive and thorough evaluation of all clients' reputations, mitigating the potential impact of adversarial behavior.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{algorithm}[t]
+% \caption{algorithm credit} %算法的名字
+% \begin{algorithmic}[1]
+%  \State \textbf{\bf Input:Model Variation of Client i $\Delta\widetilde{\omega^{i}_{t}}$, Model Variation of Cluster c $\Delta\widetilde{\omega^{c}_{t-1}}$}
+% \State\textbf{Output:Comprehensive Credit of Client $\Phi^{i}_{t}$,Peputation Opinion Vector $\Upsilon^{i}_{t}$} 
+% \State \textbf{Initialize:$u^{c \rightarrow i}_{0}=\frac{\sigma_{c}-\sigma_{min}}{\sigma_{max}-\sigma_{min}}$,$b^{c \rightarrow i}_{0}=1-u^{c \rightarrow i}_{0}$,$d^{c \rightarrow i}_{0}=0$}
+% \For{$r \in 1,\cdots,R$}
+%     \State {\color{CadetBlue}/*\textbf{Credit in cluster $c$ */}}
+%         \For{each client $i \in c$ }
+%             \If{client $i \in C \cap S$ }
+%                 \State $ \alpha^{c,i}_{t} = \alpha( \Delta\widetilde{\omega^{c}_{t-1}}, \Delta\widetilde{\omega^{i}_{t}}) = \frac{\langle \Delta\widetilde{\omega^{c}_{t-1}},\Delta\widetilde{\omega^{i}_{t}}\rangle}{\Vert \Delta\widetilde{\omega^{c}_{t-1}}\Vert\cdot\Vert \Delta\widetilde{\omega^{i}_{t}}\Vert }$,
+%                 \State$p^{c \rightarrow i}_{t} = \alpha^{c,i}_{t} -(-1)$,$n^{c \rightarrow i}_{t} = 1-\alpha^{i,j}_{t}$,
+%                 \State \textbf{update  $\Upsilon^{c \rightarrow i}_{t},\Phi^{c \rightarrow i}_{r,time}$ with equation}
+%                 \State $\Phi^{c \rightarrow j}_{t}=\Phi^{c \rightarrow i}_{r,time}$
+%             \Else
+%                 \State$\Phi^{c \rightarrow j}_{t}=\Phi^{c \rightarrow i}_{t-1}$
+%             \EndIf
+%          \EndFor
+%     \State {\color{CadetBlue}/*\textbf{Credit in supernode $s$ */}}
+%     \For{each supernode $s_{m} \in S-s_{m}$}
+%         \State $\alpha^{s_{m},s_{m^{\prime}}}_{t}= \alpha( \Delta \widetilde{\omega^{s_{m}}_{t}},  \Delta\widetilde{\omega^{s_{m^{\prime}}}_{t}}) = \frac{\langle  \Delta\widetilde{\omega^{s_{m}}_{t}}, \Delta\widetilde{\omega^{s_{m^{\prime}}}_{t}}\rangle}{\Vert  \Delta\widetilde{\omega^{s_{m}}_{t}}\Vert\cdot\Vert  \Delta\widetilde{\omega^{s_{m^{\prime}}}_{t}}\Vert }$,
+%         \State $PI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} = \alpha^{s_{m},s_{m^{\prime}}} -(-1)$,$ NI^{s_{m} \rightarrow s_{m^{\prime}}}_{t} = 1-\alpha^{s_{m},s_{m^{\prime}}}_{t}$
+%         \State \textbf{update $\UpsiloNI^{s_{m} \rightarrow s}_{t},\Phi^{s}_{t}$ with equation}
+%     \EndFor
+%     \For{each client $i \in S$}
+%         \State $\Phi^{s \rightarrow i}_{t}=\Phi^{s}_{t} $
+%     \EndFor
+%     \State {\color{CadetBlue} /*\textbf{Comprehensive credit */}}
+%     \For{each client $i \in Clients$}
+%         \If{client $i \in C\cap S$ }
+%         \State \textbf{update $\Upsilon^{i}_{t},\Phi^{i}_{t}$ with equation}
+%         \Else 
+%         \State $\Phi^{i}_{t} = \Phi^{i}_{t-1}$
+%         \EndIf
+%     \EndFor
+% \EndFor
+% \end{algorithmic}
+% \end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[tb]
+	\begin{minipage}[!t]{0.49\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{results/SCC_diff.pdf}
+		%\vspace{-2em}
+		\caption{$L_2$-divergence}
+		\label{results:1-diff}
+	\end{minipage}
+        \begin{minipage}[!t]{0.49\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{results/SCC_time.pdf}
+		%\vspace{-2em}
+		\caption{Running time}
+		\label{results:1-time}
+	\end{minipage}
+\end{figure} 
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{results/SCC_acc.pdf}
+\caption{The accuracy comparison between MR-FFL with existing heterogeneity-robust methods.}
+\label{results:1-acc}
+\end{figure}
+
+\section{Experimental results}
+\subsection{Experimental settings}
+Experiments were conducted using the PyTorch deep learning framework, employing two widely adopted benchmark datasets (EMNIST and CIFAR). To demonstrate the defense performance of the proposed MR-FFL scheme, we conduct both explicit (Flipping attack) and implicit (Backdoor attack) attack paradigms. %The EMNIST dataset encompasses 10 categories for digits and 52 categories for uppercase and lowercase English letters, totaling 62 categories. All images have dimensions of 28x28 pixels. 
+In line with the methodologies of previous studies \cite{mohri2019agnostic,tan2022fedproto, zeng2022heterogeneous}, our experiments were conducted under a non-iid setting, implementing non-uniform sampling within the dataset. 
+To create an equitable but dissimilar distribution among clients, we extracted 12,0000 training samples and 30,000 testing samples, allocating them in an 8:2 ratio between the training set and the validation set. This ensured that each client possessed an equal number of samples in the training dataset, albeit with distinct data distributions. %Two neural network architectures, a simple CNN and an MLP, were employed to undertake the Federated Learning (FL) task on the EMNIST dataset. The detailed configurations of the local network models are delineated in Tables 2 and 3.
+Throughout our experiments, we configured $200\sim 500$ UAV nodes. A total of 200 communication rounds were executed, where the local training epoch for each $U_i$ is 5, the batch size is 128, the learning rate $\eta$ is 0.1, and the momentum is 0.9. 
+
+
+\subsection{The effectiveness of MR-FFL in heterogeneous UAV network}
+
+To verify the effectiveness of our stratified community construction mechanism, we compare it with existing heterogeneity-robust methods in terms of divergence reduction, running time, and learning performance. We choose three benchmark methods (\textbf{Random}, \textbf{Bayesian}, \textbf{Generic algorithms}) and two latest methods (\textbf{Cohort} \cite{hiessl2022cohort} and \textbf{GBP-CS} \cite{li2022data}). 
+In terms of divergence reduction, as shown in Figure \ref{results:1-diff}, our method significantly reduces both the average maximum divergences and deviation among clients, which indicates better robustness. 
+Regarding execution time, SCC requires only one operation to generate a sampling template. Subsequently, it performs random sampling based on the template, resulting in a short execution time. This advantage becomes more pronounced with increasing rounds. As shown in Figure \ref{results:1-time}, our method is more time-saving than other alternative methods.%On the other hand, Bayesian sampling and Genetic Algorithm have excessively long execution times, which are not acceptable. The Cohort algorithm has a relatively short runtime, but it suffers from a large deviation from the target distribution. GBP-CS algorithm needs sampling before each iteration, and its runtime is not as efficient as the QIP algorithm.
+
+
+
+In terms of learning performance, we also compared three representative algorithms (\textbf{FedAvg} \cite{li2019convergence-fedavg}, \textbf{FedNova} \cite{wang2020tackling-fednova}, \textbf{FedProx} \cite{yuan2022convergence-fedprox}) with MR-FFL. As illustrated in Figure \ref{results:1-acc}, vanilla FL algorithms exhibit slow convergence rates and poor performance with large fluctuations in heterogeneous environments. In comparison to heterogeneous FL algorithms like FedNova and FedProx, MR-FFL continues to achieve better convergence speed, stability, and accuracy.
+
+\subsection{The performance of MR-FFL against poisoning attacks}
+\begin{figure*}[!t]
+\centering
+\subfloat[EMNIST (Flipping)]{\includegraphics[width=0.25\linewidth]{results-new/accuracy/Flip_MINIST_acc.pdf}%
+\label{result0:acc-EMNIST-FLIP}}
+\hfil
+\subfloat[CIFAR (Flipping)]{\includegraphics[width=0.25\linewidth]{results-new/accuracy/Flip_Cifar_acc.pdf}%
+\label{result0:acc-CIFAR-FLIP}}
+\hfil
+\subfloat[EMNIST (Backdoor)]{\includegraphics[width=0.25\linewidth]{results-new/accuracy/BACKDOOR_MINIST_att_acc.pdf}%
+\label{result0:acc-EMNIST-Backdoor}}
+\hfil
+\subfloat[CIFAR (Backdoor)]{\includegraphics[width=0.25\linewidth]{results-new/accuracy/BACKDOOR_Cifar_att_acc.pdf}%
+\label{result0:acc-CIFAR-Backdoor}}
+\caption{The defense performance comparison between MR-FFL with existing poisoning-resistant methods against Flipping and Backdoor attacks.}
+\label{results:0-acc}
+\end{figure*}
+
+
+
+% %%%%%%%%%%%%EMNIST+Flip%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{figure}[!t]
+% \centering
+% \subfloat[Credit (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/AAD_Flip_MINIST_cr_1.pdf}%
+% \label{result1:credit-AAD}}
+% \hfil
+% \subfloat[PR (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/AAD_Flip_MINIST_pr_1.pdf}%
+% \label{result1:prob-AAD}}
+% \hfil
+% \subfloat[Credit (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/FL_Flip_MINIST_cr_1.pdf}%
+% \label{result1:credit-FLtrust}}
+% \hfil
+% \subfloat[PR (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/FL_Flip_MINIST_pr_1.pdf}%
+% \label{result1:prob-FLtrust}}
+% \hfil
+% \subfloat[Credit (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/MRFLL_Flip_MINIST_cr_1.pdf}%
+% \label{result1:credit-MRFFL}}
+% \hfil
+% \subfloat[PR (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/MRFLL_Flip_MINIST_pr_1.pdf}%
+% \label{result1:prob-MRFFL}}
+% \caption{The credit scores (after 200 rounds) and selection probabilities of different methods (AAD, FLTrust, MR-FFL) against Flipping on EMNIST.}
+% \label{results_EMNIST_flip}
+% \end{figure}
+
+% %%%%%%%%%%%EMNIST+Backdoor%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{figure}[!t]
+% \centering
+% \subfloat[Credit (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/AAD_BACKDOOR_MINIST_cr_1.pdf}%
+% \label{result2:credit-AAD}}
+% \hfil
+% \subfloat[PR (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/AAD_BACKDOOR_MINIST_pr_1.pdf}%
+% \label{result2:prob-AAD}}
+% \hfil
+% \subfloat[Credit (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/FL_BACKDOOR_MINIST_cr_1.pdf}%
+% \label{result2:credit-FLtrust}}
+% \hfil
+% \subfloat[PR (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/FL_BACKDOOR_MINIST_pr_1.pdf}%
+% \label{result2:prob-FLtrust}}
+% \hfil
+% \subfloat[Credit (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/MRFLL_BACKDOOR_MINIST_cr_1.pdf}%
+% \label{result2:credit-MRFFL}}
+% \hfil
+% \subfloat[PR (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/MRFLL_BACKDOOR_MINIST_pr_1.pdf}%
+% \label{result2:prob-MRFFL}}
+% \caption{The credit scores (after 200 rounds) and selection probabilities of different methods (AAD, FLTrust, MR-FFL) against Backdoor on EMNIST.}
+% \label{results_EMNIST_Backdoor}
+% \end{figure}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%CIFAR+Flip%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{figure}[!t]
+% \centering
+% \subfloat[Credit (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/AAD_Flip_Cifar_cr_1.pdf}%
+% \label{result3:credit-AAD}}
+% \hfil
+% \subfloat[PR (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/AAD_Flip_Cifar_pr_1.pdf}%
+% \label{result3:prob-AAD}}
+% \hfil
+% \subfloat[Credit (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/FL_Flip_Cifar_cr_1.pdf}%
+% \label{result3:credit-FLtrust}}
+% \hfil
+% \subfloat[PR (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/FL_Flip_Cifar_pr_1.pdf}%
+% \label{result3:prob-FLtrust}}
+% \hfil
+% \subfloat[Credit (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/MRFLL_Flip_Cifar_cr_1.pdf}%
+% \label{result3:credit-MRFFL}}
+% \hfil
+% \subfloat[PR (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/MRFFL_Flip_Cifar_pr_1.pdf}%
+% \label{result3:prob-MRFFL}}
+% \caption{The credit scores (after 200 rounds) and selection probabilities of different methods (AAD, FLTrust, MR-FFL) against Flipping on CIFAR.}
+% \label{results_Cifar_flip}
+% \end{figure}
+% %%%%%%%%%%%CIFAR+Backdoor%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{figure}[!t]
+% \centering
+% \subfloat[Credit (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/AAD_BACKDOOR_Cifar_cr_1.pdf}%
+% \label{result4:credit-AAD}}
+% \hfil
+% \subfloat[PR (AAD)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/AAD_BACKDOOR_Cifar_pr_1.pdf}%
+% \label{result4:prob-AAD}}
+% \hfil
+% \subfloat[Credit (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/FL_BACKDOOR_Cifar_cr_1.pdf}%
+% \label{result4:credit-FLtrust}}
+% \hfil
+% \subfloat[PR (FLTrust)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/FL_BACKDOOR_Cifar_pr_1.pdf}%
+% \label{result4:prob-FLtrust}}
+% \hfil
+% \subfloat[Credit (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Credit/MRFLL_BACKDOOR_Cifar_cr_1.pdf}%
+% \label{result4:credit-MRFFL}}
+% \hfil
+% \subfloat[PR (MR-FFL)]{\includegraphics[width=0.5\linewidth]{results-new/Prob/MRFFL_BACKDOOR_Cifar_pr_1.pdf}%
+% \label{result4:prob-MRFFL}}
+% \caption{The credit scores (after 200 rounds) and selection probabilities of different methods (AAD, FLTrust, MR-FFL) against Backdoor on CIFAR.}
+% \label{results_Cifar_Backdoor}
+% \end{figure}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Subsequently, to further demonstrate the advantages of the MR-FFL method in ensuring model integrity, we compare our approach with existing representative reliable FL algorithms, including \textit{mitigation-oriented} \cite{blanchard2017machine-krum,yin2018byzantine-trimmedmean}, \textit{detection-oriented} \cite{andreina2021baffle}, and \textit{credit-oriented} \cite{li2019abnormal,cao2020fltrust}. The total number of UAV ndoes is set to 200. As shown in Figure \ref{results:0-acc}, we conduct explicit attacks (flipping) and compare the training accuracy in Figure \ref{result0:acc-EMNIST-FLIP} and \ref{result0:acc-CIFAR-FLIP}. Higher accuracy means better defense effect. Meanwhile, the backdoor task accuracy (implicit attack) on EMNIST and CIFAR is demonstrated in Figure \ref{result0:acc-EMNIST-Backdoor} and \ref{result0:acc-CIFAR-Backdoor}, respectively. Lower backdoor accuracy indicates better defense performance. 
+Based on the results, it is evident that mitigation-oriented schemes such as \textbf{Trimmed-mean} \cite{yin2018byzantine-trimmedmean} exhibit significant deviations from the global objectives in heterogeneous environments, resulting in lower accuracy. \textbf{BaFFLe} \cite{andreina2021baffle}, as a detection-oriented method, struggles to converge rapidly and requires additional validation rounds, incurring substantial communication and time overhead. For credit-oriented methods \textbf{AAD} \cite{li2019abnormal} and \textbf{FLTrust} \cite{cao2020fltrust}, although AAD can permanently ban attackers, the gap between heterogeneous gradients and attacker gradients relative to the pre-trained global model leads to erroneous elimination, resulting in an overall performance decline. Similarly, in FLTrust, heterogeneous UAVs with gradients opposite to the direction of server-side model updates face challenges participating in the global model aggregation, causing a decline in model performance.
+
+
+Furthermore, in Figure \ref{results_EMNIST_flip} to \ref{results_Cifar_Backdoor}, through a comparative analysis of credit assessment values and selection probabilities with existing methods such as AAD (based on autoencoder) and FLTrust (based on bootstrapping), we validate the effectiveness of the credit evaluation mechanism in the MR-FFL scheme. This validation is crucial for guiding subsequent hyperparameter tuning and adaptive configurations. As illustrated in the first rows of those figures, the AAD method lacks adaptation to highly heterogeneous environments, leading to the misclassification of numerous legitimate UAV nodes. Under FLTrust, as shown in the second rows of above figures, both the credit of normal UAV participants and their selection probabilities exhibit significant fluctuations, with a lack of robustness in detecting certain covert attacks. In contrast, MR-FFL evaluates the integrity of UAV nodes in terms of both community-wide similarity and performance. As shown in the third rows of Figure \ref{results_EMNIST_flip} to \ref{results_Cifar_Backdoor}, our method can accurately identify the stealthy malicious attackers from benign nodes.
+
+
+\subsection{The fairness of MR-FFL under adversarial environments}
+One of the important drawbacks of existing security technologies is unfairness. As shown in the second columns of Figure \ref{results_EMNIST_flip} to \ref{results_Cifar_Backdoor}, except for the low accuracy, AAD and FLTrust also assign vastly different selection probabilities to benign UAV nodes. Different from existing methods, MR-FFL employs a Sigmoid function to optimize the selection strategy, resulting in a clearer distinction between attackers and normal users (e.g., Figure \ref{result3:credit-MRFFL} and \ref{result4:credit-MRFFL}). Hence, the probabilities of legitimate clients being selected are approximate (e.g., Figure \ref{result1:prob-MRFFL} and \ref{result2:prob-MRFFL}), ensuring fairness among benign UAV nodes.
+
+\section{Conclusion}
+%随着泛在通信和技术的发展，UAV网络得到越来越广泛的应用。基于无人机的联邦学习等智能化方法能够自适应地优化部署和业务，成为重要发展趋势之一。然而，受限于有限的巡航范围，UAV设备往往高度异构，同时UAV设备资源和能量极其有限，这些约束均导致现有安全技术难以移植到UAV网络中。因此，在本文中，我们针对异构和资源受限的UAV网络下的公平联邦学习的安全问题进行了研究。基于一种分层社区构建机制，我们提出了双向可信的公平联邦学习架构，来应对异构UAV网络中的攻击威胁。在公有数据集上的系列实验表明，我们的方案相比现有技术，在异构缓解、隐私增强和污染防治方面均取得明显提升。
+With the development of ISCC and SAGIN, UAV networks are experiencing increasingly widespread applications. AI technologies such as FL based on UAV enable adaptive optimization of deployment and operations, emerging as a crucial development trend. However, due to the restricted patrol area, UAV devices exhibit high heterogeneity, and their resources and energy are also extremely limited. These constraints make it challenging to directly implant existing high-consumption security methods in UAV networks. Therefore, in this paper, we investigate the security issues of FFL in heterogeneous and resource-constrained UAV networks. Leveraging a stratified community construction mechanism, we propose a mutual reliability FFL framework (MR-FFL) to address multiple security threats. %in heterogeneous UAV networks. 
+A series of experiments on public datasets demonstrate significant improvements of MR-FFL in heterogeneity remission, fairness guarantee, and poisoning resistance compared to existing technologies.
+
+
+
+\section*{Acknowledgments}
+This work is partially supported by China Postdoctoral Science Foundation (grant No. 2024M750259), Beijing Natural Science Foundation (grant No. 4244084), National Natural Science Foundation of China (grant No. 62401075, 62394322).
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+% {\appendix[Proof of the Zonklar Equations]
+% Use $\backslash${\tt{appendix}} if you have a single appendix:
+% Do not use $\backslash${\tt{section}} anymore after $\backslash${\tt{appendix}}, only $\backslash${\tt{section*}}.
+% If you have multiple appendixes use $\backslash${\tt{appendices}} then use $\backslash${\tt{section}} to start each appendix.
+% You must declare a $\backslash${\tt{section}} before using any $\backslash${\tt{subsection}} or using $\backslash${\tt{label}} ($\backslash${\tt{appendices}} by itself
+%  starts a section numbered zero.)}
+
+
+
+%{\appendices
+%\section*{Proof of the First Zonklar Equation}
+%Appendix one text goes here.
+% You can choose not to have a title for an appendix if you want by leaving the argument blank
+%\section*{Proof of the Second Zonklar Equation}
+%Appendix two text goes here.}
+
+
+
+% \section{References Section}
+% You can use a bibliography generated by BibTeX as a .bbl file.
+%  BibTeX documentation can be easily obtained at:
+%  http://mirror.ctan.org/biblio/bibtex/contrib/doc/
+%  The IEEEtran BibTeX style support page is:
+%  http://www.michaelshell.org/tex/ieeetran/bibtex/
+ 
+ % argument is your BibTeX string definitions and bibliography database(s)
+%\bibliography{IEEEabrv,../bib/paper}
+%
+% \section{Simple References}
+% You can manually copy in the resultant .bbl file and set second argument of $\backslash${\tt{begin}} to the number of references
+%  (used to reserve space for the reference number labels box).
+
+% \begin{thebibliography}{1}
+% \bibliographystyle{IEEEtran}
+
+% \bibitem{ref1}
+% {\it{Mathematics Into Type}}. American Mathematical Society. [Online]. Available: https://www.ams.org/arc/styleguide/mit-2.pdf
+
+% \bibitem{ref2}
+% T. W. Chaundy, P. R. Barrett and C. Batey, {\it{The Printing of Mathematics}}. London, U.K., Oxford Univ. Press, 1954.
+
+% \bibitem{ref3}
+% F. Mittelbach and M. Goossens, {\it{The \LaTeX Companion}}, 2nd ed. Boston, MA, USA: Pearson, 2004.
+
+% \bibitem{ref4}
+% G. Gr\"atzer, {\it{More Math Into LaTeX}}, New York, NY, USA: Springer, 2007.
+
+% \bibitem{ref5}M. Letourneau and J. W. Sharp, {\it{AMS-StyleGuide-online.pdf,}} American Mathematical Society, Providence, RI, USA, [Online]. Available: http://www.ams.org/arc/styleguide/index.html
+
+% \bibitem{ref6}
+% H. Sira-Ramirez, ``On the sliding mode control of nonlinear systems,'' \textit{Syst. Control Lett.}, vol. 19, pp. 303--312, 1992.
+
+% \bibitem{ref7}
+% A. Levant, ``Exact differentiation of signals with unbounded higher derivatives,''  in \textit{Proc. 45th IEEE Conf. Decis.
+% Control}, San Diego, CA, USA, 2006, pp. 5585--5590. DOI: 10.1109/CDC.2006.377165.
+
+% \bibitem{ref8}
+% M. Fliess, C. Join, and H. Sira-Ramirez, ``Non-linear estimation is easy,'' \textit{Int. J. Model., Ident. Control}, vol. 4, no. 1, pp. 12--27, 2008.
+
+% \bibitem{ref9}
+% R. Ortega, A. Astolfi, G. Bastin, and H. Rodriguez, ``Stabilization of food-chain systems using a port-controlled Hamiltonian description,'' in \textit{Proc. Amer. Control Conf.}, Chicago, IL, USA,
+% 2000, pp. 2245--2249.
+
+% \end{thebibliography}
+
+
+\newpage
+
+%\section{Biography Section}
+% If you have an EPS/PDF photo (graphicx package needed), extra braces are
+%  needed around the contents of the optional argument to biography to prevent
+%  the LaTeX parser from getting confused when it sees the complicated
+%  $\backslash${\tt{includegraphics}} command within an optional argument. (You can create
+%  your own custom macro containing the $\backslash${\tt{includegraphics}} command to make things
+%  simpler here.)
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Zan Zhou.jpg}}]{Zan Zhou} (Student Member, IEEE)
+received his Ph.D. degree in Computer Science from the Beijing University of Posts and Telecommunications (BUPT) in 2022. 
+From 2021 to 2022, he was a visiting student at Nanyang Technology University (NTU), Singapore. 
+He is currently a Postdoc researcher with the State Key Laboratory of Networking and Switching Technology, BUPT, Beijing, China. His research interests include data privacy, active defense, and federated learning. %He is Student member of IEEE.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Shujie Yang.jpg}}]{Shujie Yang} received the Ph.D. degree from the Institute of Network Technology, Beijing University of Posts and Telecommunications, Beijing, China, in 2017. He is currently a lecturer with the State Key Laboratory of Networking and Switching Technology. His major research interests include network security and artificial intelligence.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/changqiao xu.jpg}}]{Changqiao Xu}
+(Senior Member, IEEE) received the Ph.D. degree from the Institute of Software, Chinese Academy of Sciences (ISCAS) in Jan. 2009. He was a researcher at Athlone Institute of Technology and Joint Training PhD at Dublin City University, Ireland during 2007-2009. %He joined BUPT in Dec. 2009. 
+Currently, he is a Professor with the State Key Laboratory of Networking and Switching Technology, and Director of the Network Architecture Research Center at BUPT. His research interests include Network Security, Mobile Networking, Multimedia Communications, and Future Internet Technology. He has edited two books and published over 200 technical papers in prestigious international journals and conferences, including IEEE Comm. Magazine, IEEE/ACM ToN, IEEE TMC, INFOCOM, ACM Multimedia, etc. He has served a number of international conferences and workshops as a Co-Chair and TPC member. He is currently serving as the Editor-in-Chief of Transactions on Emerging Telecommunications Technologies (Wiley).
+\end{IEEEbiography}
+% \bf{If you include a photo:}\vspace{-33pt}
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{fig1}}]{Michael Shell}
+% Use $\backslash${\tt{begin\{IEEEbiography\}}} and then for the 1st argument use $\backslash${\tt{includegraphics}} to declare and link the author photo.
+% Use the author name as the 3rd argument followed by the biography text.
+% \end{IEEEbiography}
+
+% \vspace{11pt}
+
+% \bf{If you will not include a photo:}\vspace{-33pt}
+% \begin{IEEEbiographynophoto}{John Doe}
+% Use $\backslash${\tt{begin\{IEEEbiographynophoto\}}} and the author name as the argument followed by the biography text.
+% \end{IEEEbiographynophoto}
+
+
+
+\vfill
+
+% \newpage
+% \onecolumn
+% \begin{longtable}{|c|p{3cm}|c|p{12cm}|} 
+%     \caption{This is the caption for the long table}
+%     \label{tabl:attack} \\ \hline
+%     Title & Conference & Year & Main Content \\ \hline
+%     \endfirsthead \hline
+%     Title & Conference & Year & Main Content \\ \hline 
+%     \endhead \hline
+%    \cite{jha2023label} & neurips & 2023 &  本文提出了一种新颖的标签投毒攻击方法，称为FLIP。与传统的后门攻击不同，FLIP仅通过修改训练数据的标签即可实现对模型的控制，而无需更改图像本身。这种方法特别适用于当训练标签可能来自潜在恶意的第三方（如众包标注或知识蒸馏）的场景。本文通过实验展示了FLIP在多个数据集和模型架构上的高效性，证明了在仅污染少量标签的情况下，FLIP能够显著影响模型的预测结果。 \\ \hline
+%    \cite{yang2023data} & International Conference on Machine Learning & 2023 & 本文首次研究了针对多模态模型的投毒攻击，包括视觉和语言两种模态。研究的主要问题是：（1）语言模态是否也容易受到投毒攻击？（2）哪种模态更易受攻击？本文提出了三种针对多模态模型的投毒攻击，并通过在不同数据集和模型架构上的广泛评估，表明这些攻击可以在保持模型实用性的同时实现显著的攻击效果。为缓解这些攻击，本文还提出了预训练和后训练的防御措施，并证明这些防御措施能够显著降低攻击效果，同时保持模型的效用。\\ \hline
+%    \cite{dai2023chameleon} & International Conference on Machine Learning & 2023 & 这篇文章的主要贡献在于提出了Chameleon攻击方法，这是一种通过利用正常图像与被污染图像之间的关系，来增强后门在联邦学习（FL）系统中持久性的策略。通过对比学习调整图像嵌入距离，Chameleon成功延长了后门的存续时间，使其在多种数据集、后门类型和模型架构下的耐久性提高了1.2至4倍，显著优于现有方法。 \\ \hline
+%    \cite{gu2023gradient} & ACL & 2023 & 这篇文章提出了一种新的梯度控制方法，旨在解决参数高效调优（PET）过程中后门攻击的遗忘问题。通过将后门注入过程视为多任务学习，文章引入了跨层梯度幅度归一化和层内梯度方向投影两种策略，以减少不同任务之间的梯度冲突和梯度大小的不平衡，从而增强后门攻击在用户微调模型后的效果。实验结果表明，该方法在情感分类和垃圾邮件检测任务中显著提高了后门攻击的持久性和有效性。 \\ \hline
+%    \cite{zhang2024a3fl} & neurips & 2024 & 这篇文章的主要贡献是提出了一种新的后门攻击方法A3FL，它通过对抗性自适应策略优化后门触发器，使其在联邦学习的全局训练动态中更持久、更难被检测到。与现有方法相比，A3FL显著提高了攻击的成功率和隐蔽性，并在多种防御机制下展现了出色的效果，揭示了现有防御方法的不足，强调了开发新防御策略的必要性。\\ \hline
+%    \cite{xu2024shadowcast} & arxiv  & 2024 & 这篇文章主要介绍了一种针对视觉语言模型（VLMs）的隐蔽数据投毒攻击方法，称为Shadowcast。该方法通过向模型的训练数据中注入视觉上与正常图像几乎无法区分的投毒样本，从而误导模型在推理时生成错误或误导性的信息。文章探讨了两种攻击类型：标签攻击（Label Attack）和说服攻击（Persuasion Attack），前者旨在让模型错误识别图像类别，而后者通过生成具有说服力但错误的文本，改变用户对图像的认知。实验结果表明，Shadowcast攻击在多种VLM架构下都非常有效，且在不同的提示词和数据增强条件下依然保持攻击效果。\\ \hline
+%    \cite{liang2024badclip} & CVPR & 2024 & 这篇文章提出了一种针对多模态对比学习模型（如CLIP）的双嵌入引导后门攻击方法，称为BadCLIP。BadCLIP通过优化视觉触发模式，使其在嵌入空间中接近目标文本语义，从而在不显著改变模型参数的情况下，植入难以被检测到的后门。此外，该方法通过对抗性训练，增强了中毒样本的视觉特征，使得后门在模型经过清洁数据微调后仍能保持有效。实验结果显示，BadCLIP在多种防御机制下都表现出显著的攻击成功率，展示了其对现有防御方法的强大威胁。\\ \hline
+
+    
+%    \cite{attack01} & arXiv preprint & 2024 & 本篇文章次揭示了在联邦学习环境下对大语言模型（LLM）进行指令调优时存在的安全漏洞。文章提出了一种简洁但有效的安全攻击方法，恶意客户端通过使用未对齐的数据来训练本地模型，从而大幅度削弱了全球模型的安全对齐性（“未对齐的数据”，是指那些与预期的安全或伦理规范不一致的数据。例如，未对齐的数据可能包含有害的、误导性的或是不道德的信息，而这些信息在普通情况下不会被用于训练模型）。实验表明，该攻击方法能够将模型的安全性降低高达70\%，而现有的防御方法在应对此类攻击时几乎无效，仅能提高4\%的安全性。为了解决这一问题，作者进一步提出了一种新的事后防御方法，即通过服务器端生成对齐数据并进一步对全局模型进行微调，从而增强模型的安全性（中央服务器在接收到各个客户端的更新后，会主动生成一组对齐的数据。这些对齐的数据是预先定义好的，确保与预期的安全和伦理规范一致。这些数据可能包含严格筛选过的内容，如道德上中立或积极的文本片段）。实验结果显示，这种防御方法能够将模型的安全性提高最多69\%，且不显著降低模型的有效性。（这篇看完了发现不是视觉大模型） \\ \hline
+%    \cite{attack02} & arXiv preprint & 2024 & 本篇文章探讨了一种针对大语言模型（LLMs）的新型训练方法，称为目标潜在对抗性训练（Targeted Latent Adversarial Training, LAT），文章提出了通过在模型的潜在表示（latent representations）中引入针对性的扰动，来更有效地消除模型中顽固的不良行为（如后门攻击和模型“越狱”）。(潜在表示是指在神经网络的中间层中，数据通过多层非线性变换后所形成的特征表示。这些表示通常处于更高的抽象层次，与原始输入相比，能够捕捉到数据的深层次特征。在视觉大模型中，这些潜在表示可能包括图像的边缘、形状、纹理等更抽象的特征，而不再是具体的像素值。潜在表示在模型中扮演着至关重要的角色，因为它们是模型用来进行预测和决策的核心特征。)(针对性的扰动是指在训练或评估过程中，特意对模型的输入或潜在表示进行细微的修改或扰动，以诱导模型产生特定的（通常是不希望的）行为。通过这种方法，可以测试和增强模型在面对各种攻击时的鲁棒性。在本文中，作者使用潜在空间中的针对性扰动来模拟攻击，目的是强化模型的防御能力，使其能够抵抗类似的实际攻击，如后门攻击或越狱行为。)研究表明，与传统的对抗性训练相比，目标潜在对抗性训练可以显著提高模型抵抗这些攻击的能力，同时对模型的整体性能影响较小。文章通过实验验证了该方法在增强模型鲁棒性方面的有效性，尤其是在面对未知触发条件的后门攻击时，表现出色。  \\ \hline
+%    \cite{attack03} & arXiv preprint & 2024 & 本文探讨了开放权重大语言模型（LLMs）在面对篡改攻击时的脆弱性，并提出了一种名为TAR（Tampering Attack Resistance）的方法，旨在增强这些模型的抗篡改能力。文章指出，现有的安全防护措施，如拒绝机制和偏好训练，容易在少量微调步骤后被攻击者绕过，导致模型被恶意修改。为此，TAR方法通过对抗性训练和元学习，设计了一种新的防护机制，使得即使在经历数千步的微调攻击后，模型仍能保持其原有的安全防护功能。实验结果显示，与现有方法相比，TAR显著提高了模型的抗篡改能力，同时保留了模型的正常功能。研究还通过大量红队评估验证了TAR方法的有效性，展示了其在应对各种复杂攻击时的鲁棒性。(红队评估是一种在网络安全和机器学习领域常用的测试方法，它通过模拟攻击者的行为来评估系统或模型的安全性和防御能力。红队通常扮演“敌方”角色，主动寻找和利用系统的漏洞，以测试系统在真实攻击场景下的表现。这种方法帮助识别和修复安全漏洞，使系统在面对潜在的实际攻击时更加稳健。这篇文章中研究人员通过设计多个测试对手，这些对手模拟了各种可能的攻击策略，试图篡改或破坏大语言模型的功能。文章中提到进行了28个不同的红队评估测试，每个测试都旨在突破TAR的防护机制。)文章中的攻击方式涉及通过微调大语言模型的权重来篡改其行为。攻击者可以在模型的开放权重上进行少量微调，使其在特定情况下产生不希望的输出。例如，攻击者可能会在输入特定触发词时，让模型生成有害内容或偏离其正常功能。\\ \hline
+%    \cite{attack04} & arXiv preprint & 2024 & 这是一篇综述。本文主要介绍了以下攻击方式：\begin{itemize}
+%     \item 对抗性攻击：通过对输入数据进行微小的扰动，这些扰动虽然对人类几乎不可见，但会导致模型产生显著错误的输出，例如在图像分类中，可能会使模型将一个正常的图像误分类为完全不同的类别；
+%     \item 后门攻击：和之前咱做的一样；
+%     \item 数据中毒攻击：攻击者向模型的训练数据中注入恶意样本，这些样本会导致模型在遇到类似数据时输出错误结果，例如在物体识别任务中，中毒数据可能会导致模型误将无害物体识别为威胁；
+%     \item 模型逃逸：攻击者通过调整输入或模型参数，试图找到绕过模型防御机制的方法，使模型输出不受控制的内容，这种攻击常用于测试模型的防御效果；
+%     \item 多模态攻击：针对处理多种类型输入（如文本和图像）的模型，攻击者通过操纵一种模态的输入来影响另一种模态的输出，例如在多模态对话系统中，通过改变图像输入可能会影响系统的文本回应；
+%     \item 跨语言攻击：在多语言任务中，攻击者通过在一种语言中引入扰动来影响模型在另一种语言中的表现，这类攻击特别针对多语言翻译或生成模型，可能导致不同语言间的翻译不准确或失真。
+%     \end{itemize}\\ \hline
+%    \cite{attack05} &  Advances in Neural Information Processing Systems 34 (NeurIPS 2021) & 2021 & 本篇文章讨了如何保护通过“彩票假设”（Lottery Ticket Hypothesis, LTH）找到的稀疏子网络（即“中奖票”）的所有权。文章提出了一种新的基于稀疏结构信息的验证方法，通过在网络的稀疏结构中嵌入签名来进行所有权验证。这种方法能够在白盒和黑盒场景下保护模型的知识产权，并且对细微调整（如微调和剪枝）具有很强的鲁棒性。研究还通过大量实验验证了该方法在多种模型（如ResNet-20、ResNet-18、ResNet-50）和数据集（如CIFAR-10和CIFAR-100）上的有效性，展示了其在应对移除攻击和模糊攻击时的坚韧性。具体攻击方式有：细微调整（Fine-tuning）攻击：对模型进行微调来改变模型的权重值，同时希望不改变网络的稀疏结构。这种攻击旨在通过调整权重，试图使嵌入的签名信息变得不可辨认或无效。然而，由于嵌入的信息是基于网络的稀疏结构（即被剪枝后的模型结构），细微调整难以改变这一基础结构，从而无法有效移除签名。剪枝（Pruning）攻击：攻击者尝试通过进一步剪枝来移除嵌入的签名信息。这种攻击的目的是通过减少模型的非零参数，使得嵌入的结构信息丢失。然而，文章中提出的嵌入方法确保了签名信息在极端稀疏的情况下仍能保留，即使剪枝比例达到一定程度，签名依然可以从稀疏结构中提取出来。模糊攻击（Ambiguity Attacks）：攻击者试图通过制造伪签名或模糊原有签名的信息来混淆所有权验证。这种攻击可能包括添加噪声、篡改稀疏结构等手段，旨在使得验证机制无法区分真实的所有权签名和伪造的信息。然而，文章中的验证方法通过设计稳健的结构嵌入机制，使得这种模糊攻击难以成功。(“签名”指的是嵌入到神经网络稀疏结构中的一种独特的标识信息。这种签名通过在模型的剪枝过程中，利用网络的稀疏性来实现。具体而言，当模型被剪枝后，一部分神经元和连接被移除，剩余的结构会呈现出一种特定的稀疏模式。作者通过在这种稀疏模式中嵌入一个特定的结构或模式，这个模式就是所谓的“签名”。这种签名是不可见的，但可以通过特定的验证过程来提取和识别。其主要功能是为网络的所有权提供证据，类似于给模型打上了一个“水印”。当有人试图非法复制或篡改模型时，这个嵌入的签名仍然可以被识别出来，从而验证模型的归属。签名的鲁棒性设计使其能够抵抗常见的攻击方式（如微调和进一步的剪枝），即使模型经历了这些操作，签名依然可以从其稀疏结构中被提取出来，证明模型的所有权。)(模型的所有权是指对一个机器学习模型（如神经网络模型）所拥有的法律和知识产权。所有权通常由开发者或公司拥有，表示他们对模型的设计、训练数据、训练方法以及最终生成的模型参数等有控制权和排他性使用权。这意味着只有模型的所有者有权利决定如何使用、修改、发布或授权使用该模型。（可能涉及到知识产权保护、商业机密的保密）)\\ \hline
+%    \cite{attack06} & Portail HAL theses(theses.hal.science) & 2022 & 这篇文章有185页。本篇文章讨论了如何通过数字水印技术来保护机器学习模型的知识产权，防止模型被盗用。文章首先提供了当前水印技术的概述，并进一步扩展了这些技术在图像分类任务之外的应用，涵盖了回归、机器翻译和强化学习模型。作者还提出了针对模型托管平台的伪造攻击（即试图通过伪造水印来绕过验证）并介绍了一种基于公平性的水印技术，以增强模型在黑盒环境中的安全性。实验结果表明，这些水印技术不仅可以有效防止模型盗用，还能够在面对各种攻击时保持鲁棒性。
+%    数字水印是一种嵌入信息的技术，用于在数字内容（如图像、音频、视频或机器学习模型）中隐藏特定的信息，以表明所有权或版权。对于机器学习模型来说，数字水印是一种通过特定算法将标识信息嵌入到模型的权重、结构或输出中的技术。这种标识信息通常是不可见或难以察觉的，但可以通过特定的提取过程来验证。（数字水印的目的有：知识产权保护：开发者可以通过在模型中嵌入水印来证明模型的所有权，防止未经授权的复制和使用；盗版检测：如果一个模型被盗用或未经许可发布，水印可以作为证据，证明模型的来源和合法所有者；内容跟踪：水印可以帮助追踪模型的使用情况，尤其是在多个平台或用户之间共享时，确保模型的使用符合许可协议。） \\ \hline
+%     % \endfoot
+%     % \hline
+%     % \endlastfoot
+%     % \hline
+% \end{longtable}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig4-history.jpg}
+\caption{Combining multiple rounds of historical identification to identify malicious nodes
+}
+\label{fig4:history}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{img/SecFFT-场景.pdf}
+\caption{Combining multiple rounds of historical identification to identify malicious nodes
+}
+\label{fig4:history}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{img/SecFFT-算法1.pdf}
+\caption{Combining multiple rounds of historical identification to identify malicious nodes
+}
+\label{fig4:history}
+\end{figure}
+
+\end{document}
