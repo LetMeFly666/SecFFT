@@ -195,7 +195,7 @@ class Trainer:
         file_path = f"./FL_Backdoor_CV/{formatted_time}"
         os.makedirs(f"./FL_Backdoor_CV/{formatted_time}/participants", exist_ok=True)
         os.makedirs(f"./FL_Backdoor_CV/{formatted_time}/model_updates", exist_ok=True)
-
+        self.participants = {}
         if not os.path.exists(saved_results_path):
             os.makedirs(saved_results_path)
         with open(arg_path, "w") as f:
@@ -223,7 +223,7 @@ class Trainer:
             start_time = time.time()
             # === participants selection phase ===
             self.server.select_participants()
-
+            self.participants[cur_round] = self.server.self.participants
             # === training and aggregating phase ===
             self.server.train_and_aggregate(
                 global_lr=args.global_lr, round=cur_round, root_path=file_path
@@ -294,6 +294,15 @@ class Trainer:
             # === save the results every args.record_res_step rounds ===
             if self.server.current_round % args.record_res_step == 0:
                 save_results_to_csv(self.results, res_path)
+                save_results_to_csv(
+                    self.participants,
+                    f"./FL_Backdoor_CV/{formatted_time}/participants/participants.csv",
+                )
+
+        save_results_to_csv(
+            self.participants,
+            f"./FL_Backdoor_CV/{formatted_time}/participants/participants.csv",
+        )
 
 
 if __name__ == "__main__":
