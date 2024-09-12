@@ -2,7 +2,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="PPDL")
 
-parser.add_argument("--reduction_factor", type=int, default=10)
+parser.add_argument("--reduction_factor", type=int, default=1)
 
 # === dataset, data partitioning mode, device, model, and rounds
 parser.add_argument(
@@ -26,12 +26,12 @@ parser.add_argument(
 
 
 parser.add_argument(
-    "--participant_population", default=10, type=int, help="total clients"
+    "--participant_population", default=50, type=int, help="total clients"
 )
 
 
 parser.add_argument(
-    "--participant_sample_size", default=10, type=int, help="participants each round"
+    "--participant_sample_size", default=50, type=int, help="participants each round"
 )
 
 
@@ -39,7 +39,7 @@ parser.add_argument("--is_poison", default=1, type=int, help="poison or not")
 
 
 parser.add_argument(
-    "--number_of_adversaries", default=1, type=int, help="the number of attackers"
+    "--number_of_adversaries", default=20, type=int, help="the number of attackers"
 )
 
 
@@ -49,7 +49,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--poison_rounds",
-    default="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15, 16, 17, 18, 19",
+    default="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
     type=str,
     help="",
 )
