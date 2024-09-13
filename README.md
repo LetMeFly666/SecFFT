@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2024-09-13 10:38:02
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-09-14 01:07:56
+ * @LastEditTime: 2024-09-14 01:51:09
 -->
 # SecFFT - branch[wb.002.clip_lora](https://github.com/LetMeFly666/SecFFT/tree/wb.002.clip_lora)
 
@@ -22,3 +22,8 @@ Changed from [RoseAgg](https://github.com/SleepedCat/RoseAgg).
 - [x] 梯度存在哪儿    resultWithTime/model_update/  使用pickle 拼接
 - [ ] 有存分吗
 - [ ] 识别结果如何
+
+NormalRun的resultWithTime是一个转置的矩阵，第一行`0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29`代表表头30轮，每一列是参与者（其实就是0-49），0-19是恶意。
+
+最终选用攻击：NEUROTOXIN、MR
+
