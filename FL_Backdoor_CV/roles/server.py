@@ -16,7 +16,7 @@ from sklearn.cluster import DBSCAN, KMeans
 from sklearn.metrics import pairwise_distances
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
-from FL_Backdoor_CV.models.create_model import create_model
+# from FL_Backdoor_CV.models.create_model import create_model
 from FL_Backdoor_CV.roles.evaluation import test_cv, test_poison_cv
 from configs import args
 from FL_Backdoor_CV.roles.aggregation_rules import roseagg

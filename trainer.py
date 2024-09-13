@@ -1,6 +1,8 @@
 import os
 
 os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["HF_DATASETS_OFFLINE"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "1"
 
 import random
 import time
@@ -192,9 +194,10 @@ class Trainer:
 
         current_time = datetime.now()
         formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        file_path = f"./FL_Backdoor_CV/{formatted_time}"
-        os.makedirs(f"./FL_Backdoor_CV/{formatted_time}/participants", exist_ok=True)
-        os.makedirs(f"./FL_Backdoor_CV/{formatted_time}/model_updates", exist_ok=True)
+        file_path = f"./FL_Backdoor_CV/resultWithTime/{formatted_time}"
+        os.makedirs(f'./FL_Backdoor_CV/resultWithTime', exist_ok=True)
+        os.makedirs(f"./FL_Backdoor_CV/resultWithTime/{formatted_time}/participants", exist_ok=True)
+        os.makedirs(f"./FL_Backdoor_CV/resultWithTime/{formatted_time}/model_updates", exist_ok=True)
         self.participants = {}
         if not os.path.exists(saved_results_path):
             os.makedirs(saved_results_path)

@@ -13,6 +13,7 @@ from FL_Backdoor_CV.helper import Helper
 from configs import args
 from transformers import CLIPProcessor, CLIPModel
 import os
+import platform
 from peft import LoraConfig, get_peft_model
 
 random.seed(0)
@@ -90,9 +91,13 @@ class ImageHelper(Helper):
 
     def __init__(self, params):
         super(ImageHelper, self).__init__(params)
-        self.processor = CLIPProcessor.from_pretrained(
-            "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
-        )
+        # if platform.system().lower() == 'windows':
+        #     self.processor = CLIPProcessor.from_pretrained(
+        #         "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
+        #     )
+        # else:
+        #     self.processor = CLIPProcessor.from_pretrained('../Datasets/clip-vit-base-patch32')
+        self.processor = CLIPProcessor.from_pretrained('../Datasets/clip-vit-base-patch32')
         # self.target_model = CLIPModel.from_pretrained(
         #     "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
         # )
@@ -121,16 +126,24 @@ class ImageHelper(Helper):
             bias="none",
         )
         # local model
-        base_model = CLIPModel.from_pretrained(
-            "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
-        )
+        # if platform.system().lower() == 'windows':
+        #     base_model = CLIPModel.from_pretrained(
+        #         "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
+        #     )
+        # else:
+        #     base_model = CLIPModel.from_pretrained('../Datasets/clip-vit-base-patch32')
+        base_model = CLIPModel.from_pretrained('../Datasets/clip-vit-base-patch32')
         self.local_model = get_peft_model(base_model, config)
         self.local_model.print_trainable_parameters()
 
         # target model
-        base_model = CLIPModel.from_pretrained(
-            "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
-        )
+        # if platform.system().lower() == 'windows':
+        #     base_model = CLIPModel.from_pretrained(
+        #         "openai/clip-vit-base-patch32", cache_dir=os.path.join(os.getcwd(), "cache")
+        #     )
+        # else:
+        #     base_model = CLIPModel.from_pretrained('../Datasets/clip-vit-base-patch32')
+        base_model = CLIPModel.from_pretrained('../Datasets/clip-vit-base-patch32')
         self.target_model = get_peft_model(base_model, config)
         self.target_model.print_trainable_parameters()
 
