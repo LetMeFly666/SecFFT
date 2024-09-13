@@ -16,7 +16,7 @@ from sklearn.cluster import DBSCAN, KMeans
 from sklearn.metrics import pairwise_distances
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
-from FL_Backdoor_CV.models.create_model import create_model
+# from FL_Backdoor_CV.models.create_model import create_model
 from FL_Backdoor_CV.roles.evaluation import test_cv, test_poison_cv
 from configs import args
 from FL_Backdoor_CV.roles.aggregation_rules import roseagg
@@ -25,6 +25,7 @@ from FL_Backdoor_CV.roles.aggregation_rules import foolsgold
 from FL_Backdoor_CV.roles.aggregation_rules import flame
 from FL_Backdoor_CV.roles.aggregation_rules import fltrust
 from FL_Backdoor_CV.roles.aggregation_rules import robust_lr
+from FL_Backdoor_CV.roles.aggregation_rules import secfft
 
 import pickle
 
@@ -37,15 +38,16 @@ def softmax(x):
 class Server:
     def __init__(self, helper, clients, adversary_list):
         # === model ===
-        if args.resume:
-            self.model = torch.load(
-                os.path.join(
-                    "./FL_Backdoor_CV/saved_models/Revision_1", args.resumed_name
-                ),
-                map_location=args.device,
-            )
-        else:
-            self.model = create_model()
+        # if args.resume:
+        #     self.model = torch.load(
+        #         os.path.join(
+        #             "./FL_Backdoor_CV/saved_models/Revision_1", args.resumed_name
+        #         ),
+        #         map_location=args.device,
+        #     )
+        # else:
+        #     self.model = create_model()
+        self.model = helper.target_model
 
         # === gradient correction ===
         # self.previous_models = []
@@ -70,61 +72,61 @@ class Server:
         # === Inherent recognition accuracy on poisoned data sets
         self.inheret_poison_acc = 0
 
-        if args.resume:
-            self.current_round = int(
-                # re.findall(r"\d+\d*", args.resumed_name.split("/")[2])[0]
-                re.search(r"avg_(\d+)", args.resumed_name).group(1)
-            )
-            test_l, test_acc = self.validate()
-            if args.attack_mode.lower() == "combine":
-                test_l_acc = self.validate_poison()
-                print(
-                    f"\n--------------------- T e s t - L o a d e d - M o d e l ---------------------"
-                )
-                print(
-                    f"Accuracy on testset: {test_acc: .4f}, Loss on testset: {test_l: .4f}."
-                )
-                for i in range(args.multi_objective_num):
-                    if i == 0:
-                        print(
-                            f"Poison accuracy (o1): {test_l_acc[0][1]: .4f}.",
-                            end="   =========   ",
-                        )
-                    elif i == 1:
-                        print(f"Poison accuracy (o2): {test_l_acc[1][1]: .4f}.")
-                    elif i == 2:
-                        print(
-                            f"Poison accuracy (o3): {test_l_acc[2][1]: .4f}.",
-                            end="   =========   ",
-                        )
-                    elif i == 3:
-                        print(f"Poison accuracy (o4): {test_l_acc[3][1]: .4f}.")
-                    elif i == 4:
-                        print(
-                            f"Poison accuracy (wall ---> bird): {test_l_acc[4][1]: .4f}."
-                        )
-                    elif i == 5:
-                        print(
-                            f"Poison accuracy (green car ---> bird): {test_l_acc[5][1]: .4f}."
-                        )
-                    elif i == 6:
-                        print(
-                            f"Poison accuracy (strip car ---> bird): {test_l_acc[6][1]: .4f}."
-                        )
-                print(
-                    f"--------------------- C o m p l e t e ! ---------------------\n"
-                )
-            else:
-                test_poison_loss, test_poison_acc = self.validate_poison()
-                self.inheret_poison_acc = test_poison_acc
-                print(
-                    f"\n--------------------- T e s t - L o a d e d - M o d e l ---------------------\n"
-                    f"Accuracy on testset: {test_acc: .4f}, "
-                    f"Loss on testset: {test_l: .4f}. <---> "
-                    f"Poison accuracy: {test_poison_acc: .4f}, "
-                    f"Poison loss: {test_poison_loss: .4f}"
-                    f"\n--------------------- C o m p l e t e ! ---------------------\n"
-                )
+        # if args.resume:
+        #     self.current_round = int(
+        #         # re.findall(r"\d+\d*", args.resumed_name.split("/")[2])[0]
+        #         re.search(r"avg_(\d+)", args.resumed_name).group(1)
+        #     )
+        #     test_l, test_acc = self.validate()
+        #     if args.attack_mode.lower() == "combine":
+        #         test_l_acc = self.validate_poison()
+        #         print(
+        #             f"\n--------------------- T e s t - L o a d e d - M o d e l ---------------------"
+        #         )
+        #         print(
+        #             f"Accuracy on testset: {test_acc: .4f}, Loss on testset: {test_l: .4f}."
+        #         )
+        #         for i in range(args.multi_objective_num):
+        #             if i == 0:
+        #                 print(
+        #                     f"Poison accuracy (o1): {test_l_acc[0][1]: .4f}.",
+        #                     end="   =========   ",
+        #                 )
+        #             elif i == 1:
+        #                 print(f"Poison accuracy (o2): {test_l_acc[1][1]: .4f}.")
+        #             elif i == 2:
+        #                 print(
+        #                     f"Poison accuracy (o3): {test_l_acc[2][1]: .4f}.",
+        #                     end="   =========   ",
+        #                 )
+        #             elif i == 3:
+        #                 print(f"Poison accuracy (o4): {test_l_acc[3][1]: .4f}.")
+        #             elif i == 4:
+        #                 print(
+        #                     f"Poison accuracy (wall ---> bird): {test_l_acc[4][1]: .4f}."
+        #                 )
+        #             elif i == 5:
+        #                 print(
+        #                     f"Poison accuracy (green car ---> bird): {test_l_acc[5][1]: .4f}."
+        #                 )
+        #             elif i == 6:
+        #                 print(
+        #                     f"Poison accuracy (strip car ---> bird): {test_l_acc[6][1]: .4f}."
+        #                 )
+        #         print(
+        #             f"--------------------- C o m p l e t e ! ---------------------\n"
+        #         )
+        #     else:
+        #         test_poison_loss, test_poison_acc = self.validate_poison()
+        #         self.inheret_poison_acc = test_poison_acc
+        #         print(
+        #             f"\n--------------------- T e s t - L o a d e d - M o d e l ---------------------\n"
+        #             f"Accuracy on testset: {test_acc: .4f}, "
+        #             f"Loss on testset: {test_l: .4f}. <---> "
+        #             f"Poison accuracy: {test_poison_acc: .4f}, "
+        #             f"Poison loss: {test_poison_loss: .4f}"
+        #             f"\n--------------------- C o m p l e t e ! ---------------------\n"
+        #         )
 
         # === total data size ===
         self.total_size = 0
@@ -233,59 +235,65 @@ class Server:
         param_updates = list()
         trained_params = list()
 
-        path = os.path.join(
-            os.getcwd(),
-            f"./{root_path}/participants/{args.dataset}_{args.attack_mode}.csv",
-        )
+        # path = os.path.join(
+        #     os.getcwd(),
+        #     f"./{root_path}/participants/{args.dataset}_{args.attack_mode}.csv",
+        # )
 
-        print(f"round: {round}")
-        with open(path, "a") as file:
-            file.write(f"{round}: ")
-            file.write(" ".join(map(str, self.participants)) + "\n")
+        # print(f"round: {round}")
+        # with open(path, "a") as file:
+        #     file.write(f"{round}: ")
+        #     file.write(" ".join(map(str, self.participants)) + "\n")
+        # 获得当前全局模型的参数
+        target_model_params = dict()
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                target_model_params[name] = param.clone().detach().requires_grad_(False)
+        target_model_params_list = [
+            param for _, param in self.model.named_parameters() if param.requires_grad
+        ]
+        print(f"participants: {self.participants}")
         for client_id in self.participants:
-            local_model = copy.deepcopy(self.model)
-            local_model.load_state_dict(self.model.state_dict())
+            local_model = self.helper.local_model
+            for name, param in local_model.named_parameters():
+                if param.requires_grad:
+                    param.data.copy_(target_model_params[name])
             trained_local_model = self.clients[client_id].local_train(
-                local_model, self.helper, self.current_round
+                local_model,
+                self.helper,
+                self.current_round,
+                (self.current_round in self.poison_rounds),
             )
+            trained_local_model_params_list = [
+                param
+                for _, param in trained_local_model.named_parameters()
+                if param.requires_grad
+            ]
             if args.aggregation_rule.lower() == "fltrust":
                 param_updates.append(
-                    parameters_to_vector(trained_local_model.parameters())
-                    - parameters_to_vector(self.model.parameters())
+                    parameters_to_vector(trained_local_model_params_list)
+                    - parameters_to_vector(target_model_params_list)
                 )
             elif args.aggregation_rule.lower() == "flame":
                 trained_param = (
-                    parameters_to_vector(trained_local_model.parameters())
-                    .detach()
-                    .cpu()
+                    parameters_to_vector(trained_local_model_params_list).detach().cpu()
                 )
                 trained_params.append(trained_param)
-
-            for name, param in trained_local_model.state_dict().items():
+            for name, param in trained_local_model.named_parameters():
+                if not param.requires_grad:
+                    continue
                 if name not in trained_models:
-                    trained_models[name] = param.data.view(1, -1)
-
+                    trained_models[name] = param.data.view(1, -1).clone()
                 else:
                     trained_models[name] = torch.cat(
-                        (trained_models[name], param.data.view(1, -1)), dim=0
+                        (trained_models[name], param.data.view(1, -1).clone()), dim=0
                     )
-
-                    # 检查 param.data 和 trained_models[name] 是否共享内存
-                if name in trained_models:
-                    # 比较内存地址
-                    if (
-                        param.data.storage().data_ptr()
-                        == trained_models[name][0].storage().data_ptr()
-                    ):
-                        print(f"{name}: param.data 与 trained_models 共享内存")
-                    else:
-                        print(f"{name}: param.data 与 trained_models 不共享内存")
 
         model_updates = dict()
         for (name, param), local_param in zip(
-            self.model.state_dict().items(), trained_models.values()
+            target_model_params.items(), trained_models.values()
         ):
-            model_updates[name] = local_param.data - param.data.view(1, -1)
+            model_updates[name] = local_param.data - param.data.view(1, -1)  # 广播机制
 
             if args.attack_mode.lower() in [
                 "mr",
@@ -335,9 +343,6 @@ class Server:
                                         )
                             model_updates[name][i] *= mal_boost / args.global_lr
 
-        # for name, param in model_updates.items():
-        #     print(f"name: {name} {param.shape}")
-
         # 保存模型梯度
         path = os.path.join(
             os.getcwd(),
@@ -346,9 +351,16 @@ class Server:
         with open(path, "wb") as file:
             pickle.dump(model_updates, file)
 
+        # 判断前后两行是不是相等
+        # first_layers = trained_models.values()[0]
+        # is_all_rows_same = (first_layers[0] == first_layers).all(dim=1).all()
+        # print(f"all rows are same: {is_all_rows_same}")
+
         # === aggregate ===
         global_update = None
-        if args.aggregation_rule.lower() == "avg":
+        if args.aggregation_rule.lower() == "secfft":
+            global_update = secfft(model_updates)
+        elif args.aggregation_rule.lower() == "avg":
             global_update = avg(model_updates)
         # elif args.aggregation_rule.lower() == 'fedcie':
         #     global_update = Server.fedcie(model_updates, previous_model_update, last_model_params)
@@ -358,23 +370,12 @@ class Server:
             global_update = foolsgold(model_updates)
         elif args.aggregation_rule.lower() == "flame":
             current_model_param = (
-                parameters_to_vector(self.model.parameters()).detach().cpu()
+                parameters_to_vector(target_model_params_list).detach().cpu()
             )
             global_param, global_update = flame(
                 trained_params, current_model_param, model_updates
             )
-            vector_to_parameters(global_param, self.model.parameters())
-            model_param = self.model.state_dict()
-            for name, param in model_param.items():
-                if (
-                    "num_batches_tracked" in name
-                    or "running_mean" in name
-                    or "running_var" in name
-                ):
-                    model_param[name] = param.data + global_update[name].view(
-                        param.size()
-                    )
-            self.model.load_state_dict(model_param)
+            vector_to_parameters(global_param, target_model_params_list)
             return
         elif args.aggregation_rule.lower() == "fltrust":
             if self.current_round > 500:
@@ -384,38 +385,56 @@ class Server:
             else:
                 lr = args.local_lr
             model = copy.deepcopy(self.model)
-            model.load_state_dict(self.model.state_dict())
-            optimizer = torch.optim.SGD(
+            for name, param in model.named_parameters():
+                if param.requires_grad:
+                    param.data.copy_(target_model_params[name])
+
+            optimizer = torch.optim.Adam(
                 model.parameters(),
-                lr=lr,
-                momentum=self.helper.params["momentum"],
-                weight_decay=self.helper.params["decay"],
+                lr=1e-3,
+                betas=(0.9, 0.98),
+                eps=1e-6,
+                weight_decay=0.2,
             )
             epochs = self.helper.params["retrain_no_times"]
             criterion = torch.nn.CrossEntropyLoss()
+            text_inputs = [
+                f"This is a photo of a {label}" for label in self.helper.classes
+            ]
             for _ in range(epochs):
                 for inputs, labels in self.root_dataset:
-                    inputs, labels = inputs.to(args.device), labels.to(args.device)
                     optimizer.zero_grad()
-                    loss = criterion(model(inputs), labels)
+                    clip_inputs = self.helper.processor(
+                        text=text_inputs,
+                        images=inputs,
+                        return_tensors="pt",
+                        padding=True,
+                        do_rescale=False,
+                    ).to(args.device)
+                    labels = labels.to(args.device)
+                    outputs = model(**clip_inputs)
+                    logits_per_image = outputs.logits_per_image
+                    loss = criterion(logits_per_image, labels)
                     loss.backward()
                     optimizer.step()
-
+            model_param_list = [
+                param for _, param in model.named_parameters() if param.requires_grad
+            ]
             clean_param_update = parameters_to_vector(
-                model.parameters()
-            ) - parameters_to_vector(self.model.parameters())
+                model_param_list
+            ) - parameters_to_vector(target_model_params_list)
 
             global_update = fltrust(model_updates, param_updates, clean_param_update)
         elif args.aggregation_rule.lower() == "rlr":
             global_update = robust_lr(model_updates)
 
         # === update the global model ===
-        model_param = self.model.state_dict()
-        for name, param in model_param.items():
-            model_param[name] = param.data + global_lr * global_update[name].view(
-                param.size()
-            )
-        self.model.load_state_dict(model_param)
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    param.data = param.data + global_lr * global_update[name].view(
+                        param.size()
+                    )
 
         # === update previous models ===
         # if args.aggregation_rule.lower() == 'fedcie':
@@ -426,8 +445,11 @@ class Server:
     def validate(self):
         with torch.no_grad():
             test_l, test_acc = test_cv(
-                self.helper.benign_test_data, self.model
-            )  # benign_test_data就是原本的测试集
+                self.helper.benign_test_data,
+                self.model,
+                self.helper.classes,
+                self.helper.processor,
+            )
         return test_l, test_acc
 
     def validate_poison(self):
@@ -439,13 +461,19 @@ class Server:
                         self.helper,
                         self.helper.poisoned_test_data,
                         self.model,
+                        self.helper.classes,
+                        self.helper.processor,
                         adversarial_index=i,
                     )
                     test_l_acc.append((test_l, test_acc))
                 return test_l_acc
             else:
                 test_l, test_acc = test_poison_cv(
-                    self.helper, self.helper.poisoned_test_data, self.model
+                    self.helper,
+                    self.helper.poisoned_test_data,
+                    self.model,
+                    self.helper.classes,
+                    self.helper.processor,
                 )
                 return test_l, test_acc
 
@@ -520,7 +548,7 @@ class Server:
             if "num_batches_tracked" in name:
                 if args.is_poison:
                     kmeans = KMeans(n_clusters=2).fit(
-                        layer_updates.cpu().numpy().reshape(-1, 1)
+                        layer_updates.cpu().numpy().view(-1, 1)
                     )
                     clusters = dict()
                     for i, clu in enumerate(kmeans.labels_):
@@ -548,7 +576,7 @@ class Server:
                 """
                 local_norms = np.array(
                     [torch.norm(layer_updates[i]).cpu().numpy() for i in range(K)]
-                ).reshape(-1, 1)
+                ).view(-1, 1)
                 if args.is_poison:
                     kmeans = KMeans(n_clusters=2).fit(local_norms)
                     clusters = dict()
@@ -763,7 +791,7 @@ class Server:
                 for i, mal_idx in enumerate(mal_idxs):
                     if mal_idx & set(abnormal_idx):
                         flags[i] = 1
-                merge_idxs = np.argwhere(np.array(flags) == 1).reshape(1, -1)[0]
+                merge_idxs = np.argwhere(np.array(flags) == 1).view(1, -1)[0]
                 if len(merge_idxs) > 0:
                     mal_idxs[merge_idxs[0]] = mal_idxs[merge_idxs[0]] | set(abnormal_idx)
                     for merge_idx in merge_idxs[1:]:
