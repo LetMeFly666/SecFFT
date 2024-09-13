@@ -165,7 +165,6 @@ class ImageHelper(Helper):
             self.test_dataset = datasets.CIFAR10(
                 self.params["data_folder"], train=False, transform=transforms.ToTensor()
             )
-
         if self.params["dataset"] == "emnist":
             if self.params["emnist_style"] == "digits":
                 self.train_dataset = EMNIST(
@@ -182,7 +181,6 @@ class ImageHelper(Helper):
                     download=True,
                     transform=self.transform,
                 )
-
             elif self.params["emnist_style"] == "byclass":
                 self.train_dataset = EMNIST(
                     self.params["data_folder"],
@@ -198,7 +196,6 @@ class ImageHelper(Helper):
                     download=True,
                     transform=self.transform,
                 )
-
             elif self.params["emnist_style"] == "letters":
                 self.train_dataset = EMNIST(
                     self.params["data_folder"],
@@ -228,6 +225,7 @@ class ImageHelper(Helper):
                 download=True,
                 transform=self.transform,
             )
+        
         self.classes = self.train_dataset.classes
 
     def get_img_classes(self):

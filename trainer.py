@@ -34,8 +34,10 @@ from datetime import datetime
 import csv
 from FL_Backdoor_CV.image_helper import plot_image
 
+from typing import Dict
 
-def save_results_to_csv(results, filename="results.csv"):
+
+def save_results_to_csv(results: Dict[str, list], filename="results.csv"):
     keys = list(results.keys())
 
     max_length = max(len(v) for v in results.values())
@@ -73,6 +75,7 @@ class Trainer:
             params_loaded["dataset"] == "cifar10"
             or params_loaded["dataset"] == "emnist"
             or params_loaded["dataset"] == "fmnist"
+            # 暂无cifar100
         ):
             dataset_name = params_loaded["dataset"]
             if os.path.isdir(f"./FL_Backdoor_CV/data/{dataset_name}/"):
