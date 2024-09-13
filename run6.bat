@@ -1,6 +1,6 @@
 @echo off
 
-python trainer.py --dataset "cifar10" --params "utils/cifar10_params.yaml" --aggregation_rule "flame" --device "cuda:1" --attack_mode "NEUROTOXIN" || echo Error ignored
+@REM python trainer.py --dataset "cifar10" --params "utils/cifar10_params.yaml" --aggregation_rule "flame" --device "cuda:1" --attack_mode "NEUROTOXIN" || echo Error ignored
 @REM python trainer.py --dataset "cifar10" --params "utils/cifar10_params.yaml" --aggregation_rule "flame" --device "cuda:1" --attack_mode "NEUROTOXIN" || echo Error ignored
 @REM python trainer.py --dataset "cifar10" --params "utils/cifar10_params.yaml" --aggregation_rule "flame" --device "cuda:1" --attack_mode "NEUROTOXIN" || echo Error ignored
 
