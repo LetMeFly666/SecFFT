@@ -1,12 +1,14 @@
 __pycache__/
 cache/
-FL_Backdoor_CV/data
-FL_Backdoor_CV/dataset
-FL_Backdoor_CV/models
-FL_Backdoor_CV/result-with-date
-FL_Backdoor_CV/results
-FL_Backdoor_CV/saved_models
-FL_Backdoor_CV/2024-09-10_22-49-25/
+*/FL_Backdoor_CV/data
+*/FL_Backdoor_CV/dataset
+*/FL_Backdoor_CV/models
+*/FL_Backdoor_CV/result-with-date
+*/FL_Backdoor_CV/results
+*/FL_Backdoor_CV/saved_models
+*/FL_Backdoor_CV/2024-09-10_22-49-25/
+*/FL_Backdoor_CV/resultWithTime
+
 cifar10_mr_-1_-1.pdf
 cifar10_mr_1_-1.pdf
 cifar10_mr_2_-1.pdf
@@ -50,7 +52,6 @@ FL_Backdoor_CV/2024-09-11_22-14-18/
 FL_Backdoor_CV/2024-09-12_00-23-54/
 
 cifar10_neurotoxin_-1_-1.pdf
-FL_Backdoor_CV/resultWithTime
 
 
 2024-09-12_23-26-43
