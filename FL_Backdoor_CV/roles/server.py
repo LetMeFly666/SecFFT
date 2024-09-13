@@ -341,7 +341,7 @@ class Server:
                                             args.number_of_adversaries
                                             / args.dba_trigger_num
                                         )
-                            model_updates[name][i] *= mal_boost / args.global_lr / 2
+                            model_updates[name][i] *= mal_boost / args.global_lr
 
         # 保存模型梯度
         path = os.path.join(
