@@ -299,12 +299,12 @@ class Trainer:
                 save_results_to_csv(self.results, res_path)
                 save_results_to_csv(
                     self.participants,
-                    f"./FL_Backdoor_CV/{formatted_time}/participants/participants.csv",
+                    f"./FL_Backdoor_CV/resultWithTime/{formatted_time}/participants/participants.csv",
                 )
 
         save_results_to_csv(
             self.participants,
-            f"./FL_Backdoor_CV/{formatted_time}/participants/participants.csv",
+            f"./FL_Backdoor_CV/resultWithTime/{formatted_time}/participants/participants.csv",
         )
 
 
