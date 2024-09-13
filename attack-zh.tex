@@ -2,6 +2,7 @@
 \usepackage{amsmath,amsfonts}
 \usepackage{longtable}
 \usepackage[UTF8]{ctex}
+\usepackage{tabularx}
 \usepackage{array}
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{textcomp}
@@ -270,7 +271,7 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
 
 \textbf{Motivation}: 为了规避异常检测，有很多通过多轮次的组合攻击来植入后门的攻击。本部分结合每个客户端的历史记录，通过识别攻击者最终的模型引导意图点来识别恶意节点。
 
-\textbf{Overview}: 前面的攻击中已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$\max\{t-T+1, 1\}\leq  t'\leq t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\zeta$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
+\textbf{Overview}: 前面的防御已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$\max\{t-T+1, 1\}\leq  t'\leq t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\zeta$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
 
 \begin{algorithm}
 \caption{Malicious Node Detection and Gradient Aggregation}
@@ -299,9 +300,9 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
     \For {Each point $O_j \neq O_i$}
         \State Calculate distance $\|O_i - O_j\|$
     \EndFor
-    \State Determine $\kappa$-distance $\widetilde{dis_i^\kappa}$ for $O_i$
-    \State Find neighbors $Nei_i$ within $\widetilde{dis_i^\kappa}$
-    \State Compute reachability distance $rea_{i,j} = \max\{\widetilde{dis_i^\kappa}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$
+    \State Determine $q$-distance $\widetilde{dis_i^q}$ for $O_i$
+    \State Find neighbors $Nei_i$ within $\widetilde{dis_i^q}$
+    \State Compute reachability distance $rea_{i,j} = \max\{\widetilde{dis_i^q}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$
     \State Calculate local reachability density $lrd_i = \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$
 \EndFor
 % \For {Client $i$}
@@ -327,41 +328,56 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
 \end{algorithmic}
 \end{algorithm}
 
-算法\ref{alg:malicious-node-detection-history}展示了根据每个客户端历史记录进行识别的识别过程，主要包含4个步骤：
+% 算法\ref{alg:malicious-node-detection-history}展示了根据每个客户端历史记录进行识别的识别过程，主要包含4个步骤：
+本部分主要包含4个步骤：
 
 \begin{enumerate}
 
 \item \textbf{Keep T-rounds History}
 
-“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$\theta_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_i$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$\theta^t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-\theta^t$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上轮次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
+像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$\theta_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_i$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$\theta^t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-\theta^t$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上轮次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。% 此部分可以参考算法\ref{alg:malicious-node-detection-history}的step1。
 
 \item \textbf{Obtain the Purpose Intention}
 
-“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上轮次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
+这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上轮次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。
+
+我们使用符号$O_i$代表客户端$i$在高维空间中超球的球心，使用符号$r_i$代表这个超球的半径。假设当前轮次为$t$，$t'$是最近$T$轮次中的其中一轮，使用符号$\tilde O_i^{t'}$代表球心到第$t'$对应射线的最近点。则可以定义优化问题：
+
+\begin{equation}
+    \min_{O_i, r_i} \quad r_i
+\end{equation}
+
+\begin{equation} 
+\text{s.t.} \quad \left| \left\{ t' \mid \| O_i - \tilde{O}_{i}^{t'} \| \leq r_i \right\} \right| \geq \zeta T,
+\end{equation}
+\begin{equation} 
+    \max\{t-T+1, 1\}\leq  t'\leq t.
+\end{equation}
+
+“Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
 
 “Construct Ray Model”的主要过程如下。对于每个客户端 \(R_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的更新变化历史。设 \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(i\) 上传的展平后的梯度变化向量。
-    对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
 
-    \begin{equation}
-    \widetilde{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1}),
-    \end{equation}
-    \begin{equation}
-    {v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}},
-    \end{equation}
+对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
 
-    其中，\( \widetilde{\theta_{i}^{t'-1}} \) 是射线的起点，\( {v}_{i}^{t'} \) 是射线的方向向量。则射线方程为：
+\begin{equation}
+    \left\{\begin{matrix}
+    \widetilde{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1})\\
+    {v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}}
+    \end{matrix}\right.,
+\end{equation}
+其中，\( \widetilde{\theta_{i}^{t'-1}} \) 是射线的起点，\( {v}_{i}^{t'} \) 是射线的方向向量。则射线方程为：
 
-    \begin{equation}
-    l_i^{t'}=\widetilde{\theta_{i}^{t'-1}}+\alpha {v}_{i}^{t'},
-    \end{equation}
+\begin{equation}
+l_i^{t'}=\widetilde{\theta_{i}^{t'-1}}+\alpha {v}_{i}^{t'},
+\end{equation}
 
-    其中，$\alpha\in [0, +\infty)$为射线的自变量参数。
-
+其中，$\alpha\in [0, +\infty)$为射线的自变量参数。
 
 “Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \zeta \) 比例的射线的最小超球。首先，设定初始球心 \( O_{i,0} \) 为所有射线起点的几何中心，计算公式如下：
 
 \begin{equation}
-    O_{i,0} = \frac{1}{T} \sum_{t'=\max\{t-T+1, 1\}}^{t} \widetilde{\theta_g^{t'-1}}.
+    O_{i,0} = \frac{1}{\min\{T, t\}} \sum_{t'=\max\{t-T+1, 1\}}^{t} \widetilde{\theta_g^{t'-1}}.
 \end{equation}
 
 初始半径 \( r_{i,0} \) 设定为从初始球心 \( O_{i,0} \) 到所有射线起点的最大距离：
@@ -398,16 +414,9 @@ r_{i,0} = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_{i,0} - \widetilde{\theta_{g}^{t'-
         r_{i,k+1} =  \{ \max\{\| O_{i,k+1}-\tilde O_{i,k+1}^{t'} \|\}, t'\in \tilde T\} ,
         \end{equation}
 
-    其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。终止条件：当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。这部分可以定义为一个有约束的最优化问题：
+    % 其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。终止条件：当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。这部分可以定义为一个有约束的最优化问题：
+    其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。
 
-
-\begin{equation}
-\min_{O_i, r_i} \quad r_i
-\end{equation}
-
-\begin{equation} 
-\text{s.t.} \quad \left| \left\{ t' \mid \| O_i - \tilde{O}_{i}^{t'} \| \leq r_i \right\} \right| \geq \zeta T.
-\end{equation}
 % \begin{equation} 
 % \quad |r_{i,k+1} - r_{i,k}| < \lambda \quad \text{or} \quad k \geq k_{max}
 % \end{equation}
@@ -451,34 +460,34 @@ r_{i,0} = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_{i,0} - \widetilde{\theta_{g}^{t'-
 
 \item \textbf{Abnormal Detection}
 
-“Abnormal Detection”的主要过程基于局部离群因子（Local Outlier Factor, LOF）得到异常点。LOF算法是一种基于密度的异常检测方法，算法的核心思想是通过计算一个数值$lof_i$来反应节点$i$的异常程度。$lof_i$大致意思是节点$i$目的意图点$O_i$周围意图点所处位置的平均密度比上$O_i$所在位置的密度。比值越大于$1$，则$O_i$所在位置的密度越小于周围其他意图点所在位置的密度，即$O_i$越有可能是异常点。首先定义意图点$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$，假设高维空间中存在节点$j$的意图点$O_j$，则有$O_j$与$O_i$之间的距离为$\|O_i-O_j\|$，如果满足以下两个条件，我们就认为$\widetilde{dis_i^\kappa}=\|O_i-O_j\|$：
+“Abnormal Detection”的主要过程基于局部离群因子（Local Outlier Factor, LOF）得到异常点。LOF算法是一种基于密度的异常检测方法，算法的核心思想是通过计算一个数值$lof_i$来反应节点$i$的异常程度。$lof_i$大致意思是节点$i$目的意图点$O_i$周围意图点所处位置的平均密度比上$O_i$所在位置的密度。比值越大于$1$，则$O_i$所在位置的密度越小于周围其他意图点所在位置的密度，即$O_i$越有可能是异常点。首先定义意图点$O_i$的$q$距离$\widetilde{dis_i^q}$，假设高维空间中存在节点$j$的意图点$O_j$，则有$O_j$与$O_i$之间的距离为$\|O_i-O_j\|$，如果满足以下两个条件，我们就认为$\widetilde{dis_i^q}=\|O_i-O_j\|$：
 
 \begin{itemize}
-    \item 在样本空间中，至少存在$\kappa$个意图点$O_j'$，使得$\|O_i-O_j'\|\leq \|O_i-O_j\|$, 其中$j'\neq i$；
-    \item 在样本空间中，至多存在$\kappa-1$个意图点$O_j'$，使得$\|O_i-O_j'\|< \|O_i-O_j\|$, 其中$j'\neq i$。
+    \item 在样本空间中，至少存在$q$个意图点$O_j'$，使得$\|O_i-O_j'\|\leq \|O_i-O_j\|$, 其中$j'\neq i$；
+    \item 在样本空间中，至多存在$q-1$个意图点$O_j'$，使得$\|O_i-O_j'\|< \|O_i-O_j\|$, 其中$j'\neq i$。
 \end{itemize}
 
-总的来说，$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$表示高维空间中距离第$\kappa$远的点。之后定义意图点$O_i$的第$\kappa$距离邻域$Nei_i$为到$O_i$距离不超过$\widetilde{dis_i^\kappa}$的所有意图点的集合。由于可能同时存在多个第$\kappa$距离的数据，所以$|Nei_i|\geq \kappa$。可以想象，离群度越大的意图点的$\kappa$距离往往较大，离群度越小的意图点的$\kappa$距离往往较小。之后定义意图点$O_i$相对于意图点$O_j$的可达距离：
+总的来说，$O_i$的$q$距离$\widetilde{dis_i^q}$表示高维空间中距离第$q$远的点。之后定义意图点$O_i$的第$q$距离邻域$Nei_i$为到$O_i$距离不超过$\widetilde{dis_i^q}$的所有意图点的集合。由于可能同时存在多个第$q$距离的数据，所以$|Nei_i|\geq q$。可以想象，离群度越大的意图点的$q$距离往往较大，离群度越小的意图点的$q$距离往往较小。之后定义意图点$O_i$相对于意图点$O_j$的可达距离：
 
 \begin{equation}
-rea_{i,j}=\max\{\widetilde{dis_i^\kappa}, \|O_i-O_j\|\},
+rea_{i,j}=\max\{\widetilde{dis_i^q}, \|O_i-O_j\|\},
 \end{equation}
 
-也就是说，如果意图点$O_j$远离意图点$O_i$，则两者之间的可达距离就是他们之间的实际距离$\|O_i-O_j\|$；而如果二者距离足够近，则可达距离用意图点$O_i$的$\kappa$距离$\widetilde{dis_i^\kappa}$代替。之后定义意图点$O_i$的局部可达密度$lrd_i$为其$Nei_i$所有意图点的平均可达距离的倒数，即：
+也就是说，如果意图点$O_j$远离意图点$O_i$，则两者之间的可达距离就是他们之间的实际距离$\|O_i-O_j\|$；而如果二者距离足够近，则可达距离用意图点$O_i$的$q$距离$\widetilde{dis_i^q}$代替。之后定义意图点$O_i$的局部可达密度$lrd_i$为其$Nei_i$所有意图点的平均可达距离的倒数，即：
 
 \begin{equation}
 lrd_i=1/(\frac{\sum_{j\in Nei_i} rea_{i,j}}{|Nei_i|})
 \end{equation}
 
-此时，若有重复点，则可能导致$lrd$变为无限大。$lrd_i$的可以理解为意图点$O_i$所处位置的密度，密度越高则意图点$O_i$越有可能属于同一簇，密度越低则意图点$O_i$越有可能是离群点。也就是说，如果意图点$O_i$和周围邻域点是同一簇，则可达距离可能为较小的$\widetilde{dis_i^\kappa}$，导致可达距离之和较小，密度值较高；如果$O_i$和周围邻居意图点较远，则可达距离可能会取较大的$\|O_i-O_j\|$，导致可达距离之和较大，密度值较低，越有可能是离群点。最后，我们定义意图点$O_i$的局部离群因子$lof_i$为其$Nei_i$所有意图点的局部可达密度与其自身局部可达密度的比值的平均值，即：
+此时，若有重复点，则可能导致$lrd$变为无限大。$lrd_i$的可以理解为意图点$O_i$所处位置的密度，密度越高则意图点$O_i$越有可能属于同一簇，密度越低则意图点$O_i$越有可能是离群点。也就是说，如果意图点$O_i$和周围邻域点是同一簇，则可达距离可能为较小的$\widetilde{dis_i^q}$，导致可达距离之和较小，密度值较高；如果$O_i$和周围邻居意图点较远，则可达距离可能会取较大的$\|O_i-O_j\|$，导致可达距离之和较大，密度值较低，越有可能是离群点。最后，我们定义意图点$O_i$的局部离群因子$lof_i$为其$Nei_i$所有意图点的局部可达密度与其自身局部可达密度的比值的平均值，即：
 
 \begin{equation}
     lof_i=\frac{\sum_{j\in Nei_i}\frac{lrd_j}{lrd_i}}{|Nei_i|}=\frac{\sum_{j\in Nei_i} lrd_j}{|Nei_i|\cdot lrd_i}
 \end{equation}
 
-如果$lof_i$比较接近$1$，则说明意图点$O_i$与其邻域点密度差不多，$O_i$可能和邻域属于同一簇；如果$lof_i$小于$1$，则说明意图点$O_i$的密度高于其邻域点的密度，$O_i$为密集点；如果$lof_i$大于$1$，则说明意图点$O_i$的密度低于其邻域点的密度，$O_i$可能是离群点。总之，LOF算法主要通过比较每个意图点$O_i$和其邻域点的密度来判断$O_i$是否为离群点，密度越低，则越有可能是离群点。而密度主要是通过点之间的距离来计算的，点之间的距离越远密度越低，距离越近密度越高。
+如果$lof_i$比较接近$1$，则说明意图点$O_i$与其邻域点密度差不多，$O_i$可能和邻域属于同一簇；如果$lof_i$小于$1$，则说明意图点$O_i$的密度高于其邻域点的密度，$O_i$为密集点；如果$lof_i$大于$1$，则说明意图点$O_i$的密度低于其邻域点的密度，$O_i$可能是离群点。总之，LOF算法主要通过比较每个意图点$O_i$和其邻域点的密度来判断$O_i$是否为离群点，密度越低，则越有可能是离群点。而密度主要是通过点之间的距离来计算的，点之间的距离越远密度越低，距离越近密度越高。计算每个节点$i$的局部离群因子$lof_i$，将$lof_i$大于$1$的客户端视为异常客户端，并将其梯度丢弃。
 
-计算每个节点$i$的局部离群因子$lof_i$，将$lof_i$大于$1$的客户端视为异常客户端，并将其梯度丢弃。
+“Abnormal Detection”的主要过程如算法\ref{alg:malicious-node-detection-history}的19-30行所示。
 
 % \begin{itemize}
 %     \item 首先，计算局部离群因子（LOF）。对于一个样本点 \(x_i\)，其局部可达密度（Local Reachability Density, LRD）定义为其相对于 \(\varepsilon\)-邻域内点的平均可达距离的倒数：
@@ -527,13 +536,6 @@ lrd_i=1/(\frac{\sum_{j\in Nei_i} rea_{i,j}}{|Nei_i|})
 
 \item \textbf{Gradients Aggregation}
 
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=\linewidth]{figures/fig5-before-agg.jpg}
-    \caption{Benign and Malicious Nodes Before Aggregation}
-    \label{fig:before-agg}
-\end{figure}
-
 剔除了异常节点后，依据正常节点的置信度$cre$进行聚合。其中定义：
 
 \begin{equation}
@@ -565,7 +567,7 @@ $\rho$是一个很小的正数，以防分母为$0$。
 \begin{figure}[!t]
     \centering
     \includegraphics[width=\linewidth]{results/prob-history-Visualization of Client Intentions and Anomalies.png}
-    \caption{使用模拟数据得到的结果}
+    \centering \caption{使用模拟数据得到的结果}
     \label{fig:result-of-histry}
 \end{figure}
 
@@ -597,6 +599,17 @@ $\rho$是一个很小的正数，以防分母为$0$。
 
 % 通过使用主观逻辑模型对客户端梯度进行聚合，能够有效利用信任度信息来优化全局模型的更新过程，减少因恶意客户端或不确定性导致的模型偏差。
 \end{enumerate}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig4.jpg}
+    \caption{Benign and Malicious Nodes Before Aggregation}
+    \label{fig:before-agg}
+\end{figure}
+
+如图\ref{fig:before-agg}所示展示了异常检测和梯度聚合的计算流程示意图。图中每个球都是某个节点的意图范围。蓝色的球代表良性节点，红色的球代表异常节点。在进行异常检测时我们只考虑每个节点的意图点，即图中的球心位置。在计算可达距离时，由于意图点$O_{j_1}$距离意图点$O_i$较近，故二者之间的可达距离为意图点$O_i$的$q$距离$\widetilde{dis_i^q}$；由于意图点$O_{j_2}$距离$O_i$较远，所以二者之间的可达距离为二者之间的实际距离$\|O_i-O_{j_2}\|$。意图点$O_i$的密度高于其邻域意图点的密度，$lof_i<1$；而意图点$O_{j_2}$的密度低于其邻域意图点的密度，因此$lof_{j_2} > 1$。
+
+将异常节点剔除，在聚合良性节点的梯度时，依据正常节点的置信度进行加权处理。图中可以看出，虽然节点$j_1$被划分为了良性节点，但其置信度非常低，其超球甚至已经与异常节点$j_2$有所重合。因此在梯度聚合的时候，其权重较小。
 
 % \textbf{时间上不连续的攻击}
 
@@ -768,6 +781,54 @@ $\rho$是一个很小的正数，以防分母为$0$。
 \end{array}
 \]
 
+TODO:写成竖排的
+
+为了衡量恶意客户端识别的准确性，算法的预测结果可以分为以下四类：
+
+\begin{itemize}
+    \item \textbf{真阳性（True Positive, TP）}：实际为正例且预测为正例的样本数量。
+    \item \textbf{真阴性（True Negative, TN）}：实际为负例且预测为负例的样本数量。
+    \item \textbf{假阳性（False Positive, FP）}：实际为负例但预测为正例的样本数量。
+    \item \textbf{假阴性（False Negative, FN）}：实际为正例但预测为负例的样本数量。
+\end{itemize}
+
+基于这些基础概念，以下是常用的分类指标及其计算公式和说明：
+
+\begin{table}[h!]
+\small
+\centering
+\begin{tabularx}{0.5\textwidth}{|X|X|X|}
+\hline
+\textbf{指标名称} & \textbf{计算公式} & \textbf{说明} \\ \hline
+准确率（Accuracy） & 
+$\frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}$ & 
+模型预测正确的样本占总样本的比例，适用于类别平衡的数据集。准确率越大越好。 \\ \hline
+
+精确率（Precision） & 
+$\frac{\text{TP}}{\text{TP} + \text{FP}}$ & 
+被预测为正例的样本中实际为正例的比例。精确率越大越好，特别是在关注减少误报的应用中。 \\ \hline
+
+召回率（Recall） & 
+$\frac{\text{TP}}{\text{TP} + \text{FN}}$ & 
+实际正例中被正确预测为正例的比例。召回率越大越好，特别是在关注减少漏报的应用中。 \\ \hline
+
+特异度（Specificity） & 
+$\frac{\text{TN}}{\text{TN} + \text{FP}}$ & 
+实际负例中被正确预测为负例的比例。特异度越大越好。 \\ \hline
+
+误报率（False Positive Rate, FPR） & 
+$\frac{\text{FP}}{\text{FP} + \text{TN}}$ & 
+实际负例中被错误预测为正例的比例。误报率越小越好。 \\ \hline
+
+假阴率（False Negative Rate, FNR） & 
+$\frac{\text{FN}}{\text{FN} + \text{TP}}$ & 
+实际正例中被错误预测为负例的比例。假阴率越小越好。 \\ \hline
+
+\end{tabularx}
+\caption{分类模型性能衡量指标}
+\end{table}
+
+TODO: 再多写几个
 
 % \subsubsection{攻防相关}
 
