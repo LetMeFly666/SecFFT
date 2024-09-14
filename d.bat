@@ -1,2 +1,0 @@
-@REM scp -r BUPT426@zhou.narc.letmefly.xyz:C:\Users\BUPT426\Desktop\RoseAgg\RoseAgg_Latest\FL_Backdoor_CV\2024-09-13_23-15-48 NormalRun\FL_Backdoor_CV\resultWithTime\2024-09-13_23-15-48-foolsgold-fmnist_NEUROTOXIN
-scp -r BUPT426@zhou.narc.letmefly.xyz:C:\Users\BUPT426\Desktop\RoseAgg\RoseAgg_Latest\FL_Backdoor_CV\saved_models\Revision_1\foolsgold_NEUROTOXIN_09132315 NormalRun\FL_Backdoor_CV\saved_models\Revision_1

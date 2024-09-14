@@ -9,60 +9,70 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 
-def plot_detection_heatmaps(cosine_similarity_a: torch.Tensor, cosine_similarity_b: torch.Tensor):
+def plot_detection_heatmaps_3x4(*heatmap_params):
     """
-    绘制两种攻击（NEUROTOXIN、MR）下四种检测方法（Cosine Similarity Detection, FLTrust, FLAME, SecFFT）的检测结果热力图。
-    
+    绘制三种攻击（原始 NEUROTOXIN、限制大小的攻击、限制角度和大小的攻击）下四种防御方法（Foolsgold, FLTrust, FLAME, SecFFT）的检测结果热力图。
+
     参数:
-    - cosine_similarity_a: np.ndarray, (50, 50) 的二维数组，表示攻击 NEUROTOXIN 下的余弦相似度矩阵。
-    - cosine_similarity_b: np.ndarray, (50, 50) 的二维数组，表示攻击 MR 下的余弦相似度矩阵。
+    - heatmap_params: 12 个参数，分别代表不同攻击下不同防御方法的评分或相似度矩阵。
+                      每个参数可以是二维 torch.Tensor（torch.Size([50, 50])），表示已经计算好的相似度矩阵，
+                      也可以是一维 torch.Tensor（torch.Size([50])），表示单个评分数组。
+                      如果是一维数组，则函数会先计算出两两之间的相似度矩阵。
     """
-    cosine_similarity_a = cosine_similarity_a.cpu().numpy()
-    cosine_similarity_b = cosine_similarity_b.cpu().numpy()
     
-    # 生成其他检测方法的评分数组 (FLTrust, FLAME, SecFFT) 并计算相似度矩阵
-    def generate_defense_scores_similarity_matrix(num_clients=50, num_malicious=10):
-        scores = np.random.rand(num_clients)  # 随机生成评分
-        
-        # 模拟恶意客户端和良性客户端的评分情况
-        for i in range(num_clients):
-            if i < num_malicious:  # 恶意客户端
-                scores[i] = np.random.uniform(0.7, 1.0)
-            else:  # 良性客户端
-                scores[i] = np.random.uniform(0.0, 0.3)
-        
-        # 计算两两客户端之间的相似度矩阵（这里也用相似度差异作为计算示例）
+    assert len(heatmap_params) == 12, "必须提供 12 个参数，每个参数表示一个子图的数据。"
+
+    # 计算两两相似度矩阵的函数
+    def compute_similarity_matrix(scores: torch.Tensor) -> np.ndarray:
+        """
+        接受一个一维的 torch.Tensor，并计算两两之间的相似度矩阵。
+
+        参数:
+        - scores: torch.Tensor, 一维张量，表示单个评分数组。
+
+        返回:
+        - similarity_matrix: np.ndarray, 二维数组，表示两两之间的相似度矩阵。
+        """
+        num_clients = len(scores)
         similarity_matrix = np.zeros((num_clients, num_clients))
+        
+        # 计算相似度矩阵
         for i in range(num_clients):
             for j in range(num_clients):
                 if i == j:
                     similarity_matrix[i, j] = 1.0  # 自己与自己的相似度为1
                 else:
-                    similarity_matrix[i, j] = 1 - abs(scores[i] - scores[j])  # 使用简单的相似性计算
+                    similarity_matrix[i, j] = 1 - abs(scores[i].item() - scores[j].item())  # 使用简单的相似性计算
         
         return similarity_matrix
 
     # 创建图像和子图
-    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(20, 10))
+    fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(20, 15))
 
     # 标题和标签
-    attacks = ['NEUROTOXIN', 'MR']
-    methods = ['Cosine Similarity Detection', 'FLTrust', 'FLAME', 'SecFFT']
+    attacks = ['Original NEUROTOXIN', 'Size-constrained Attack', 'Angle and Size-constrained Attack']
+    methods = ['Foolsgold', 'FLTrust', 'FLAME', 'SecFFT']
 
     # 生成热力图数据并绘制
-    for i, attack in enumerate([cosine_similarity_a, cosine_similarity_b]):  # 分别为攻击NEUROTOXIN和MR
-        for j, method in enumerate(methods):  # 四种方法
+    for i in range(3):  # 三行，分别为不同的攻击
+        for j in range(4):  # 四列，分别为四种防御方法
             ax = axes[i, j]
+            heatmap_data = heatmap_params[i * 4 + j]  # 获取每个参数对应的数据
             
-            if j == 0:  # 第一列为传入的余弦相似度 (50x50矩阵)
-                sns.heatmap(attack, ax=ax, cmap='coolwarm', cbar=True, annot=False)
-                # print(attack)
-            else:  # 其余为根据评分计算的两两相似度矩阵
-                defense_scores_similarity_matrix = generate_defense_scores_similarity_matrix(num_clients=50, num_malicious=10)
-                sns.heatmap(defense_scores_similarity_matrix, ax=ax, cmap='coolwarm', cbar=True, annot=False)
+            # 如果是二维 tensor，直接转换为 numpy
+            if len(heatmap_data.shape) == 2:
+                heatmap_array = heatmap_data.cpu().numpy()
+            # 如果是一维 tensor，计算相似度矩阵
+            elif len(heatmap_data.shape) == 1:
+                heatmap_array = compute_similarity_matrix(heatmap_data)
+            else:
+                raise ValueError("参数必须是 1D 或 2D 的 torch.Tensor。")
+            
+            # 绘制热力图
+            sns.heatmap(heatmap_array, ax=ax, cmap='coolwarm', cbar=True, annot=False)
             
             # 设置标题和轴标签
-            ax.set_title(f'{attacks[i]} - {method}', fontsize=12)
+            ax.set_title(f'{attacks[i]} - {methods[j]}', fontsize=12)
             ax.set_xlabel('Client Index', fontsize=10)
             if j == 0:
                 ax.set_ylabel('Client Index', fontsize=10)
@@ -73,16 +83,38 @@ def plot_detection_heatmaps(cosine_similarity_a: torch.Tensor, cosine_similarity
     plt.tight_layout()
 
     # 保存为jpg文件
-    plt.savefig('detection_comparison_results.jpg', format='jpg')
+    plt.savefig('detection_comparison_results_3x4.jpg', format='jpg')
+
+
+def generate_data_1dimension(num_clients, num_malicious):
+    # 生成一维评分数组
+    scores = torch.zeros(num_clients)
+    for i in range(num_clients):
+        if i < num_malicious:  # 恶意客户端
+            scores[i] = torch.rand(1).item() * 0.3 + 0.7  # 评分在0.7到1之间
+        else:  # 良性客户端
+            scores[i] = torch.rand(1).item() * 0.3  # 评分在0到0.3之间
+    return scores
 
 
 if __name__ == '__main__':
-    import numpy as np
-    # from your_module import plot_detection_heatmaps  # 请替换 'your_module' 为实际保存函数的模块名
+    # 生成模拟数据
+    num_clients = 50
+    num_malicious = 20  # 前20个是恶意客户端
 
-    # 创建NEUROTOXIN和MR的余弦相似度矩阵 (50x50)
-    cosine_similarity_a = np.random.rand(50, 50)
-    cosine_similarity_b = np.random.rand(50, 50)
+    
+
+    # 生成12个模拟数据 (可以是1D的评分数组，也可以是计算好的2D相似度矩阵)
+    data_params = []
+
+    # 使用两种数据：随机生成的50x50相似度矩阵和一维评分数组
+    for _ in range(12):
+        if np.random.rand() > 0.5:
+            # 生成二维相似度矩阵
+            data_params.append(torch.rand(50, 50))
+        else:
+            # 生成一维评分数组
+            data_params.append(generate_data(num_clients, num_malicious))
 
     # 调用绘制函数
-    plot_detection_heatmaps(cosine_similarity_a, cosine_similarity_b)
+    plot_detection_heatmaps_3x4(*data_params)

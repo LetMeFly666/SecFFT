@@ -8,6 +8,16 @@
 
 Changed from [RoseAgg](https://github.com/SleepedCat/RoseAgg).
 
+## Nothing
+
+```
+"image/svg+xml": [
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"800\" height=\"20\">",
+    "<text x=\"0\" y=\"15\" fill=\"red\">https://github.com/LetMeFly666/SecFFT/releases/download/v0.0.0/result.2x4.ReLiTu.trueAndRand.png</text>",
+    "</svg>"
+],
+```
+
 ## TODO 
 
 - [x] 数据画热力图，大图及其小图，以及标注
