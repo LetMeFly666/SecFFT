@@ -1,0 +1,2 @@
+scp -r BUPT426@zhou.narc.letmefly.xyz:C:\Users\BUPT426\Desktop\RoseAgg\RoseAgg_Latest\FL_Backdoor_CV\2024-09-14_15-11-15 NormalRun\FL_Backdoor_CV\resultWithTime\2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN
+scp -r BUPT426@zhou.narc.letmefly.xyz:C:\Users\BUPT426\Desktop\RoseAgg\RoseAgg_Latest\FL_Backdoor_CV\saved_models\Revision_1\fltrust_NEUROTOXIN_09141511 NormalRun\FL_Backdoor_CV\saved_models\Revision_1
