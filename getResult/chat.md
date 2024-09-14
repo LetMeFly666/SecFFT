@@ -445,3 +445,152 @@ malicious_clients, cosine_similarity_matrix = fltrust([15, 16, 17, 18, 19], '../
 # datas = [foolsgoldScore2] * 12
 # plot_detection_heatmaps_3x4(*datas)
 ```
+
+
+
+```
+# fltrust
+# https://github.com/LetMeFly666/SecFFT/blob/706bb287c3b00f6143e2190edc74714ed88f3532/getResult/FL_Backdoor_CV/roles/aggregation_rules.py#L301-L340
+
+def fltrust_original(model_updates, param_updates, clean_param_update):
+    cos = torch.nn.CosineSimilarity(dim=0)
+    g0_norm = torch.norm(clean_param_update)
+    weights = []
+    for param_update in param_updates:
+        weights.append(F.relu(cos(param_update.view(-1, 1), clean_param_update.view(-1, 1))))
+    weights = torch.tensor(weights).to('cuda:0').view(1, -1)
+    weights = weights / weights.sum()
+    weights = torch.where(weights[0].isnan(), torch.zeros_like(weights), weights)
+    nonzero_weights = torch.count_nonzero(weights.flatten())
+    nonzero_indices = torch.nonzero(weights.flatten()).flatten()
+
+    print(f'g0_norm: {g0_norm}, '
+          f'weights_sum: {weights.sum()}, '
+          f'*** {nonzero_weights} *** model updates are considered to be aggregated !')
+
+    normalize_weights = []
+    for param_update in param_updates:
+        normalize_weights.append(g0_norm / torch.norm(param_update))
+
+    global_update = dict()
+    for name, params in model_updates.items():
+        if 'num_batches_tracked' in name or 'running_mean' in name or 'running_var' in name:
+            global_update[name] = 1 / nonzero_weights * params[nonzero_indices].sum(dim=0, keepdim=True)
+        else:
+            global_update[name] = torch.matmul(
+                weights,
+                params * torch.tensor(normalize_weights).to('cuda:0').view(-1, 1))
+    return global_update
+
+def fltrust(roundsNum: List[int], dirPath: str, modelPath: str):
+    clientPerRound = 10  # 这里就先写死了
+    maliciousPerRound = 3
+    # gradients = [0] * len(roundsNum) * clientPerRound
+    # maliciouses = []
+    gradientsList = []  # 里面存放每一轮的梯度，最后再聚合
+    for th, roundNum in enumerate(roundsNum):
+        participants_thisRound = getParticipants(roundNum, dirPath)
+        # get model updates
+        pklName = f'../NormalRun/FL_Backdoor_CV/saved_models/Revision_1/fltrust_NEUROTOXIN_09141511-fmnist/fltrust_{roundNum}.pth'
+        # print(pklName)
+        with open(pklName, 'rb') as f:
+            model_updates: Dict[str, torch.Tensor] = torch.load(f)
+        # print(model_updates)
+        pklName = f'../NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN/model_updates/fmnist_NEUROTOXIN_{roundNum}.pkl'
+        with open(pklName, 'rb') as f:
+            param_updates: Dict[str, torch.Tensor] = pickle.load(f)
+        param_updates = torch.cat(list(param_updates.values()), dim=1)
+        # print(param_updates[list(param_updates.keys())[0]].shape)  # torch.Size([10, 12288])
+        pklName = f'../NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN/clean_param_updates/fmnist_NEUROTOXIN_{roundNum}.pkl'
+        with open(pklName, 'rb') as f:
+            clean_param_update: torch.Tensor = pickle.load(f)
+        
+        # global_update = fltrust_original(model_updates, [param_updates[key] for key in param_updates.keys()], clean_param_update)
+        global_update = fltrust_original(model_updates, param_updates, clean_param_update)
+
+        # print(clean_param_update.shape)  # torch.Size([2674688])
+        thisGradients = [0] * clientPerRound
+
+
+        gradientsList.append(thisGradients)
+        break
+malicious_clients, cosine_similarity_matrix = fltrust([15, 16, 17, 18, 19], '../NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN', '../NormalRun/FL_Backdoor_CV/saved_models/Revision_1/fltrust_NEUROTOXIN_09141511-fmnist')
+```
+报错
+```
+{
+	"name": "AttributeError",
+	"message": "'CLIPModel' object has no attribute 'items'",
+	"stack": "---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\peft\\peft_model.py:737, in PeftModel.__getattr__(self, name)
+    736 try:
+--> 737     return super().__getattr__(name)  # defer to nn.Module's logic
+    738 except AttributeError:
+
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\torch\
+n\\modules\\module.py:1729, in Module.__getattr__(self, name)
+   1728         return modules[name]
+-> 1729 raise AttributeError(f\"'{type(self).__name__}' object has no attribute '{name}'\")
+
+AttributeError: 'PeftModel' object has no attribute 'items'
+
+During handling of the above exception, another exception occurred:
+
+AttributeError                            Traceback (most recent call last)
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\peft\\tuners\\lora\\model.py:356, in LoraModel.__getattr__(self, name)
+    355 try:
+--> 356     return super().__getattr__(name)  # defer to nn.Module's logic
+    357 except AttributeError:
+
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\torch\
+n\\modules\\module.py:1729, in Module.__getattr__(self, name)
+   1728         return modules[name]
+-> 1729 raise AttributeError(f\"'{type(self).__name__}' object has no attribute '{name}'\")
+
+AttributeError: 'LoraModel' object has no attribute 'items'
+
+During handling of the above exception, another exception occurred:
+
+AttributeError                            Traceback (most recent call last)
+c:\\Users\\admin\\Desktop\\LLM\\wb2\\Codes\\getResult\\getUpdates.ipynb Cell 10 line 1
+----> <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=0'>1</a> malicious_clients, cosine_similarity_matrix = fltrust([15, 16, 17, 18, 19], '../NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN', '../NormalRun/FL_Backdoor_CV/saved_models/Revision_1/fltrust_NEUROTOXIN_09141511-fmnist')
+      <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=2'>3</a> # foolsgoldMaliciousIndex, foolsgoldScore2 = foolsgold([15, 16, 17, 18, 19], '../NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-13_23-15-48-foolsgold-fmnist_NEUROTOXIN')
+      <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=3'>4</a> # print(foolsgoldMaliciousIndex)
+      <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=4'>5</a> # print(foolsgoldScore2)
+      <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=5'>6</a> # datas = [foolsgoldScore2] * 12
+      <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=6'>7</a> # plot_detection_heatmaps_3x4(*datas)
+
+c:\\Users\\admin\\Desktop\\LLM\\wb2\\Codes\\getResult\\getUpdates.ipynb Cell 10 line 5
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=54'>55</a>     clean_param_update: torch.Tensor = pickle.load(f)
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=56'>57</a> # global_update = fltrust_original(model_updates, [param_updates[key] for key in param_updates.keys()], clean_param_update)
+---> <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=57'>58</a> global_update = fltrust_original(model_updates, param_updates, clean_param_update)
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=59'>60</a> # print(clean_param_update.shape)  # torch.Size([2674688])
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=60'>61</a> thisGradients = [0] * clientPerRound
+
+c:\\Users\\admin\\Desktop\\LLM\\wb2\\Codes\\getResult\\getUpdates.ipynb Cell 10 line 2
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=21'>22</a>     normalize_weights.append(g0_norm / torch.norm(param_update))
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=23'>24</a> global_update = dict()
+---> <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=24'>25</a> for name, params in model_updates.items():
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=25'>26</a>     if 'num_batches_tracked' in name or 'running_mean' in name or 'running_var' in name:
+     <a href='vscode-notebook-cell:/c%3A/Users/admin/Desktop/LLM/wb2/Codes/getResult/getUpdates.ipynb#X11sZmlsZQ%3D%3D?line=26'>27</a>         global_update[name] = 1 / nonzero_weights * params[nonzero_indices].sum(dim=0, keepdim=True)
+
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\peft\\peft_model.py:741, in PeftModel.__getattr__(self, name)
+    739 if name == \"base_model\":  # see #1892: prevent infinite recursion if class is not initialized
+    740     raise
+--> 741 return getattr(self.base_model, name)
+
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\peft\\tuners\\lora\\model.py:360, in LoraModel.__getattr__(self, name)
+    358 if name == \"model\":  # see #1892: prevent infinite recursion if class is not initialized
+    359     raise
+--> 360 return getattr(self.model, name)
+
+File c:\\ProgramData\\Anaconda3\\envs\\clip_lora\\lib\\site-packages\\torch\
+n\\modules\\module.py:1729, in Module.__getattr__(self, name)
+   1727     if name in modules:
+   1728         return modules[name]
+-> 1729 raise AttributeError(f\"'{type(self).__name__}' object has no attribute '{name}'\")
+
+AttributeError: 'CLIPModel' object has no attribute 'items'"
+}
+```
