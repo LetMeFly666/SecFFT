@@ -114,7 +114,7 @@ if __name__ == '__main__':
             data_params.append(torch.rand(50, 50))
         else:
             # 生成一维评分数组
-            data_params.append(generate_data(num_clients, num_malicious))
+            data_params.append(generate_data_1dimension(num_clients, num_malicious))
 
     # 调用绘制函数
     plot_detection_heatmaps_3x4(*data_params)

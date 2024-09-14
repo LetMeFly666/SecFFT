@@ -57,6 +57,6 @@ NormalRun的resultWithTime是一个转置的矩阵，第一行`0,1,2,3,4,5,6,7,8
 数据来源：
 
 + [x] foolsgold: `./NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-13_23-15-48-foolsgold-fmnist_NEUROTOXIN`、`./NormalRun/FL_Backdoor_CV/saved_models/Revision_1/foolsgold_NEUROTOXIN_09132315-fmnist`
-- [x] fltrust: `./NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-12_23-29-51-fltrust-fmnist_NEUROTOXIN`、`./NormalRun/FL_Backdoor_CV/saved_models/Revision_1/fltrust_NEUROTOXIN_09122329-fmnist`
+- [x] fltrust: `./NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-14_15-11-15-fltrust-fmnist_NEUROTOXIN`、`./NormalRun/FL_Backdoor_CV/saved_models/Revision_1/fltrust_NEUROTOXIN_09141511-fmnist`
 - [x] flame: `./NormalRun/FL_Backdoor_CV/resultWithTime/2024-09-12_23-30-57-flame-fmnist_NEUROTOXIN`、`./NormalRun/FL_Backdoor_CV/saved_models/Revision_1/flame_NEUROTOXIN_09122330-fmnist`
 
