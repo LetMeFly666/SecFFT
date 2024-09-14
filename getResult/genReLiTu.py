@@ -61,7 +61,10 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
             
             # 如果是二维 tensor，直接转换为 numpy
             if len(heatmap_data.shape) == 2:
-                heatmap_array = heatmap_data.cpu().numpy()
+                if isinstance(heatmap_data, torch.Tensor):
+                    heatmap_array = heatmap_data.cpu().numpy()
+                else:
+                    heatmap_array = heatmap_data
             # 如果是一维 tensor，计算相似度矩阵
             elif len(heatmap_data.shape) == 1:
                 heatmap_array = compute_similarity_matrix(heatmap_data)
