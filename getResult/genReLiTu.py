@@ -50,8 +50,8 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(20, 15))
 
     # 标题和标签
-    attacks = ['Original NEUROTOXIN', 'Size-constrained Attack', 'Angle and Size-constrained Attack']
-    methods = ['Foolsgold', 'FLTrust', 'FLAME', 'SecFFT']
+    attacks = ['Original NEUR', 'Size constrained attack', 'Angle and size constrained attack']
+    methods = ['Foolsgold', 'FLTrust', 'Flame', 'SecFFT']
 
     # 生成热力图数据并绘制
     for i in range(3):  # 三行，分别为不同的攻击
@@ -86,7 +86,7 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     plt.tight_layout()
 
     # 保存为jpg文件
-    plt.savefig('detection_comparison_results_3x4.jpg', format='jpg')
+    plt.savefig('detection_comparison_results_3x4.pdf', format='pdf')
 
 
 def generate_data_1dimension(num_clients, num_malicious):
