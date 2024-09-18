@@ -3,6 +3,7 @@
 \usepackage{longtable}
 \usepackage[UTF8]{ctex}
 \usepackage{tabularx}
+\usepackage{lscape}  % 引入 lscape 包以横向显示表格
 \usepackage{array}
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{textcomp}
@@ -84,18 +85,24 @@
 
 \section{System Model}
 
-考虑在机器人物联网（IoRT）网络中进行视觉语言模型联邦微调的场景下，系统模型包括多个机器人节点和一个中心服务器，机器人节点在本地进行模型微调，并通过中心服务器进行全局聚合。以下是系统模型的详细描述。
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.5\textwidth]{figures/fig1.pdf}
+    \label{fig:scenario}
+\end{figure}
+
+如图\ref{fig:scenario}所示，考虑在机器人物联网（IoRT）网络中对视觉大模型进行联邦微调的场景下，整个系统模型包括多个机器人节点和一个中心服务器。每轮，每个机器人节点在本地对视觉大模型进行微调并只上传微调部分的参数更新，随后中心服务器对所有更新进行聚合，然后下发聚合后的参数，开启新一轮的联邦微调。以下是系统模型的详细描述。
 
 \begin{enumerate}
     \item \textbf{参与者和数据集}：
-    假设系统模型中存在 $n$ 个机器人节点，每个节点记作 $R_i$, $i \in \{1, 2, \ldots, n\}$。 每个机器人节点 $R_i$ 拥有一个本地数据集 $D_i = \{x_{i,j}, y_{i,j}\}_{j=1}^{|D_i|}$，其中 $x_{i,j}$ 表示输入数据，$y_{i,j}$ 表示对应的标签数据，$|D_i|$ 为数据集的大小，$D = \bigcup_{i=1}^{n} D_i$表示整体的数据集。
+    假设系统模型中存在 $N$ 个机器人节点，每个节点记作 $R_i$, 其中$i \in \{1, 2, \ldots, N\}$。 每个机器人节点 $R_i$ 拥有本地数据集 $D_i = \{x_{i,j}, y_{i,j}\}_{j=1}^{|D_i|}$，其中 $x_{i,j}$ 表示输入数据，$y_{i,j}$ 表示对应的标签数据，$|D_i|$ 为数据集的大小，所有节点本地数据集的并集$D = \bigcup_{i=1}^{N} D_i$构成整体数据集。
 
     \item \textbf{LoRA}：
-    在LoRA(Low-Rank Adaptation) 方法中，每一个参数矩阵 $W$ 被表示为：
+    在LoRA(Low-Rank Adaptation) \cite{lora}方法中，每个参数矩阵 $W$ 被表示为：
     \[
     W = W_0 + \Delta W, \quad \Delta W = BA
     \]
-    其中，$W_0$ 为模型的原始权重矩阵，$\Delta W$ 是低秩增量矩阵，$B$ 和 $A$ 是低秩分解矩阵，$r$ 为矩阵的秩。假设模型原始参数$\Theta = \sum {W_0}$，模型引入的增量参数$\theta = \sum {W}$。在联邦微调过程中，仅对增量参数$\theta$ 进行微调更新，保持原始参数$\Theta$不变。
+    其中，$W_0$ 为模型的原始权重矩阵，$\Delta W$ 是低秩增量矩阵，$B$ 和 $A$ 是低秩分解矩阵，$r$ 为矩阵的秩。在对视觉大模型进行联邦微调的场景中，全局模型原始参数为$\Theta_p = \sum {W_0}$，而LoRA引入的增量参数为$\theta_p = \sum {W}$，因此全局模型的整个参数集为$\Theta = \Theta_p + \theta_g$。在整个联邦微调过程中，仅对全局模型的增量参数$\theta_g$ 进行微调训练，保持原始参数$\Theta_p$不变。
     
     \item \textbf{本地模型训练}：
     在每轮联邦训练的开始时，中心服务器将全局模型的增量参数 $\theta_g^{t-1}$ 发送给每个机器人节点$R_i$。每个节点在获得增量参数$\theta_g^{t-1}$后，基于本地数据集 $D_i$ 进行微调训练。
@@ -106,21 +113,21 @@
     ，其中$(\theta_i^{t})^e$表示在第$e$轮微调后的参数，初始时$(\theta_i^{t})^0 = \theta_g^{t-1}$。
     本地训练的目标是最小化损失函数 $f(D_i^b, (\theta_i^{t})^e)$：
     \[
-    f(D_i^b, (\theta_i^{t})^e) = \frac{1}{|D_i^b|} \sum_{j=1}^{|D_i^b|} \ell(x_{i,j}, y_{i,j}; \Theta + (\theta_i^{t})^e)
+    f(D_i^b, (\theta_i^{t})^e) = \frac{1}{|D_i^b|} \sum_{j=1}^{|D_i^b|} \ell(x_{i,j}, y_{i,j}; \Theta_p + (\theta_i^{t})^e)
     \]
     其中$\Theta$是模型的原始参数， $\ell$表示损失函数（如交叉熵损失）。本地训练完成后，节点计算其增量参数更新 $\triangledown \theta_i^t = (\theta_i^t)^{E_l} - (\theta_i^t)^0$ 并上传至中心服务器。
     \item \textbf{联邦聚合}：
     在每轮本地训练结束后，中心服务器从每个机器人节点 $R_i$ 收集本地更新$\triangledown \theta_i^t$，并利用相应的聚合算法进行聚合，以更新全局增量参数得到$\theta_g^t$，其计算公式为：
     \[
-    \theta_g^t = \theta_g^{t-1} + Aggregate(\triangledown \theta_1^t, \triangledown \theta_2^t, \dots, \triangledown \theta_n^t)
+    \theta_g^t = \theta_g^{t-1} + Agg(\triangledown \theta_1^t, \triangledown \theta_2^t, \dots, \triangledown \theta_n^t)
     \]
-    其中，$Aggregate$表示中心服务器使用到的聚合算法，例如FedAvg、Krum、Bulyan、RoseAgg等，$\theta_g^t$ 是第 $t$ 轮更新的全局增量参数，更新后的全局增量参数 $\theta_g^t$ 将在下一轮训练前下发给所有机器人节点，用于进一步的本地微调。
+    其中，$Agg$表示中心服务器使用到的聚合算法，例如FedAvg、FLTrust\cite{cao2020fltrust}、RoseAgg\cite{yang2024roseagg}等，$\theta_g^t$ 是第 $t$ 轮更新的全局增量参数，更新后的全局增量参数 $\theta_g^t$ 将在下一轮训练前下发给所有机器人节点，用于进一步的本地微调。
 \end{enumerate}
 
 \section{Threat Model}
 \begin{itemize}
-    \item Attacker's Goal：假设在对视觉语言模型进行联邦微调的场景中，存在一个或者多个由攻击者操纵的恶意节点。其目标是对全局模型 $\mathbf{F}$ 进行后门植入，使得模型能够将任何带有预定义触发器 $\delta$ 的测试输入分类为目标类别 $t$，同时尽可能保持对干净输入的分类准确性。
-    \item Attacker's Ability: 在联邦学习场景中，假设攻击者对恶意节点的本地训练过程具有完全的控制权。这意味着攻击者可以任意操控本地数据、触发器模式、优化策略和本地更新过程。此外，攻击者可以采用“智能”攻击策略，这种策略的特点是攻击效果不会在单轮训练中显现，而是通过多轮训练的累积效应逐步将后门植入全局模型中。这种场景在实际中是可能存在的，因为中央服务器只能接收到客户端上传的训练后模型更新，而无法知晓每个客户端的具体训练过程。然而，攻击者无法对中央服务器的操作进行干扰，例如，无法更改全局模型的聚合规则或篡改其他良性客户端的模型更新。
+    \item Attacker's Goal：假设在对视觉语言模型进行联邦微调的场景中，存在一个或者多个由攻击者操纵的恶意节点。其目标是对全局模型$\Theta$ 进行后门植入，使得模型能够将任何带有预定义触发器 $\delta$ 的测试输入分类为目标类别，即$\Theta(x+\delta) = y'$，其中$x$代表正常输入，$y'$表示目标类别。同时尽可能保持对干净输入的分类准确性，即$\Theta(x) = y$，其中$y$为输出$x$的原始类别。
+    \item Attacker's Ability: 在对视觉大模型进行联邦微调的场景中，假设攻击者对恶意节点的本地训练过程具有完全的控制权。这意味着攻击者可以任意操控本地数据、触发器模式、优化策略和本地更新过程。此外，攻击者可以采用“智能”攻击策略，这种策略的特点是攻击效果不会在单轮训练中显现，而是通过多轮训练的累积效应逐步将后门植入全局模型中。这种场景在实际中是可能存在的，因为中央服务器只能接收到客户端上传的训练后模型更新，而无法知晓每个客户端的具体训练过程。然而，攻击者无法对中央服务器的操作进行干扰，例如，无法更改全局模型的聚合规则或篡改其他良性客户端的模型更新。
 \end{itemize}
 
 % \subsection{Defender's Goal}
@@ -136,25 +143,27 @@
 \hline
 \textbf{Notation} & \textbf{Definition} \\ \hline
 % 联邦学习
-$ n $ & The number of the nodes participating during each round. \\ \hline
+$ N $ & The number of the nodes participating during each round. \\ \hline
 % $\mathcal{M}$ & The number of the participants during each round. \\ \hline
 $D_i$ & The private local dataset of node $C_i$. \\ \hline
 
 % 单论识别
-$\theta_i^t$ & The local model of participant at round $t$. \\ \hline
+$\theta_g^t, \theta_i^t$ & The global model, the local model of participant $R_i$ at round $t$. \\ \hline
 $\triangledown \theta_i^t$ & The local update of node $R_i$ during the $t$-th round. \\ \hline
 $G_i^t $ & The low-frequency components extracted from the update of node $R_i$ during the $t$-th round.. \\ \hline
 $m$ & The length of the low-frequency components. \\ \hline
-$H^t$ & The matrix formed by stacking $G_i^t$, with a shape of $m \times n$ during the $t$-th round. \\ \hline
+$H^t$ & The matrix formed by stacking $G_i^t$, with a shape of $m \times N$ during the $t$-th round. \\ \hline
 $\tilde{G}_{0}^t $ & The clean ingredient extracted from the nodes' low-frequency components during the $t$-th round. \\ \hline
 $\lambda_{max}^t$ & The largest singular value of matrix $H^t$ during the $t$-th round. \\ \hline
 $\xi_{max}^t$ & The corresponding left singular vector of singular value $\lambda_{max}^t$ during the $t$-th round. \\ \hline
-$P_i^t$ & The distribution corresponding to $G_i^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
-$Q^t$ &  The distribution corresponding to $\tilde{G}_{0}^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
-$O_t'$ &  The center of the high dimensional ball $t'$-th round. \\ \hline
-\( {v}_{i}^{t'} \) & The vector of the high dimensional ball $t'$-th round.\\ \hline
-$lof_i$ & The LOF score of the $i$-th node\\ \hline
-$cre_i$ & The confidence of the $i$-th node\\ \hline
+$Chi_i^t$ & The distance difference between Node $R_i$'s Update and the clean ingredient during the $t$-th round. \\ \hline
+% $P_i^t$ & The distribution corresponding to $G_i^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
+% $Q^t$ &  The distribution corresponding to $\tilde{G}_{0}^t$ after applying the Softmax function during the $t$-th round.. \\ \hline
+$t'$ & One round of the total $T$ rounds. \\ \hline
+$O_i^{t'}$ &  The center of the high dimensional ball $t'$-th round of robot node $i$. \\ \hline
+\( {v}_{i}^{t'} \) & The vector of the high dimensional ball $t'$-th round of robot node $i$.\\ \hline
+$lof_i$ & The LOF score of the $i$-th node.\\ \hline
+$cre_i$ & The confidence of the $i$-th node.\\ \hline
 
 % 待总结
 
@@ -163,61 +172,24 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
 
 
 \subsection{单轮恶意节点识别}
-\textbf{Motivation}: 目前的防御策略主要集中于利用攻击的“浅层语义特征”来进行恶意节点识别，所谓浅层语义是指模型上传更新的方向，范数以及神经元符号等几何或者统计特性。然而，这些基于浅层特征的防御方法在高维空间中存在显著的局限性。
+\textbf{Motivation}: 目前的防御策略主要集中于利用攻击的“浅层语义特征”来进行恶意节点识别，所谓浅层语义是指模型上传更新的方向，范数以及更新符号等几何或者统计特性。然而，这些基于浅层特征的防御方法在高维空间中存在显著的局限性。
 % Multi-metrics adaptively identifies backdoors in Federated learning
-首先，这些防御方式只能在特定假设条件下对某些类型的攻击起作用。例如，余弦距离能够检测出具有较大方向偏差的恶意更新，而欧几里得距离则用于检测通过扩大$L_2$范数影响全局模型的恶意更新。同时最新的研究表明，基于欧几里得距离等传统的距离度量方法在高维空间中无法有效区分恶意和良性更新，因为这些方法往往受到维度灾难的影响。此外攻击策略也在不停的演变，现在的攻击者已经能够通过精心调整，使恶意更新在方向、范数等浅层特征上与良性更新相似，从而巧妙地避开这些基于浅层语义特征的防御措施，最终在全局模型中植入后门。值得注意的是，后门攻击的本质在于让模型建立起预定义触发器和目标之间的联系，因此无论攻击者如何调整自己的攻击方式或策略，其上传的模型更新相较于良性用户始终具有分布上的差异。
+首先，这些防御方式只能在特定假设条件下对某些类型的攻击起作用。例如，余弦距离能够检测出具有较大方向偏差的恶意更新，而欧几里得距离则用于检测通过扩大$L_2$范数影响全局模型的恶意更新。同时最新的研究表明\cite{huang2023multi}，基于欧几里得距离等传统的距离度量方法在高维空间中无法有效区分恶意和良性更新，因为这些方法往往受到维度灾难的影响。此外攻击策略也在不停的演变，现在的攻击者已经能够通过精心调整，使恶意更新在方向、范数等浅层特征上与良性更新相似，从而巧妙地避开这些基于浅层语义特征的防御措施，最终在全局模型中植入后门。但值得注意的是，后门攻击的本质在于让模型建立起预定义触发器和目标之间的联系，因此无论攻击者如何调整自己的攻击方式或策略，其上传的模型更新相较于良性用户始终在某种分布上具有偏移。
 
-\textbf{Overview}: 为解决基于浅层语义特征的防御方法在高维空间中面临的局限性，我们从后门攻击的本质出发，提出了一种基于深层语义特征的防御策略，重点分析模型更新在频率域上的分布差异。通过将本地模型更新转换到频域，我们能够更深入地捕捉恶意更新在低频成分上的异常表现，这些异常通常难以通过传统的浅层特征检测方法发现。通过对频率域上的特征进行分析，我们可以有效地区分出恶意节点与良性节点，从而增强联邦学习系统在面对复杂后门攻击时的鲁棒性和检测精度。
+\textbf{Overview}: 在深度神经网络模型中，每个权重代表两个神经元之间连接的强度。权重分布及其相关的能量在训练过程中会经历动态演变，以缩小模型预测结果与训练数据中的真实目标之间的差距。当后门攻击迫使神经网络模型学习一种在正常数据中不存在的关联模式时，根据后门触发器的设计和实现方式，这种模式可能是微妙的，也可能是相当明显的，但无论如何，它都代表了与模型从正常数据中学习到的模式的偏离。因此，为解决基于浅层语义特征的防御方法在高维空间中面临的局限性，我们从后门攻击的本质出发，提出了一种基于深层语义特征的防御策略，重点分析模型更新在频率分布上的差异。通过将本地模型更新转换到频域，我们能够更深入地捕捉恶意更新在低频成分上的异常表现，这些异常通常难以通过传统的浅层特征检测方法发现。通过对频率域上的特征进行分析，我们可以有效地区分出恶意节点与良性节点，从而增强联邦学习系统在面对复杂后门攻击时的鲁棒性和检测精度。
 
-\begin{algorithm}
-\caption{Malicious Node Detection via DCT}
-\label{alg:malicious-node-detection}
-\begin{algorithmic}[1]
-\State \textbf{Input:} $d$, $n$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_n^t) \in \mathbb{R}^{n \times d}$, $m$ \Comment{$d$ is the dimension of each node update; $n$ is the number of the nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_n^t) \in \mathbb{R}^{n \times d}$is the local updates from nodes during the $t$-th round; $m$ is the length of low-frequency components}
-\State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
-
-\State Step 1: Frequency Domain Transformation
-\For {Node $R_i$}
-    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_i^t)$
-    \State $G_i^t = Trunc(DCT(\bar{\theta_i^t}), m)$ \Comment{Compute DCT and retain only the top $m$ low-frequency components}
-\EndFor
-
-\State
-
-\State Step 2: Clean Ingredient Extraction
-\State $H^t \gets (G_0^t, G_1^t, \ldots, G_{n}^t) \in \mathbb{R}^{d \times m}$ \Comment{Stacking to form Matrix $H^t$.}
-
-\State $\hat{H}^t \gets (H^t)^{T} H^t$
-\State $\lambda_{max}^t, \xi_{max}^t \gets \text{eig}(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
-\State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
-
-\State
-
-\State Step 3: Kullback-Leibler Divergence Calculation
-\State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
-\For {Node $R_i$}
-    \State $Ki \gets \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)$
-\EndFor
-\State $S \gets \{KL_1, KL_2, \ldots, KL_n\}$ \Comment{The distribution differences calculated by KL divergence.}
-
-\State
-
-\State Step 4: Malicious Node Detection
-\State $\{C_1, C_2, \ldots, C_K\} \gets \text{HDBSCAN}(S)$
-\State $U_{nor} \gets C_{\text{max}}$, $U_{mal} \gets \{C_i \, | \, i \neq \text{max}\}$
-
-\end{algorithmic}
-\end{algorithm}
-算法\ref{alg:malicious-node-detection}展示了整体的恶意用户识别过程，主要包含四个步骤：Frequency Domain Transformation, Clean Ingredient Extraction, Kullback-Leibler Divergence Calculation,Single-round Malicious Node Detection。
 \begin{enumerate}
 \item \textbf{Frequency Domain Transformation}：
-相比于目前基于浅层语义特征的防御方法，我们利用DCT进行频域转换，将模型的更新向量映射到频域空间，以探究其在频率域上的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的4-7行所示，假设每个本地模型的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，并提取低频分量，得到频率向量\(G_i^t\)。这里的 $Trunc$ 操作表示仅保留前 $m$ 个低频分量，以捕捉频域中更具代表性的特征用于后续的恶意节点检测。
+% 相比于目前基于浅层语义特征的防御方法，我们利用DCT进行频域转换，将模型的更新向量映射到频域空间，以探究其在频率域上的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的4-7行所示，假设每个本地模型的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，并提取低频分量，得到频率向量\(G_i^t\)。这里的 $Trunc$ 操作表示仅保留前 $m$ 个低频分量，以捕捉频域中更具代表性的特征用于后续的恶意节点检测。
+受高维空间中维度灾难的影响，传统的基于距离度量的方法已无法有效识别恶意节点。相反，将模型更新转换到频率域后，其差异将主要集中在低频成分上。因此，专注于低频成分的分析，在提升识别准确率的同时，将显著的降低计算开销。假设每个节点上传的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，对其进行归一化，然后通过一维的DCT-II\cite{ahmed1974discrete}变化将其转换为对应的频率分布，并提取$m$个低频分量，例如5000，得到低频向量\(G_i^t\)。
 
 % 对应的计算过程如下：
-% \begin{equation}
-% G_i^t = Trunc(DCT(Flatten(\triangledown \theta_i^t), m)
-% \end{equation}
+\begin{equation}
+G_i^t = Trunc(DCT(Flatten(\frac{\triangledown \theta_i^t}{{\|\triangledown \theta_i^t\|}_2}), m)
+\label{eq:DCT}
+\end{equation}
 
+频域转换的主要过程如公式\ref{eq:DCT}所示，这里的 $Trunc$ 操作表示仅保留前$m$个低频分量。
 % \begin{equation}
 % Flatten: \bar{\theta_i^t} = Flatten(\triangledown \theta_i^t)
 % \end{equation}
@@ -226,20 +198,27 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
 % DCT: G_i^t[k] = \sum_{j=0}^{d-1} \bar{\theta_i^t}[j] \cos \left( \frac{\pi}{d} \left(j + \frac{1}{2}\right) k \right)
 % \end{equation}
 
-\item \textbf{Clean Ingredient Extraction}：在将模型更新向量转换到频域空间后，我们基于“恶意节点的数量少于良性节点”的假设，通过奇异值分解（SVD）从所有节点的频域向量中提取出“干净成分”，并以此作为区分恶意与良性节点的标准。其主要过程如算法\ref{alg:malicious-node-detection}的10-13行所示，将所有节点的频率向量堆叠为矩阵 \(H^t = ({G_0^t}, {G_1^t}, \ldots, {G_{n}^t}) \in \mathbb{R}^{d \times n}\)，其中每一列代表一个节点的低频向量。通过计算矩阵的最大奇异值及其对应的左奇异向量来作为相应的干净成分。即计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净成分 \(\tilde{G}^t\)。这个干净成分\(\tilde{G}^t\)表示了良性节点的主要成分，能够有效地与恶意节点的异常行为区分开来，从而用于后续的恶意节点检测。
-
+\item \textbf{Clean Ingredient Extraction}：在提取到节点更新对应的低频向量\(G_i^t\)后，我们使用流行的聚类算法例如HDBSCAN\cite{mcinnes2017hdbscan}对这些更新进行聚类，得到多个簇$C_0^t, C_1^t, \ldots, C_{\kappa}^t$，其中$\kappa$表示簇的数量。在大多数联邦学习场景中，良性节点的数量通常多于恶意节点的数量，且良性节点的更新通常更接近全局模型的方向并表现出更高的聚集性。基于这一观察，我们选择节点数量最多的簇$C_{max} = \{R_{i_0}, R_{i_1}, \ldots, R_{i_n}\}$作为主要分析对象。为了进一步提取该簇的主要特征或模式，我们对其中所有节点组成的矩阵进行奇异值分解。由于，SVD分解的左奇异向量$\tilde{G}^t$对应于数据的主要方向，因此，$\tilde{G}^t$可以作为良性节点在低频域内的主要特征。
+% 计算出矩阵\(\hat{H}^t = (H^t)^{T} H^t\)最大特征值 \(\lambda_{\text{max}}\) 及其对应的特征向量 \(\xi_{\text{max}}\)，根据公式\ref{equation:singular}，得到干净成分 \(\tilde{G}^t\)。
 \begin{equation}
-\tilde{G}^t = \frac{H^t \xi_{\text{max}}}{\sqrt{\lambda_{\text{max}}}}
-\label{equation:singular}
+\tilde{G}^t = \frac{H^t \xi_{\text{max}^t}}{\sqrt{\lambda_{\text{max}^t}}}
+\label{eq:singular}
 \end{equation}
 
+公式\ref{eq:singular}展示了计算左奇异向量$\tilde{G}^t$的主要过程，其中\(H^t = ({G_{i_0}^t}, {G_{i_1}^t}, \ldots, {G_{i_n}^t}) \in \mathbb{R}^{m \times n}\)为该簇节点的低频向量堆叠而成的矩阵，其中每一列代表一个节点的低频向量，$\lambda_{max}^t$与$xi_{max}^t$分别对应了矩阵$\hat{H}^t \gets (H^t)^{T} H^t$的最大特征值及其特征向量。通过这种方式，我们有效地提取了反映良性节点全局更新在频域上的主要特征，并将$\tilde{G}^t$作为“干净成分”，为后续恶意节点检测提供基准依据。
 
-\item \textbf{Kullback-Leibler Divergence Calculation}：在得到干净分量后，我们计算每个节点的频率向量与干净成分之间的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的16-20行所示，对于每个节点的低频向量\(G_i^t\)以及上一步求得的干净成分\(\tilde{G}^t\)，通过Softmax函数来将它们转换为相应的概率分布 \(P_i^t\) 和 \(Q^t\) 。然后利用KL散度计算每个节点概率分布\((P_i^t\)和干净分量概率分布 \(Q^t\) 之间的距离，得到相应的分布差异集合\(S = ({{KL}}_1, {{KL}}_2, \ldots, {{KL}}_n)\)。这个集合反映了每个节点频率向量相对于干净成分的异常程度，较大的KL散度值表示节点对应的频率向量与干净成分的分布差异较大，提示该节点可能是恶意节点。最终，这些分布差异将作为恶意节点检测的基础，通过进一步分析来区分良性节点和潜在的恶意节点。
+\item \textbf{Chi-square distance calculation}：
+% 在得到“干净成分”后，我们计算每个节点的低频向量与“干净成分”之间的差异度。对于每个节点的低频向量\(G_i^t\)以及上一步求得的干净成分\(\tilde{G}^t\)，
+我们利用每个节点的低频向量与“干净成分”之间的差异度来作为衡量恶意节点和良性节点的依据。对于每个节点的低频向量 \(G_i^t\) 以及上一步中求得的“干净成分” \(\tilde{G}^t\)，通过卡方距离来计算两者之间的差异度，得到距离差异集合$S^t = Chi^t_i, Chi^t_2, \ldots, Chi^t_N$。卡方距离的计算公式为：
+% Chi-square distance
+\begin{equation}
+{Chi^t_i}^2 = \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}
+\label{equation:KL}
+\end{equation}
 
-% \begin{equation}
-% {{KL}}_i = D(P_i^t \| Q^t) = \sum_{k=0}^{m-1} P_i^t[k] \log \left( \frac{P_i^t[k]}{Q^t[k]} \right)
-% \label{equation:KL}
-% \end{equation}
+其中 \(m\) 是低频向量的维度，\(\epsilon\) 是一个小的常数，用于避免分母为零。相比于传统的欧氏距离，卡方距离根据两个向量对应分量的大小进行加权，使得特征值较大的部分对距离的影响更大，从而能够更准确地反映低频向量中重要特征之间的差异，同时忽略不重要的噪声成分。
+
+
 
 % 其中
 % \[
@@ -251,21 +230,66 @@ $cre_i$ & The confidence of the $i$-th node\\ \hline
 % \]
 
 
-\item \textbf{Single-round Malicious Node Detection}：为了进一步识别恶意节点，我们利用良性节点与干净成分的分布高度相似这一特性，对分布差异集合$S$进行聚类分析。具体来说，我们采用流行的HDBSCAN算法对计算得到的KL散度集合$S$进行聚类，主要过程如算法\ref{alg:malicious-node-detection}的23-24行所示。聚类结果为多个簇\(C_1, C_2, \ldots, C_K\)，从所有簇中选出最大的一簇（即包含节点数量最多的簇），记作 \(C_{max}\)。基于良性节点在每轮训练中数量通常多于恶意节点的假设，以及良性节点与干净成分之间的KL散度通常更为相似，我们将 \(C_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)。对于其他所有簇\(C_i\)（\(i \neq {max}\)），其中的所有节点则被标记为恶意节点，记作\(U_{mal}\)。  
+\item \textbf{Single-round Malicious Node Detection}：为了准确地识别恶意节点，我们利用良性节点的更新与干净成分的频率分布高度相似这一特性，对距离差异集合$S^t$进一步进行聚类分析。具体而言，我们采用流行的KMeans聚类算法对距离差异集合$S^t$进行聚类，并将类别数设置为2，因此聚类结果为两个簇\(C'_1, C'_2\)。基于在每轮训练中良性节点的数量通常多于恶意节点，以及良性节点与干净成分之间的距离差异通常更小，我们将 \(C'_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)。对于另一簇\(C'_k\)（\(k \neq {max}\)），则将其中所有节点标记为恶意节点，记作\(U_{mal}\)。  
+
 
 
 % TODO 总结
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.4\textwidth]{img/t_sne_indicative_layer_round_0.png}
-    \hspace{0.1in}
-    \includegraphics[width=0.4\textwidth]{img/t_sne_dct_round_0.png}
-    \caption{Result}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/t_sne_indicative_layer_round_0.png}
+%     \hspace{0.1in}
+%     \includegraphics[width=0.4\textwidth]{img/t_sne_dct_round_0.png}
+%     \caption{Result}
+% \end{figure}
 
 % 放图
 
 \end{enumerate}
+
+算法\ref{alg:malicious-node-detection}展示了单轮恶意用户识别的整体过程，其中3-6行代表了频率转换的计算过程，7-12行代表了“干净分量”$\tilde G^t$的计算过程，13-16行代表了每个用户与“干净分量”间的卡方差异度的计算过程，最后17-18行代表了通过KMeans聚类算法进行恶意用户检测的计算过程。
+
+\begin{algorithm}
+\caption{Malicious Node Detection via DCT}
+\label{alg:malicious-node-detection}
+\begin{algorithmic}[1]
+\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each node update; $N$ is the number of the nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from nodes during the $t$-th round; $m$ is the length of low-frequency components}
+\State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
+
+% \State Step 1: Frequency Domain Transformation
+\For {Node $R_i$}
+    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_i^t)$
+    \State $G_i^t = Trunc(DCT(\bar{\theta_i^t}), m)$ \Comment{Compute DCT and retain only the top $m$ low-frequency components}
+\EndFor
+
+% \State
+
+% \State Step 2: Clean Ingredient Extraction
+\State $(C_0^t, C_1^t, \ldots, C_{\kappa}^t) \gets Clustering (\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t)$
+\State $ C_{max} = \underset{C_i}{\arg\max} \, |C_i|, \quad i = 1, 2, \ldots, \kappa $ \Comment{$|C_i|$ denotes the number of nodes in cluster $C_i$}
+\State $H^t \gets (G_0^t, G_1^t, \ldots, G_{n}^t) \in \mathbb{R}^{m \times n} $ \Comment{Stacking to form Matrix $H^t$, where $\quad R_{i_0}, R_{i_1}, \ldots, R_{i_n} \in C_{max}$.}
+
+\State $\hat{H}^t \gets (H^t)^{T} H^t$
+\State $\lambda_{max}^t, \xi_{max}^t \gets \text{eig}(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
+\State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
+
+% \State
+
+% \State Step 3: Chi-square distance calculation
+% \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
+\For {Node $R_i$}
+    \State ${Chi}_i^2 \gets \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}$
+\EndFor
+\State $S \gets \{Chi_1, Chi_2, \ldots, Chi_n\}$ \Comment{The Distance differences calculated by Chi-square distance.}
+
+% \State
+
+% \State Step 4: Malicious Node Detection
+\State $\{C_1, C_2\} \gets KMeans(S, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
+\State $U_{nor} \gets C_{\text{max}}$, $U_{mal} \gets \{C_i \, | \, i \neq \text{max}\}$
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{多轮次攻击识别}
 
@@ -555,13 +579,13 @@ $\rho$是一个很小的正数，以防分母为$0$。
 激活函数Tanh在$0$到$\infty$范围内是一个上升又快到慢的单调递增函数。当$cre_i\to 0$时$cer_i'\to 0$，也就是说节点$i$的最小覆盖球半径$r_i$很大时该节点在聚合时的权重很小；当$cre_i\to \infty$时$cer_i'\to 1$，也就是说节点$i$的最小覆盖球半径$r_i$很小时该节点在聚合时的权重较大。这样，我们就可以对每个加权处理过的置信度$cer_i'$进行归一化处理，得到权重$w_i$。其中：
 
 \begin{equation}
-    w_i=\frac{cre_i'}{\sum_{i=1}^{n}cre_i'},
+    w_i=\frac{cre_i'}{\sum_{i=1}^{N}cre_i'},
 \end{equation}
 
 因此第$t$轮模型的梯度聚合公式为：
 
 \begin{equation}
-    \theta_g^t = \theta_g^{t-1}+\sum_{i=1}^{n}w_i\triangledown \theta_i^t,
+    \theta_g^t = \theta_g^{t-1}+\sum_{i=1}^{N}w_i\triangledown \theta_i^t,
 \end{equation}
 
 \begin{figure}[!t]
@@ -742,46 +766,59 @@ $\rho$是一个很小的正数，以防分母为$0$。
 %     \item \textbf{自适应聚合策略}：该方法能够根据客户端的实际行为动态调整聚合策略，而无需事先设定恶意客户端的数量或行为模式，这使得方法在各种场景下更具通用性和适应性。
 % \end{enumerate}
 
-\subsection{EXPERIMENTAL EVALUATION}
+\section{EXPERIMENTAL EVALUATION}
 
-\subsubsection{Experimental Setup}
+This section presents a thorough evaluation of SecFFT on two benchmark datasets, aiming to illustrate its effectiveness.
 
-\subsubsection{硬件设施}
-
-本实验在一台Ubuntu操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU。
-
-\subsubsection{基本设置}
+\subsection{Experimental Setup}
 
 在本实验中，我们采用了常用的联邦学习场景进行评估。具体设置如下：
 
 \begin{itemize}
-    \item \textbf{数据集}：我们使用了MNIST和CIFAR-10数据集。MNIST数据集包含60,000张28x28像素的灰度手写数字图像，分为10个类别。CIFAR-10【TODO:引用】数据集包含60,000张32x32像素的彩色图像，分为10个类别。
+    \item \textbf{数据集}：我们使用FMNIST\cite{minist}和CIFAR-10\cite{cifar10}数据集作为实验数据集。FMNIST数据集包含60,000张28x28像素的灰度时尚商品图像，共分为10个类别，其中50,000张为训练集，10,000张为测试集。CIFAR-10数据集包含60,000张32x32像素的彩色图像，也分为10个类别，其中50,000张为训练集，10,000张为测试集。
     
-    \item \textbf{模型}：在MNIST和CIFAR-10数据集上，我们使用了Vision Transformer (ViT) 模型，并使用LOAR进行微调。ViT 是一种基于 Transformer 架构的图像分类模型，它将图像划分为固定大小的patch，并将其输入到Transformer编码器中进行处理。
+    \item \textbf{微调模型}：我们采用CLIP的CLIP-ViT-B/32\cite{huggingface_clip}模型作为微调所使用的预训练模型。CLIP是一种通过对比学习在文本和图像数据上进行预训练的模型，能将自然语言和视觉信息映射到同一特征空间中。CLIP-ViT-B/32基于ViT\cite{vit}架构，包含12层Transformer编码器，隐藏层维度为768，多头注意力头数为12，使用32x32的图像块作为输入。在微调过程中，我们使用LORA\cite{lora}方案仅在Vision Encoder部分插入低秩矩阵，保持Textual Encoder不变。我们设定低秩矩阵的秩为16，学习率为$10^{-3}$，以在有限计算资源下高效微调模型，使其更好地适应特定任务的数据分布。
+
+    \item \textbf{攻击假设}：对于单轮恶意用户检测，我们使用包括MR\cite{MR}、EDGE CASE\cite{EDGE_CASE}、以及NEUR\cite{zhang2022neurotoxin}在内的三种针对联邦学习场景的最新攻击。MR攻击通过将中毒图像与正常图像混合来创建恶意数据集，并使用投影梯度下降法进行本地训练来达到植入后门的效果；EDGE CASE攻击利用罕见的“边缘情况”样本，通过数据或模型投毒在联邦学习模型中插入后门；Neurotoxin攻击则尝试通过识别在正常节点训练中不常更新的参数，并利用这些参数插入后门，以提高后门的持久性。
+
+    \item \textbf{对比算法}：对于单轮恶意用户检测算法，我们对比了三种聚合算法：FedAVG\cite{FedAVG}、FLTrust\cite{FLTrust}和Flame\cite{FLAME}。FedAVG根据每个节点数据集的大小对其上传的更新进行加权聚合；FLTrust利用一个干净的数据集，仅聚合那些上传更新与该干净数据集上训练所得更新余弦相似度较高的节点；而Flame则通过模型聚类和权重剪裁来估计并注入适量噪声，有效消除联邦学习中的后门攻击。
     
-    \item \textbf{联邦相关机制（聚合算法）}：我们采用了经典的联邦平均（Federated Averaging, FedAvg）算法作为聚合机制。FedAvg算法通过聚合每个客户端在本地计算的模型更新，来生成全局模型。
+    \item \textbf{评估指标}：
+    
+    % \item \textbf{联邦相关机制（聚合算法）}：我们采用了经典的联邦平均（Federated Averaging, FedAvg）算法作为聚合机制。FedAvg算法通过聚合每个客户端在本地计算的模型更新，来生成全局模型。
     
 \end{itemize}
 
-\subsubsection{参数取值表}
+\subsection{硬件设施}
 
-\[
-\begin{array}{|c|c|c|}
-\hline
-\text{参数} & \text{MNIST} & \text{CIFAR-10} \\
-\hline
-\text{学习率} & 0.01 & 0.01 \\
-\text{全局轮次} & 50 & 50 \\
-\text{本地批次} & 5 & 5 \\
-\text{客户端数量} & 20 & 20 \\
-\text{批次大小} & 64 & 64 \\
-\text{优化器} & \text{SGD} & \text{SGD} \\
-\text{模型} & \text{ViT} & \text{ViT} \\
-\hline
-\end{array}
-\]
+本实验在一台Windows操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU(24G)。
 
-TODO:写成竖排的
+\subsection{参数取值表}
+
+
+% \begin{table*}{|c|c|c|c|c|c|c|c|}
+% \hline
+% & \text{学习率} & \text{全局轮次} & \text{本地批次} & \text{客户端数量} & \text{批次大小} & \text{优化器} & \text{模型} \\
+% \hline
+% \text{MNIST} & 0.01 & 50 & 5 & 20 & 64 & \text{SGD} & \text{ViT} \\
+% \text{CIFAR-10} & 0.01 & 50 & 5 & 20 & 64 & \text{SGD} & \text{ViT} \\
+% \hline
+% \end{table}
+
+\begin{table*}[t]  % 使用 table* 环境，并选择 t 位置选项
+\small
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|}  % 使用 \textwidth
+\hline
+& 学习率 & 全局轮次 & 本地批次 & 客户端数量 & 批次大小 & 优化器 & 模型 \\
+\hline
+MNIST & 0.01 & 50 & 5 & 20 & 64 & SGD & ViT \\
+CIFAR-10 & 0.01 & 50 & 5 & 20 & 64 & SGD & ViT \\
+\hline
+\end{tabularx}
+\caption{参数取值表}
+\end{table*}
+
 
 为了衡量恶意客户端识别的准确性，算法的预测结果可以分为以下四类：
 
@@ -794,41 +831,100 @@ TODO:写成竖排的
 
 基于这些基础概念，以下是常用的分类指标及其计算公式和说明：
 
-\begin{table}[h!]
+\begin{table*}[h!]
 \small
 \centering
-\begin{tabularx}{0.5\textwidth}{|X|X|X|}
+\begin{tabularx}{\textwidth}{|l|X|X|X|}
 \hline
-\textbf{指标名称} & \textbf{计算公式} & \textbf{说明} \\ \hline
+\textbf{指标名称} & \textbf{计算公式} & \textbf{说明} & \textbf{优化方向} \\ \hline
+
+真阳性（True Positive, TP） & 
+--- & 
+实际为正例且预测为正例的样本数量。 & 越大越好。 \\ \hline
+
+真阴性（True Negative, TN） & 
+--- & 
+实际为负例且预测为负例的样本数量。 & 越大越好。 \\ \hline
+
+假阳性（False Positive, FP） & 
+--- & 
+实际为负例但预测为正例的样本数量。 & 越小越好。 \\ \hline
+
+假阴性（False Negative, FN） & 
+--- & 
+实际为正例但预测为负例的样本数量。 & 越小越好。 \\ \hline
+
 准确率（Accuracy） & 
 $\frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}$ & 
-模型预测正确的样本占总样本的比例，适用于类别平衡的数据集。准确率越大越好。 \\ \hline
+模型预测正确的样本占总样本的比例，适用于类别平衡的数据集。 & 越大越好。 \\ \hline
 
 精确率（Precision） & 
 $\frac{\text{TP}}{\text{TP} + \text{FP}}$ & 
-被预测为正例的样本中实际为正例的比例。精确率越大越好，特别是在关注减少误报的应用中。 \\ \hline
+被预测为正例的样本中实际为正例的比例，反映模型对正类结果的准确性。 & 越大越好，特别是在关注减少误报的应用中。 \\ \hline
 
 召回率（Recall） & 
 $\frac{\text{TP}}{\text{TP} + \text{FN}}$ & 
-实际正例中被正确预测为正例的比例。召回率越大越好，特别是在关注减少漏报的应用中。 \\ \hline
+实际正例中被正确预测为正例的比例，反映模型对正类样本的覆盖能力。 & 越大越好，特别是在关注减少漏报的应用中。 \\ \hline
 
 特异度（Specificity） & 
 $\frac{\text{TN}}{\text{TN} + \text{FP}}$ & 
-实际负例中被正确预测为负例的比例。特异度越大越好。 \\ \hline
+实际负例中被正确预测为负例的比例，反映模型对负类样本的识别能力。 & 越大越好。 \\ \hline
 
 误报率（False Positive Rate, FPR） & 
 $\frac{\text{FP}}{\text{FP} + \text{TN}}$ & 
-实际负例中被错误预测为正例的比例。误报率越小越好。 \\ \hline
+实际负例中被错误预测为正例的比例，衡量模型的误报情况。 & 越小越好。 \\ \hline
 
 假阴率（False Negative Rate, FNR） & 
 $\frac{\text{FN}}{\text{FN} + \text{TP}}$ & 
-实际正例中被错误预测为负例的比例。假阴率越小越好。 \\ \hline
+实际正例中被错误预测为负例的比例，衡量模型的漏报情况。 & 越小越好。 \\ \hline
+
+ROC（Receiver Operating Characteristic） & 
+--- & 
+反映分类模型在各种阈值下的性能，通过真阳率（召回率）和假阳率（FPR）之间的权衡来评估。ROC曲线越靠近左上角，模型性能越好。 & 越靠近左上角越好。 \\ \hline
+
+AUC（Area Under Curve） & 
+--- & 
+ROC曲线下的面积，取值范围为0.5到1，越接近1表示模型性能越好。 & 越接近1越好。 \\ \hline
+
+MCC（Matthews Correlation Coefficient） & 
+$\frac{(\text{TP} \times \text{TN}) - (\text{FP} \times \text{FN})}{\sqrt{(\text{TP} + \text{FP})(\text{TP} + \text{FN})(\text{TN} + \text{FP})(\text{TN} + \text{FN})}}$ & 
+MCC的值范围为-1到1，1表示完美分类，0表示随机猜测，-1表示完全错误的分类。 & 越接近1越好。 \\ \hline
 
 \end{tabularx}
-\caption{分类模型性能衡量指标}
-\end{table}
+\caption{分类模型性能衡量指标总结}
+\end{table*}
 
-TODO: 再多写几个
+% \begin{tabular}{|c|c|c|}
+% \hline
+% 攻击方式 & 防御方式 & 值 \\
+% \hline
+% \multirow{3}{*}{攻击1} & 防御1 &  \\ 
+%                        & 防御2 &  \\ 
+%                        & 防御3 &  \\ 
+% \hline
+% \multirow{3}{*}{攻击2} & 防御1 &  \\ 
+%                        & 防御2 &  \\ 
+%                        & 防御3 &  \\ 
+% \hline
+% \end{tabular}
+
+\begin{table*}[h!]
+\small
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{攻击方式} & \textbf{防御方式} & \textbf{FP} & \textbf{TP} & \textbf{FN} & \textbf{TN} & \textbf{准确率} & \textbf{精确率} & \textbf{召回率} & \textbf{特异度} & \textbf{误报率} & \textbf{假阴率} & \textbf{AUC} & \textbf{MCC} \\ \hline
+
+\multirow{3}{*}{攻击1} & 防御1 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \cline{2-14}
+                       & 防御2 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \cline{2-14}
+                       & 防御3 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \hline
+
+\multirow{3}{*}{攻击2} & 防御1 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \cline{2-14}
+                       & 防御2 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \cline{2-14}
+                       & 防御3 & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... & ... \\ \hline
+\end{tabular}
+\caption{不同攻击方式和防御方式下的分类指标结果}
+\end{table*}
 
 % \subsubsection{攻防相关}
 
