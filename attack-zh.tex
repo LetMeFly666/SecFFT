@@ -143,7 +143,7 @@
 \hline
 \textbf{Notation} & \textbf{Definition} \\ \hline
 % 联邦学习
-$ N $ & The number of the nodes participating during each round. \\ \hline
+$ N $ & The number of nodes participating during each round. \\ \hline
 % $\mathcal{M}$ & The number of the participants during each round. \\ \hline
 $D_i$ & The private local dataset of node $C_i$. \\ \hline
 
@@ -297,60 +297,7 @@ G_i^t = Trunc(DCT(Flatten(\frac{\triangledown \theta_i^t}{{\|\triangledown \thet
 
 \textbf{Overview}: 前面的防御已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$\max\{t-T+1, 1\}\leq  t'\leq t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\zeta$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
 
-\begin{algorithm}
-\caption{Malicious Node Detection and Gradient Aggregation}
-\label{alg:malicious-node-detection-history}
-\begin{algorithmic}[1]
-\State \textbf{Input:} Global model history $\{\theta_g^{t-T}, \dots, \theta_g^{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \dots, \triangledown \theta_{i}^{t-1}\}$, threshold $\varepsilon$
-\State \textbf{Output:} Sets of normal clients $U_{nor}$ and malicious clients $U_{mal}$
 
-\State \textbf{Step 1: Keep T-rounds History}
-\For {Client $i$}
-    \State Record flattened gradients $\bar{\theta_i^t} = Flatten(\triangledown \theta_{i}^t)$ and models $\theta_g^{t-1}$
-    \State Construct rays: $\widetilde{\theta_{i}^{t'-1}} = Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'} = \overline{\triangledown\theta_{i}^{t'}}$ for $t' = \max\{t-T+1, 1\}, \ldots, t$
-\EndFor
-
-\State \textbf{Step 2: Obtain the Purpose Intention}
-\For {Client $i$}
-    \State Initialize center $O_{i,0}$ and radius $r_{i,0}$
-    \While {Not Converged}
-        \State Update center $O_{i,k+1}$ and radius $r_{i,k+1}$
-    \EndWhile
-    \State Calculate confidence $cre_i = \frac{1}{r_i + \rho}$
-\EndFor
-
-\State \textbf{Step 3: Abnormal Detection}
-\For {Client $i$}
-    \For {Each point $O_j \neq O_i$}
-        \State Calculate distance $\|O_i - O_j\|$
-    \EndFor
-    \State Determine $q$-distance $\widetilde{dis_i^q}$ for $O_i$
-    \State Find neighbors $Nei_i$ within $\widetilde{dis_i^q}$
-    \State Compute reachability distance $rea_{i,j} = \max\{\widetilde{dis_i^q}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$
-    \State Calculate local reachability density $lrd_i = \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$
-\EndFor
-% \For {Client $i$}
-%     \State Compute $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
-%     \If {$lof_i > 1$}
-%         \State Mark client $i$ as malicious, add to $U_{mal}$
-%     \Else
-%         \State Mark client $i$ as normal, add to $U_{nor}$
-%     \EndIf
-% \EndFor
-\State Calculate $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$ for each client $i$
-% \State $U_{mal} = \{i \,|\, lof_i > 1\}$
-% \State $U_{nor} = \{i \,|\, lof_i \leq 1\}$
-\State $U_{mal}, U_{nor} = \{i \,|\, lof_i > 1\}, \{i \,|\, lof_i \leq 1\}$
-
-\State \textbf{Step 4: Gradients Aggregation}
-\For {Client $i\in U_{nor}$}
-        \State Compute adjusted confidence $cre_i' = \tanh(cre_i)$
-        \State Normalize weights $w_i = \frac{cre_i'}{\sum_{i \in U_{nor}} cre_i'}$
-\EndFor
-
-\State \textbf{Output:} Aggregated global model update $\theta_g^t = \theta_g^{t-1} + \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i^t$
-\end{algorithmic}
-\end{algorithm}
 
 % 算法\ref{alg:malicious-node-detection-history}展示了根据每个客户端历史记录进行识别的识别过程，主要包含4个步骤：
 本部分主要包含4个步骤：
@@ -421,12 +368,6 @@ r_{i,0} = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_{i,0} - \widetilde{\theta_{g}^{t'-
     则最近点 \( \tilde O_{i,k}^{t'} =\widetilde{\theta_{i}^{t'-1}}+\max \left\{ 0, \alpha_k\right\} {v}_{i}^{t'} \)。
     
     计算当前球心 \( O_{i,k} \) 到这些最近点 \( \tilde O_{i,k}^{t'} \) 的距离集合 \( Dis_{i,k}= \{ \| O_{i,k}-\tilde O_{i,k}^{t'} \|, \max\{t-T+1, 1\}\leq  t'\leq t\} \)，并按从小到大的顺序进行排序，然后暂时舍弃$1-\zeta$比例的射线来忽略离群点对计算过程的影响，得到集合${Dis}_{i,k}'$，保留射线对应轮次的集合记为$\tilde T$。将球心向着被保留的最近点中距离最远的点$\tilde{O}_{i,k}^{t_{max}'}$移动：
-    % ，$ {Dis}_{i,k}'=\text{Sort}(Dis_{i,k})$。
-        % 并计算这些投影点的最大距离 \( D_k \)：
-
-        % \begin{equation}
-        % D_k = \max_{1\leq j\leq \lceil n\times \varepsilon\rceil} \|O_k - Q_{i}^{t-j}\|.
-        % \end{equation}
 
     \begin{equation}
     O_{i,k+1} = O_{i,k} + \eta' (\tilde{O}_{i,k}^{t_{max}'}-O_{i,k}),
@@ -438,7 +379,6 @@ r_{i,0} = \max_{t'=\max\{t-T+1, 1\}}^{t}  \|O_{i,0} - \widetilde{\theta_{g}^{t'-
         r_{i,k+1} =  \{ \max\{\| O_{i,k+1}-\tilde O_{i,k+1}^{t'} \|\}, t'\in \tilde T\} ,
         \end{equation}
 
-    % 其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。终止条件：当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。这部分可以定义为一个有约束的最优化问题：
     其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。
 
 % \begin{equation} 
@@ -588,12 +528,12 @@ $\rho$是一个很小的正数，以防分母为$0$。
     \theta_g^t = \theta_g^{t-1}+\sum_{i=1}^{N}w_i\triangledown \theta_i^t,
 \end{equation}
 
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=\linewidth]{results/prob-history-Visualization of Client Intentions and Anomalies.png}
-    \centering \caption{使用模拟数据得到的结果}
-    \label{fig:result-of-histry}
-\end{figure}
+% \begin{figure}[!t]
+%     \centering
+%     \includegraphics[width=\linewidth]{results/prob-history-Visualization of Client Intentions and Anomalies.png}
+%     \centering \caption{使用模拟数据得到的结果}
+%     \label{fig:result-of-histry}
+% \end{figure}
 
 % 在上一步已经剔除了恶意客户端后，本部分将使用主观逻辑模型（Subjective Logic Model）进行剩余客户端的梯度聚合。主观逻辑模型是一种基于概率论和信任度的数学框架，能够有效地处理不确定性和不一致性信息。在联邦学习场景中，主观逻辑模型可以用于在不完全信任的环境下对客户端上传的梯度进行加权聚合，从而提高全局模型的稳健性。其主要流程如算法25-29行所示。
 
@@ -768,16 +708,16 @@ $\rho$是一个很小的正数，以防分母为$0$。
 
 \section{EXPERIMENTAL EVALUATION}
 
-This section presents a thorough evaluation of SecFFT on two benchmark datasets, aiming to illustrate its effectiveness.
+This section presents a thorough evaluation of SecFFT on two benchmark datasets, aiming to illustrate its effectiveness. 本实验在一台Windows操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU(24G)。
 
 \subsection{Experimental Setup}
 
 在本实验中，我们采用了常用的联邦学习场景进行评估。具体设置如下：
 
 \begin{itemize}
-    \item \textbf{数据集}：我们使用FMNIST\cite{minist}和CIFAR-10\cite{cifar10}数据集作为实验数据集。FMNIST数据集包含60,000张28x28像素的灰度时尚商品图像，共分为10个类别，其中50,000张为训练集，10,000张为测试集。CIFAR-10数据集包含60,000张32x32像素的彩色图像，也分为10个类别，其中50,000张为训练集，10,000张为测试集。
+    \item \textbf{数据集}：我们使用FMNIST\cite{minist}作为实验数据集。FMNIST数据集包含60,000张28x28像素的灰度时尚商品图像，共分为10个类别，其中50,000张为训练集，10,000张为测试集。
     
-    \item \textbf{微调模型}：我们采用CLIP的CLIP-ViT-B/32\cite{huggingface_clip}模型作为微调所使用的预训练模型。CLIP是一种通过对比学习在文本和图像数据上进行预训练的模型，能将自然语言和视觉信息映射到同一特征空间中。CLIP-ViT-B/32基于ViT\cite{vit}架构，包含12层Transformer编码器，隐藏层维度为768，多头注意力头数为12，使用32x32的图像块作为输入。在微调过程中，我们使用LORA\cite{lora}方案仅在Vision Encoder部分插入低秩矩阵，保持Textual Encoder不变。我们设定低秩矩阵的秩为16，学习率为$10^{-3}$，以在有限计算资源下高效微调模型，使其更好地适应特定任务的数据分布。
+    \item \textbf{微调模型}：我们采用CLIP的CLIP-ViT-B/32\cite{huggingface_clip}模型作为微调所使用的预训练模型。CLIP是一种通过对比学习在文本和图像数据上进行预训练的模型，能将自然语言和视觉信息映射到同一特征空间中。CLIP-ViT-B/32基于ViT\cite{vit}架构，包含12层Transformer编码器，隐藏层维度为768，多头注意力头数为12，使用32x32的图像块作为输入。在微调过程中，我们使用LORA\cite{lora}方案仅在Vision Encoder模块插入低秩矩阵，保持Textual Encoder模块不变。我们设定低秩矩阵的秩为16，学习率为$10^{-4}$，以在有限计算资源下高效微调模型，使其更好地适应特定任务的数据分布。
 
     \item \textbf{攻击假设}：对于单轮恶意用户检测，我们使用包括MR\cite{MR}、EDGE CASE\cite{EDGE_CASE}、以及NEUR\cite{zhang2022neurotoxin}在内的三种针对联邦学习场景的最新攻击。MR攻击通过将中毒图像与正常图像混合来创建恶意数据集，并使用投影梯度下降法进行本地训练来达到植入后门的效果；EDGE CASE攻击利用罕见的“边缘情况”样本，通过数据或模型投毒在联邦学习模型中插入后门；Neurotoxin攻击则尝试通过识别在正常节点训练中不常更新的参数，并利用这些参数插入后门，以提高后门的持久性。
 
@@ -785,13 +725,8 @@ This section presents a thorough evaluation of SecFFT on two benchmark datasets,
     
     \item \textbf{评估指标}：
     
-    % \item \textbf{联邦相关机制（聚合算法）}：我们采用了经典的联邦平均（Federated Averaging, FedAvg）算法作为聚合机制。FedAvg算法通过聚合每个客户端在本地计算的模型更新，来生成全局模型。
-    
 \end{itemize}
 
-\subsection{硬件设施}
-
-本实验在一台Windows操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU(24G)。
 
 \subsection{参数取值表}
 
@@ -925,7 +860,7 @@ MCC的值范围为-1到1，1表示完美分类，0表示随机猜测，-1表示�
 \end{tabular}
 \caption{不同攻击方式和防御方式下的分类指标结果}
 \end{table*}
-
+ 
 % \subsubsection{攻防相关}
 
 % \onecolumn

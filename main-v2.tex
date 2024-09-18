@@ -9,6 +9,7 @@
 \usepackage{url}
 \usepackage{verbatim}
 \usepackage{graphicx}
+% \usepackage{tabularx}
 \usepackage{cite}
 \hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
 % updated with editorial comments 8/9/2021
@@ -38,6 +39,8 @@
 \usepackage{cite}
 \usepackage[]{chapterbib}
 \usepackage{enumerate}
+\usepackage{threeparttable}
+
 
 \usepackage[dvipsnames, svgnames, x11names]{xcolor}
 \usepackage{algorithm,algpseudocode,float}
@@ -50,13 +53,13 @@
 \title{SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Covert Backdoor Attacks in IoRT Networks}
  
 \author{Zan Zhou, %~\IEEEmembership{Student Member,~IEEE}, 
- Bo Wang, Tengfei Li, Shujie Yang, Changqiao Xu, Su Yao, 
+  Changqiao Xu, Bo Wang, Tengfei Li, Sizhe Huang, Shujie Yang$^{\ast}$\thanks{*Corresponding authors}, Su Yao$^{\ast}$
 % <-this % stops a space
-\thanks{Z. Zhou, H. Li, S. Huang, S. Yang, P. Guo, and C. Xu are with the State Key Laboratory of Networking and Switching Technology, Beijing University of Posts and Telecommunications, Beijing 100876, P.R. China. E-mail: \{zan.zhou, lihongjing, swhsz, sjyang, guopeng, cqxu\}@bupt.edu.cn. 
+\thanks{Z. Zhou, B. Wang, T. Li, S. Huang, C. Xu, and S. Yang are with the State Key Laboratory of Networking and Switching Technology, Beijing University of Posts and Telecommunications, Beijing 100876, P.R. China. E-mail: \{zan.zhou, cqxu, bowang, tf, swhsz, sjyang\}@bupt.edu.cn. 
 	}  % <-this % stops a space
 %\thanks{Y. Zhuang is with the Research Institute of China Telecom, Ave Zhongshan, Guangzhou 510630, China. E-mail: 13316094433@chinatelecom.cn.}% <-this % stops a space
 % \thanks{L. Zhong is with the Information Engineering College, Capital Normal University, Beijing 100048, China. E-mail: zhonglj@cnu.edu.cn (Corresponding author).}% <-this % stops a space
-\thanks{Su Yao is with Tsinghua University, China. E-mail: XXXX@xxx.}% <-this % stops a space
+\thanks{Su Yao is with the Beijing National Research Center for Information Science and Technology (BNRist), Tsinghua University, Beijing 100190, China. E-mail: yaosu@tsinghua.edu.cn}% <-this % stops a space
 %\thanks{This paper was produced by the IEEE Publication Technology Group. They are in Piscataway, NJ.}% <-this % stops a space
 %\thanks{Manuscript received April 19, 2021; revised August 16, 2021.}
 }
@@ -72,16 +75,15 @@
 \maketitle
 
 \begin{abstract}
-%攻击者
+%随着大模型与具身智能机器人网络的迅速发展，以及在智慧城市、电网、工厂、交通运输等领域的应用，视觉感知理解成为了突破具身智能节点性能瓶颈的基础性要素之一。而由于通用的预训练模型并不能很好应对特定任务，联邦微调技术由于其能够最大限度利用离散节点数据、算力的优势，成为了提升视觉感知模型能力的热带技术。然而，随着多种针对性高级持续性威胁的涌现，现有的污染防治方案，并不能有效应对这一新场景下的隐蔽后门攻击。本文因此提出SecFFT方法，其核心在于针对攻击隐蔽性高与攻击策略复杂的问题，分别设计了基于频域分布一致性提取的瞬时攻击行为识别，和基于隐藏攻击意图检测的长效安全聚合机制。从最终目的出发，有效限缩了智能化攻击者通过隐藏自身行为来绕过防御方案的可行域。在公共数据集上的实验表明，我们所提出的方法能够显著提升面对后门攻击时的防御成功率、模型性能和识别精度，尤其是面对具有多轮次复杂策略的高隐蔽后门范式。
+As the large vision language models and embodied intelligent robotic networks continue to advance at a remarkable pace, particularly in applications spanning smart cities, power grids, factories, and transportation, visual perception and understanding have emerged as foundational elements to overcoming performance limitations in such intelligent systems. However, since general pre-trained models are not well-suited to specific tasks, federated fine-tuning (FFT) has gained attention as a promising technique for enhancing the performance of vision-based perception models by leveraging data and computational power distributed across nodes. The rise of advanced persistent threats has revealed significant vulnerabilities in existing defense mechanisms, which struggle to mitigate sophisticated backdoor attacks toward FFT for LVLMs. To address these challenges, this paper proposes the SecFFT method, which tackles both the stealthiness and complexity of backdoor strategies. The approach incorporates instantaneous attack behavior detection based on frequency-domain distribution consistency and introduces a long-term secure aggregation mechanism aimed at identifying hidden attack intentions. These strategies effectively limit the feasibility of adversaries attempting to bypass defense measures by concealing their behaviors. Experiments conducted on public datasets demonstrate that SecFFT significantly improves defense success rates, model performance, and detection accuracy, particularly in response to highly covert, multi-round backdoor attacks.
 
 
-
-Fairness-aware federated learning (FFL) plays a crucial role in miti
 
 \end{abstract}
 
 \begin{IEEEkeywords}
-Federated learning, fairness, privacy, integrity, heterogeneous UAV network.
+Vision Language Model, Federated learning, Fine-tuning, Security, Backdoor, Internet of Robotic Things.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -90,24 +92,32 @@ Federated learning, fairness, privacy, integrity, heterogeneous UAV network.
 %作为的一种，
 
 %随着具身智能技术的迅猛进步和在智慧城市、智能交通、无人机等领域的广泛应用，机器人节点从执行等单一任务的agent，逐步向集合了感知交互和自主决策的智能体进行了演进，这也成为了未来IORT网络的重要发展趋势之一。而视觉大模型作为一种新兴热门的图像感知和物体识别技术，能够成为支撑智能机器人对周围环境进行认识和理解不可或缺的基础。
-With the rapid advancements in embodied intelligence technology and its widespread application in multiple areas such as smart cities, intelligent transportation, and unmanned aerial vehicles, robotic nodes have evolved from agents performing singular tasks to intelligent entities that integrate perception, interaction, and autonomous decision-making jointly. This evolution has become one of the critical developmental trends for Internet of Robotic Things (IoRT) networks. Meanwhile, the Large Vision Language Model (LVLM), as an emerging and popular image perception and object recognition technology, has the potential to be an indispensable foundation supporting intelligent robots in understanding and interpreting their surrounding environments. 
+With the rapid advancements of embodied intelligence technology and its widespread application in multiple areas such as smart cities, intelligent transportation, and unmanned aerial vehicles, robotic nodes have evolved from agents performing singular tasks to intelligent entities that integrate perception, interaction, and autonomous decision-making. This evolution has become one of the critical developmental trends for Internet of Robotic Things (IoRT) networks\cite{andronie2023big}. Meanwhile, the Large Vision Language Model (LVLM)\cite{liu2024survey}, as an emerging and popular image perception and object recognition technology, has the potential to support intelligent robots in understanding and interpreting their surrounding environments. 
 
 %视觉大模型极大地增强了机器人的视觉语义理解能力，使其能够对多模态任务进行更加智能化的决策响应，然而在真实应用环境中，仍存在以下问题：1）由于真实世界的多样性和异构性，通用大模型在特定任务上往往无法较好迁移通用知识，需要进行微调才能显著提升识别精度（例如，针对动目标检测任务，交通机器人主要针对车辆、行人，而工厂机器人则主要针对机床，两者轮廓、行为模式范围均存在较大差异）；2）此外，将来自不同源头的离散化、碎片化分布的海量数据进行传输并汇聚于主服务器，将会导致巨大的通信开销和时间延迟，无法满足具身智能业务的需求，且存在潜在的隐私风险。
-Although LVLMs significantly enhance the visual semantic understanding capabilities of robots, enabling them to make more intelligent decisions in multi-modal tasks, there are still challenges in real-world applications: 1) Due to the diversity and heterogeneity of the real world, general foundation models often cannot effectively transfer their general knowledge to specific tasks, necessitating fine-tuning to significantly improve recognition accuracy (for example, traffic robots primarily focus on vehicles and pedestrians for moving object detection tasks, while factory robots mainly target machine tools, with significant differences in their contours and behavioral patterns); 2) Additionally, transmitting and aggregating massive amounts of discretized and fragmented data from different sources to a central server can result in significant communication overhead and latency, failing to meet the demands of embodied intelligence applications and posing potential privacy risks. 
+Although LVLMs significantly enhance the visual semantic understanding capabilities of robots, enabling them to make more intelligent decisions in multi-modal tasks, there are still challenges in real-world applications: (1) Due to the diversity and heterogeneity of the real world\cite{dai2023tackling}, general foundation models often cannot effectively transfer their general knowledge to specific tasks, necessitating fine-tuning\cite{fu2023effectiveness} to significantly improve recognition accuracy (for example, traffic robots primarily focus on vehicles and pedestrians for moving object detection tasks, while factory robots mainly target machine tools, with significant differences in their contours and behavioral patterns); (2) Additionally, transmitting and aggregating massive amounts of discretized and fragmented data from different sources to a central server can result in significant communication overhead and latency\cite{zhao2023towards}, failing to meet the demands of embodied intelligence applications and posing potential privacy risks\cite{wen2023survey, khan2023federated}. 
 
 %因此，如图1所示，在pretrained的通用视觉大模型的基础上，不同于核心节点汇聚所有数据而后训练垂域模型的集中式微调，通过联邦微调技术，驱使大量机器人节点利用私有数据和算力计算微调梯度而后聚合，能够在不交互原始数据的前提下，充分利用整个IORT网络中各个节点的知识和算力资源，成为了一种非常具有前景的解决方案。
 As illustrated in Figure \ref{fig1:scene}, a promising solution is to employ federated fine-tuning (FFT) technology rather than adopting a centralized fine-tuning approach where core nodes aggregate all data before training domain-specific models. This approach drives numerous robotic nodes to compute fine-tuning gradients using private data and computational resources and then aggregate these gradients, effectively leveraging the knowledge and computational resources of each node in the IoRT network without exchanging raw data.
 
-%不幸的是，FFT的分布式特性为多种后门攻击提供了存续的空间。尽管多种防御手段相继提出，但是尽我们所知，目前尚未有针对LVM的FFT过程进行污染防治的后门对抗技术提出。现有技术大多是针对普通联邦学习场景或集中式的VLM训练进行设计，这暴露出两大核心问题：（1）高隐蔽的攻击行为感知困难：攻击者在设计攻击行为时，(2)复杂攻击策略的检测困难：
+%不幸的是，FFT的分布式特性为多种后门攻击提供了存续的空间。尽管多种防御手段相继提出，但是尽我们所知，目前尚未有针对LVM的FFT过程进行污染防治的后门对抗技术提出。现有技术大多是针对普通联邦学习场景或集中式的VLM训练进行设计，这暴露出两大核心问题：（1）高隐蔽的攻击行为感知困难：攻击者在设计攻击行为时，尽量在行为特征上拟合正常用户，perception的区分度越来越narrow；(2)复杂攻击策略的检测困难：为了规避防御，攻击者可能采用限制角度、大小、符号等方式，将原有单次攻击转化为多轮次长时间尺度的持续性威胁，攻击识别更加困难。
+Unfortunately, the distributed nature of FFT provides a persistent space for various backdoor attacks. While several defense strategies have been proposed, to the best of our knowledge, no countermeasures specifically address backdoor attacks in the FFT process for LLVMs. Most existing techniques are designed for conventional federated learning scenarios or centralized VLM training, exposing two critical issues: (1) \textbf{The high stealthy nature of attack behavior:} Attackers increasingly design their actions to mimic normal users, narrowing the perception’s distinguishing capability\cite{xu2024shadowcast, zhang2024a3fl}; and (2) \textbf{The complexity of detecting sophisticated attack strategies:} To evade defenses, attackers may employ techniques such as limiting angle, magnitude, or sign, transforming a single attack into a multi-round, long-term threat, further complicating attack detection\cite{geisler2024attacking, chen2024optimal, sagliano2024powered, dong2023adaptive,wan2023average}.
 
-
-% 因此，在本文中，我们提出了一种
+% 因此，在本文中，我们针对LVLM的FFT过程，提出了一种新型的抗backdoor防御方案。针对攻击行为感知难题，我们创新地从频域分布一致性入手，将隐性的梯度更新分布差异而非显性的更新离群性作为新的鉴别角度，从而实现对高隐蔽攻击的感知；在此基础上，进一步针对智能化攻击者可能采取的复杂多轮次策略，我们创新地提出了基于意图识别的长效评估架构，有效分离高级持续性威胁，并据此设计安全聚合方法。
 % 主要包括以下几方面贡献：
-% 我们首先提出了针对进行防御
-% 针对意图
-% 防御策略
+Therefore, in this paper, we propose a novel backdoor defense scheme tailored for the FFT process of LVLMs. To address the challenge of detecting attack behaviors, we introduce a groundbreaking approach based on consistency in frequency domain distributions. Rather than focusing on explicit gradient outliers, we leverage the implicit differences in gradient update distributions as a new identification criterion, enabling the detection of highly covert attacks. Building on this, we further address the issue of complex multi-round strategies employed by intelligent attackers by proposing an innovative long-term evaluation framework based on intent recognition. This framework effectively isolates advanced persistent threats and informs the design of a secure aggregation method.
 
-The remainder of this paper is organized as follows: Section \uppercase\expandafter{\romannumeral2} reviews the related works. Section \uppercase\expandafter{\romannumeral3} and \uppercase\expandafter{\romannumeral4} present the system and threat models, respectively. Section \uppercase\expandafter{\romannumeral6} elaborates on the design philosophy of the proposed SecFFT solution, providing comprehensive details on the availability, security, and integrity of FFT in IoRT networks. Section \uppercase\expandafter{\romannumeral7} presents the experimental results. Finally, Section \uppercase\expandafter{\romannumeral8} concludes this paper and briefly explores future directions.
+The main contributions of this scheme include:
+\begin{enumerate}
+    \item Based on an in-depth analysis of emerging covert backdoor attacks, we first define two core challenges: detecting highly covert attack behaviors and identifying complex attack strategies. We then provide a case study of these issues within the FFT process of large vision models. To the best of our knowledge, this is the first framework capable of recognizing deep-level attack intentions during the fine-tuning process in IoRT networks, effectively defending against covert attacks.
+    \item In response to the potential threat of intelligent attackers fragmenting their behaviors to evade detection, we propose an innovative method for constructing attack intentions based on historical behavior sequences. By building an approximate minimal covering hypersphere from these behaviors, the malicious intent hidden behind seemingly disordered, benign actions is fully exposed. 
+    \item SecFFT also adopts a novel nonlinear defense strategy, dynamically adjusting aggregation weights using local outlier factors while ensuring fairness for benign nodes and effectively eliminating malicious ones. A series of experiments on public datasets demonstrate that our approach significantly improves model integrity, effectively suppresses covert backdoor attacks, and maintains a low false positive rate.
+\end{enumerate}
+% 基于对现有新型隐蔽后门攻击的分析，我们首先定义了高隐蔽攻击行为感知和复杂攻击策略识别这两大核心问题，并基于视觉大模型的FFT过程进行实例分析。据我们所知，这是首个在IORT网络中能够实现对微调过程中深层次攻击目的识别，从而抵御高隐蔽攻击的方案。
+% 针对智能攻击者可能将攻击行为切片化拆解从而规避防御检测的潜在威胁，我们创新地设计了基于历史行为序列进行攻击意图构建的方法。通过构建历史行为的近似最小覆盖超球，将智能攻击者隐藏在看似杂乱无序、良性无害的攻击行为背后的恶意意图充分暴露。
+% 基于意图识别架构，SecFFT能够设计一种非线性的新型防御策略，利用局部离群因子动态调整聚合权重，同时保障良性用户公平性和恶意用户的消除。公有数据集上的系列实验表明，我们的方法能够显著提升模型完整性，有效遏制隐蔽后门攻击，并同时保证极低的误判率。
+
+The remainder of this paper is organized as follows: Section \uppercase\expandafter{\romannumeral2} reviews related works. Section \uppercase\expandafter{\romannumeral3} and \uppercase\expandafter{\romannumeral4} present the system and threat models, respectively. Section \uppercase\expandafter{\romannumeral6} elaborates on the design philosophy of the proposed SecFFT solution, providing comprehensive details on the availability, security, and integrity of FFT in IoRT networks. Section \uppercase\expandafter{\romannumeral7} presents the experimental results. Finally, Section \uppercase\expandafter{\romannumeral8} concludes this paper and briefly explores future directions.
 
 %攻击识别
 % Alongside the conti
@@ -121,6 +131,7 @@ The remainder of this paper is organized as follows: Section \uppercase\expandaf
     \includegraphics[width=\linewidth]{figures/SecFFT-scenario.pdf}
     \caption{FFT process for large vision language models in IoRT network}
     \label{fig1:scene}
+    %\vspace{-0.7cm}
 \end{figure}
 
 \section{Related Works}
@@ -129,28 +140,28 @@ The remainder of this paper is organized as follows: Section \uppercase\expandaf
 Backdoor attacks pose a significant security threat to deep learning models, aiming to induce improper behavior in the target model by adding specific perturbations to the input, such as misclassification in image classifiers. We classify existing backdoor attacks on models into two types: spatially covert backdoor attacks and temporally covert backdoor attacks.
 
 % 空间隐蔽性后门攻击是指攻击者通过微调模型参数、修改输入特征或操纵模型训练过程等方式，使得现有防御方法无法在特征空间中有效区分恶意攻击者与良性参与者，从而有效逃避检测。EDGE CASE\cite{EDGE_CASE}提出了一种针对联邦学习的边缘案例后门攻击方法，通过在训练和测试数据集中通常不存在但自然存在的输入数据点（即边缘样本）来注入后门。Shadowcast\cite{xu2024shadowcast}通过在特征空间中引入微小、不可察觉的扰动，操纵视觉语言模型（VLMs）在特定视觉输入下生成误导性的文本输出。Flip\cite{jha2023label}通过修改训练数据的标签，使得模型训练轨迹接近于带有后门的专家模型，从而在特征空间中达到隐蔽攻击的效果，即使在图像干净的情况下也能逃避现有检测方法。
-\textbf{Spatially Covert Backdoor Attacks} refer to attacks where adversaries fine-tune model parameters, modify input features, or manipulate the model training process in a way that existing defense cannot effectively distinguish between malicious attackers and benign participants in the feature space, thereby evading detection. EDGE CASE\cite{EDGE_CASE} proposes an edge-case backdoor attack method for federated learning by injecting backdoors using input data points that are naturally occurring but typically absent in both training and testing datasets (i.e., edge-case samples). Shadowcast \cite{xu2024shadowcast} manipulates vision-language models (VLMs) to produce misleading textual outputs for specific visual inputs by introducing subtle, imperceptible perturbations in the feature space. Flip \cite{jha2023label} modifies the labels of training data so that the model's training trajectory approximates that of an expert model with a backdoor, achieving covert attacks in the feature space that can evade existing detection methods even when the images are clean.
+\textbf{Spatially Covert Backdoor Attacks} refer to attacks where adversaries fine-tune model parameters, modify input features, or manipulate the model training process in a way that existing defense cannot effectively distinguish between malicious attackers and benign participants in the feature space, thereby evading detection. EDGE CASE\cite{EDGE_CASE} proposes an edge-case backdoor attack method for federated learning by injecting backdoors using input data points that are naturally occurring but typically absent in both training and testing datasets (i.e., edge-case samples). Shadowcast \cite{xu2024shadowcast} manipulates VLMs to produce misleading textual outputs for specific visual inputs by introducing subtle, imperceptible perturbations in the feature space. Flip \cite{jha2023label} modifies the labels of training data so that the model's training trajectory approximates that of an expert model with a backdoor. This hidden process completes covert attacks in the feature space, thus evading existing detection methods even when the images are clean.
 
 % 时间隐蔽性后门攻击是指攻击者通过调整模型训练过程或优化后门植入等方式，使后门在恶意攻击者结束攻击后仍能长期存在，不被后续良性更新所覆盖，从而持续影响模型行为。 Neurotoxin\cite{zhang2022neurotoxin}提出了一种针对联邦学习的更持久的后门攻击方法，通过攻击在训练过程中变化较小的模型参数来增加后门的耐久性，避免与良性用户梯度的冲突，使其不易在后续的模型更新中被清除。ImgTrojan\cite{tao2024imgtrojan}通过在视觉语言模型的训练数据中注入少量恶意样本，使得这些后门即使在模型后续的良性训练中仍能保持有效，从而持续影响模型的行为。\cite{gu2023gradient}提出了一种新的更新控制方法，通过跨层更新幅度归一化和层内更新方向投影，解决了参数高效调优（PET）过程中后门攻击的遗忘问题，从而维持攻击的持久性和隐蔽性。A3FL\cite{zhang2024a3fl}通过对抗性适应损失函数来优化触发器的方式，使得后门能够在全局训练动态中持久存在，从而在联邦学习模型中实现高效且持久的攻击效果。
 % Chameleon \cite{dai2023chameleon} focuses on enhancing the spatial covert nature of backdoor attacks by adjusting the relationships between poisoned samples, interference samples, and promoting samples in contrastive learning.
-\textbf{Temporally Covert Backdoor Attacks} involve adjusting the model training process or optimizing backdoor implantation such that the backdoor persists even after the malicious attacker has stopped the attack, remaining undetected by subsequent benign updates, and continuing to affect the model’s behavior. NEUR\cite{zhang2022neurotoxin} proposes a more persistent backdoor attack method for federated learning by targeting model parameters that change less during training. This approach increases the durability of the backdoor, avoids conflicts with the gradients of benign users, and makes it less likely to be removed in subsequent model updates. ImgTrojan \cite{tao2024imgtrojan} injects a small number of malicious samples into the training data of vision-language models, ensuring that these backdoors remain effective even after subsequent benign training, thereby continuously affecting the model's behavior. \cite{gu2023gradient} proposes a novel update control method that normalizes cross-layer update magnitudes and projects intra-layer update directions to address the issue of backdoor forgetting during parameter-efficient tuning (PET), thus maintaining the persistence and concealment of the attack. A3FL \cite{zhang2024a3fl} optimizes the trigger by using an adversarial adaptation loss function, enabling the backdoor to persist throughout global training dynamics, thereby achieving efficient and persistent attack effects.
+\textbf{Temporally Covert Backdoor Attacks} involve adjusting the model training process or optimizing backdoor implantation such that the backdoor persists even after the malicious attacker has stopped the attack, remaining undetected by subsequent benign updates, and continuing to affect the model’s behavior. NEUR\cite{zhang2022neurotoxin} proposes a more persistent backdoor attack method for federated learning by targeting model parameters that change less during training. This approach increases the durability of the backdoor, avoids conflicts with the gradients of benign nodes, and makes it less likely to be removed in subsequent model updates. ImgTrojan \cite{tao2024imgtrojan} injects a small number of malicious samples into the training data of vision-language models, ensuring that these backdoors remain effective even after subsequent benign training, thereby continuously affecting the model's behavior. \cite{gu2023gradient} proposes a novel update control method that normalizes cross-layer update magnitudes and projects intra-layer update directions to address the issue of backdoor forgetting during parameter-efficient tuning (PET), thus maintaining the persistence and concealment of the attack. A3FL \cite{zhang2024a3fl} optimizes the trigger by using an adversarial adaptation loss function, enabling the backdoor to persist throughout global training dynamics, thereby achieving efficient and persistent attack effects.
 % 总之，现有的后门攻击策略在空间隐蔽性和时间隐蔽性方面都有了显著的进展。空间隐蔽性后门攻击通过优化特征空间中的触发器或更新，使得恶意行为难以被现有的检测方法发现，从而实现了更高效、更难以检测的攻击。而时间隐蔽性后门攻击则专注于提高后门的持久性，使得即使在恶意攻击结束后，这些后门依然能够在模型中长期存在并继续影响其行为。通过这些攻击方式的结合，攻击者能够在各种应用场景中有效地躲避检测，并确保攻击效果的持续性，这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
 
 %总的来看，现有的后门攻击方法已展现出显著的隐蔽性和持久性，能够有效规避当前的检测机制。这些攻击不仅在特征空间中巧妙隐藏恶意意图，还能在长期训练过程中保持攻击效果，对模型行为产生持续而深远的影响，也对模型安全构成了严峻挑战。这对现有的防御机制提出了更高的挑战，强调了未来在开发更加鲁棒的防御方法方面的迫切需求。
-Overall, existing backdoor attack methods have demonstrated significant advances in both spatial and temporal concealment, effectively circumventing current detection mechanisms. These attacks not only cleverly hide malicious intent in the feature space but also maintain their effects throughout long-term training, posing a sustained and profound impact on model behavior, thus presenting a severe challenge to model security. This underscores the need for future research to focus on developing more robust defense methods.
+Overall, existing backdoor attack methods have demonstrated significant advances in both spatial and temporal concealment, effectively circumventing current detection mechanisms. These attacks not only cleverly hide malicious intent in the feature space but also maintain their effects throughout long-term training, posing a sustained and profound impact on model behavior, thus presenting a severe challenge to model security. This underscores the need for developing more robust defense methods.
 
 \subsection{Backdoor countermeasures}
 %在当前深度学习模型的安全性研究中，针对后门攻击的防御措施主要可以分为两大类：后门检测和后门缓解。% Backdoor Mitigation or Elimination
-In the current research on the defense technologies, defense measures against backdoor attacks can be also broadly categorized into two major types: %backdoor detection and backdoor mitigation.
+In current research on defense technologies, defense measures against backdoor attacks can be also broadly categorized into two major types: %backdoor detection and backdoor mitigation.
 
 % 后门检测主要旨在识别模型中已存在的后门攻击。在这一类中，SEER\cite{zhu2024seer}提出了一种用于视觉-语言模型的后门检测算法，通过在图像和文本模态的特征空间中联合搜索目标文本和图像触发器，成功实现了在多种场景下的后门检测。FoolsGold\cite{foolsgold}提出了一种通过检测各客户端更新的相似性来识别攻击者方法，该方法利用攻击者的更新通常更为相似这一特征自适应调整每个客户端的学习率，从而减少攻击者对模型训练的影响，有效防御投毒攻击，即使在存在大量恶意客户端的情况下也能显著降低攻击成功率。ASSET\cite{pan2023asset}提出了一种通过主动诱导后门样本和干净样本在模型行为上的差异，从而实现跨多种深度学习范式的鲁棒后门数据检测方法，并在端到端监督学习、自监督学习和迁移学习中表现出色。DECREE\cite{feng2023detecting}提出了一种用于检测自监督学习中预训练图像编码器后门的创新方法，该方法无需依赖标签数据或下游分类器，且在多种数据集和攻击类型下表现出极高的检测准确率。
 \textbf{Backdoor Detection} primarily aims to identify existing backdoor attackers. In this category, FoolsGold\cite{foolsgold} proposes a method to identify attackers by detecting the similarity of updates from each client. This method adaptively adjusts the learning rate of each nodes based on the observation that the updates from attackers are usually more similar. It effectively defends against poisoning attacks and significantly lowers the attack success rate even with a large number of malicious nodes. ASSET \cite{pan2023asset} introduces a robust backdoor data detection method across multiple deep learning paradigms by actively inducing behavioral differences between backdoor and clean samples, demonstrating excellent performance in end-to-end supervised learning, self-supervised learning, and transfer learning. DECREE \cite{feng2023detecting} presents an innovative method for detecting backdoors in pre-trained image encoders used in self-supervised learning, achieving high detection accuracy across various datasets and attack types without relying on label data or downstream classifiers.
 
 % 后门缓解则侧重于通过各种技术手段来消除或减轻后门攻击的影响。FLAME\cite{FLAME}提出了一种防御联邦学习中后门攻击的方法，通过动态聚类和权重剪裁来识别并移除可能的恶意模型更新，同时注入差分隐私噪声以有效消除后门的影响，从而在保持全局模型性能的前提下，确保后门攻击的防御效果，即使面对多样的攻击者模型和数据分布也能显著降低攻击成功率。MCLDef\cite{yue2023model}提出了一种基于模型对比学习的两阶段后门防御方法，通过收缩或破坏中毒数据在特征空间中的聚类，并将中毒数据的特征拉向其干净对应物，从而有效去除深度神经网络中的后门，同时在不显著降低模型准确性的情况下提升防御效果。DPoE\cite{liu2023shortcuts}提出了一种基于端到端集成的后门防御框架，通过结合浅层模型和主模型来捕捉和抑制后门触发器，从而有效应对各种显性和隐性的后门攻击，同时减轻噪声标签对模型性能的影响。此外，PSIM\cite{zhao2024defending}提出了一种基于参数高效微调的防御模块，通过利用样本的置信度来识别被后门攻击污染的样本，显著增强了模型抵御权重中毒后门攻击的能力，并在不影响模型准确性的情况下有效过滤出被污染的样本。CleanCLIP\cite{bansal2023cleanclip}通过在视觉和文本编码器上进行无监督微调，独立调整每种模态的表示，以削弱视觉-语言对比学习模型中由后门攻击引入的错误关联，从而有效减少后门攻击的影响，同时保持模型在正常数据上的性能。
-\textbf{Backdoor Mitigation} focuses on eliminating or reducing the impact of backdoor attacks through various technical means. FLAME\cite{FLAME} proposes a method to defend against backdoor attacks in federated learning by dynamically clustering and pruning weights to identify and remove potential malicious model updates. It also injects differential privacy noise to effectively eliminate the impact of backdoors, thereby ensuring the defense against backdoor attacks while maintaining global model performance. This approach significantly reduces the attack success rate even when facing diverse attacker models and data distributions. MCLDef \cite{yue2023model} proposes a two-stage backdoor defense method based on model contrastive learning, effectively removing backdoors in deep neural networks by contracting or disrupting the clustering of poisoned data in the feature space and pulling the features of poisoned data toward their clean counterparts, while improving defense effectiveness without significantly reducing model accuracy. DPoE \cite{liu2023shortcuts} introduces an end-to-end integrated backdoor defense framework that captures and suppresses backdoor triggers by combining a shallow model and a main model, effectively countering various explicit and covert backdoor attacks while mitigating the impact of noisy labels on model performance. Additionally, PSIM \cite{zhao2024defending} proposes a defense module based on parameter-efficient fine-tuning, significantly enhancing the model's ability to resist weight poisoning backdoor attacks by identifying samples polluted by backdoor attacks using sample confidence, effectively filtering out polluted samples without affecting model accuracy. CleanCLIP \cite{bansal2023cleanclip} reduces the impact of backdoors in vision-language contrastive learning models by adjusting the representations of each modality through unsupervised fine-tuning of the visual and text encoders while maintaining model performance on clean data.
+\textbf{Backdoor Mitigation} focuses on eliminating or reducing the impact of backdoor attacks through various technical means. FLAME\cite{FLAME} proposes a method to defend against backdoor attacks in federated learning by dynamically clustering and pruning weights to identify and remove potential malicious model updates. It also injects differential privacy noise to effectively eliminate the impact of backdoors, thereby ensuring the defense against backdoor attacks while maintaining global model performance. This approach significantly reduces the attack success rate even when facing diverse attacker models and data distributions. MCLDef \cite{yue2023model} proposes a two-stage backdoor defense method based on model contrastive learning, effectively removing backdoors in deep neural networks by disrupting the clustering of poisoned data in the feature space and pulling the features of poisoned data toward their clean counterparts, while improving defense effectiveness without significantly reducing model accuracy. DPoE \cite{liu2023shortcuts} introduces an end-to-end integrated backdoor defense framework that captures and suppresses backdoor triggers by combining a shallow model and a main model, effectively countering various explicit and covert backdoor attacks while mitigating the impact of noisy labels on model performance. Additionally, PSIM \cite{zhao2024defending} proposes a defense module based on parameter-efficient fine-tuning, significantly enhancing the model's ability to resist weight poisoning backdoor attacks by identifying samples polluted by backdoor attacks using sample confidence, effectively filtering out polluted samples without affecting model accuracy. CleanCLIP \cite{bansal2023cleanclip} reduces the impact of backdoors in vision-language contrastive learning models by adjusting the representations of each modality through unsupervised fine-tuning of the visual and text encoders while maintaining model performance on clean data.
 
 %尽管这些方法在应对后门攻击方面展现了显著效果，但在面对更隐蔽或复杂的后门攻击时，效果依然可能不够理想。某些方法还依赖于外部知识或置信度的设定，可能导致误判或性能瓶颈。此外，这些方法在实际应用中也增加了计算开销和训练时间。因此，未来的研究仍需在提升整体性能与效率的同时，着力解决隐蔽或复杂后门攻击的防御挑战。
-Despite the effectiveness of these methods in countering explicit backdoors, their performance may still be insufficient when faced with more covert or complex backdoor attacks. Some methods also rely on external knowledge or confidence settings, which may lead to misjudgments or performance bottlenecks. Moreover, these methods increase computational overhead and training time in practical applications. %Therefore, future research must continue to focus on addressing the challenges posed by covert or complex backdoor attacks while enhancing overall performance and efficiency.
+Despite the effectiveness of these methods in countering explicit backdoors, their performance may still be insufficient when faced with more covert or complex backdoor attacks. Some methods rely on external knowledge or confidence settings, which may lead to misjudgments or performance bottlenecks. Moreover, these methods increase computational overhead and training time in practical applications. %Therefore, future research must continue to focus on addressing the challenges posed by covert or complex backdoor attacks while enhancing overall performance and efficiency.
 
 \section{System model \& Preliminaries}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -166,23 +177,23 @@ Despite the effectiveness of these methods in countering explicit backdoors, the
 \hline
 \textbf{Symbol} & \multicolumn{1}{c |}{\textbf{Description}}\\
     \hline
-    $ N $ & Number of nodes participating in each round.\\ \hline
+    $ N $ & The number of nodes participating in each round.\\ \hline
     $R_i$ & The $i$-th robot node. \\ \hline
-    $D_i$ & Private local dataset of node $R_i$.\\ \hline
-    $\theta_g^t, \theta_i^t$ & Global model and local model of $R_i$ at round $t$. \\ \hline
+    $D_i$ & The private local dataset of node $R_i$.\\ \hline
+    $\theta_g^t, \theta_i^t$ & The global model and local model of $R_i$ at round $t$. \\ \hline
     $\triangledown \theta_i^t$ & Local update of $R_i$ during round $t$. \\ \hline
     $G_i^t $ & Frequency component of $R_i$'s update at round $t$. \\ \hline
-    $m$ & Length of the low-frequency components. \\ \hline
-    $H^t$ & Matrix formed by stacking $G_i^t$, with dimensions $m \times N$ during round $t$. \\ \hline
-    $\tilde{G}_{0}^t $ & Clean ingredient extracted from $R_i$'s low-frequency components during round $t$. \\ \hline
-    $\lambda_{max}^t$ & Largest singular value of matrix $H^t$ during round $t$. \\ \hline
-    $\xi_{max}^t$ & Left singular vector corresponding to $\lambda_{max}^t$ during round $t$. \\ \hline
-    $Chi_i^t$ & Distance difference between $R_i$'s update and the clean ingredient during round $t$. \\ \hline
-    $t'$ & One of the total $T$ rounds. \\ \hline
-    $O_i^{t'}$ & Intention point of $R_i$ during round $t'$. \\ \hline
-    \( {v}_{i}^{t'} \) & Vector of the high-dimensional ball for $R_i$ during round $t'$. TODO: CHANGE THIS\\ \hline
-    $lof_i$ & The LOF score of $R_i$.\\ \hline
-    $cre_i$ & The credit of $R_i$.\\ \hline
+    $m$ & The length of the low-frequency components. \\ \hline
+    $H^t$ & The matrix formed by stacking $G_i^t$. \\ \hline
+    $\tilde{G}^t $ & The extracted global clean ingredient at round $t$. \\ \hline
+    $\lambda_{max}^t$ & The largest singular value of matrix $H^t$ at round $t$. \\ \hline
+    $\xi_{max}^t$ & The left singular vector corresponding to $\lambda_{max}^t$. \\ \hline
+    $Chi_i^t$ & The difference between $\triangledown \theta_i^t$ and $\tilde{G}^t $ at round $t$. \\ \hline
+    $t'$ & The round number within total $T$ rounds. \\ \hline
+    $O_i^{t'}$ & The intention point of $R_i$ at round $t'$. \\ \hline
+    \( {v}_{i}^{t'} \) & The vector of the behavior ray for $R_i$ at round $t'$. \\ \hline
+    $lof_i$ & The outlier level of $R_i$.\\ \hline
+    $cre_i$ & The credit score of $R_i$.\\ \hline
 \end{tabular}
     }
  \vspace{-1.5em}
@@ -218,7 +229,7 @@ Taking Low-Rank Adaptation (LoRA) \cite{lora} as an example, model parameter mat
     At the beginning of each federated training round, the central server sends the global model's incremental parameters $\theta_g^{t-1}$ to each robotic node $R_i$. Upon receiving $\theta_g^{t-1}$, each node fine-tunes the model based on its local dataset $D_i$.
     % 算法\ref{alg:local_update}展示了节点进行本地模型每轮训练的主要过程。
     %假设本地训练的轮次为$E_l$，批次大小为$b$，学习率为$\eta$。对于每一轮，节点$R_i$首先从其本地数据集$D_i$中随机抽取一个批次数据$D_i^b \sim Sample(D_i, b)$，然后利用随机梯度下降等优化算法，对增量参数进行更新，
-    Assume the number of local training epochs is $E_l$, the batch size is $b$, and the learning rate is $\eta$. For each epoch, the node $R_i$ randomly samples a batch of data $D_i^b \sim Sample(D_i, b)$ from its local dataset and updates the incremental parameters using an optimization algorithm such as stochastic gradient descent (SGD):
+    Assume the number of local training epochs is $E_l$, the batch size is $b$, and the learning rate is $\eta$. For each epoch, the node $R_i$ randomly samples a batch of data $D_i^b \sim Sample(D_i, b)$ from its local dataset and updates the incremental parameters using an optimization procedure as:
 \begin{equation}
     (\theta_i^{t})^e = (\theta_i^{t})^{e-1} - \eta \nabla f(D_i^b, (\theta_i^{t})^{e-1}),
 \end{equation}
@@ -226,7 +237,7 @@ Taking Low-Rank Adaptation (LoRA) \cite{lora} as an example, model parameter mat
     where $(\theta_i^{t})^e$ denotes the parameters after the $e$-th epoch, with the initial value $(\theta_i^{t})^0 = \theta_g^{t-1}$.
 
     %本地训练的目标是最小化损失函数 $f(D_i^b, (\theta_i^{t})^e)$：
-    The local training objective to minimize the loss function $f(D_i^b, (\theta_i^{t})^e)$ is:
+    The local training objective to minimize the loss $f(D_i^b, (\theta_i^{t})^e)$ is:
 \begin{equation}
     f(D_i^b, (\theta_i^{t})^e) = \frac{1}{|D_i^b|} \sum_{j=1}^{|D_i^b|} \ell(x_{i,j}, y_{i,j}; \Theta_p + (\theta_i^{t})^e),
 \end{equation}
@@ -235,7 +246,7 @@ Taking Low-Rank Adaptation (LoRA) \cite{lora} as an example, model parameter mat
     
     %\item \textbf{联邦聚合}：在每轮本地训练结束后，中心服务器从每个机器人节点 $R_i$ 收集本地更新$\triangledown \theta_i^t$，并利用相应的聚合算法进行聚合，以更新全局增量参数得到$\theta_g^t$，其计算公式为：
     \textbf{Federated Aggregation}:
-    At the end of each local training round, the central server collects the local updates $\triangledown \theta_i^t$ from each robotic node $R_i$ and aggregates them using a specified aggregation algorithm to update the global incremental parameters $\theta_g^t$:   
+    At the end of each round, the central server collects the local updates $\triangledown \theta_i^t$ from each robotic node $R_i$ and aggregates them using a specified aggregation algorithm to update the global model parameters $\theta_g^t$:   
 \begin{equation}
     \theta_g^t = \theta_g^{t-1} + Agg(\triangledown \theta_1^t, \triangledown \theta_2^t, \dots, \triangledown \theta_n^t),
 \end{equation}
@@ -245,14 +256,14 @@ Taking Low-Rank Adaptation (LoRA) \cite{lora} as an example, model parameter mat
 
 \section{Threat Model}
 %Attacker's Goal：假设在对视觉语言模型进行联邦微调的场景中，存在一个或者多个由攻击者操纵的恶意节点。其目标是对全局模型$\Theta$ 进行后门植入，使得模型能够将任何带有预定义触发器 $\delta$ 的测试输入分类为目标类别，即$\Theta(x+\delta) = y'$，其中$x$代表正常输入，$y'$表示目标类别。同时尽可能保持对干净输入的分类准确性，即$\Theta(x) = y$，其中$y$为输出$x$的原始类别。
-\textbf{Attacker's Goal:} In the scenario of federated fine-tuning of a vision-language model, it is assumed that one or more malicious nodes controlled by attackers are present. The goal is to implant a backdoor into the global model $\Theta$, such that the model classifies any test input with a predefined trigger $\delta$ as the target class, i.e., $\Theta(x + \delta) = y'$, where $x$ represents a normal input and $y'$ denotes the target class. Simultaneously, the attacker aims to preserve the classification accuracy on clean inputs, such that $\Theta(x) = y$, where $y$ is the original class corresponding to $x$.
+\textbf{Attacker's Goal:} In the scenario of the FFT process of LVLMs, it is assumed that one or more malicious nodes are controlled by attackers. The goal is to implant a backdoor into the global model $\Theta$, such that the model classifies any test input with a predefined trigger $\delta$ as the target class, i.e., $\Theta(x + \delta) = y'$, where $x$ represents a normal input and $y'$ denotes the target class. Simultaneously, the attacker aims to preserve the classification accuracy on clean inputs, such that $\Theta(x) = y$, where $y$ is the original class corresponding to $x$.
 
 %Attacker's Ability: 在对视觉大模型进行联邦微调的场景中，假设攻击者对恶意节点的本地训练过程具有完全的控制权。这意味着攻击者可以任意操控本地数据、触发器模式、优化策略和本地更新过程。此外，攻击者可以采用“智能”攻击策略，这种策略的特点是攻击效果不会在单轮训练中显现，而是通过多轮训练的累积效应逐步将后门植入全局模型中。这种场景在实际中是可能存在的，因为中央服务器只能接收到客户端上传的训练后模型更新，而无法知晓每个客户端的具体训练过程。然而，攻击者无法对中央服务器的操作进行干扰，例如，无法更改全局模型的聚合规则或篡改其他良性客户端的模型更新。
 \textbf{Attacker's Ability:} In the FFT processes of LVLMs, it is assumed that the attacker has complete control over the local training process of malicious nodes. This means the attacker can manipulate the local dataset, trigger patterns, optimization strategies, and the local update procedure at will. Additionally, the attacker can employ stealthy attack strategies, where the backdoor is not immediately apparent in a single training round but is gradually embedded into the global model through the cumulative effect of multiple training rounds. Such a scenario is feasible in practice since the central server only receives the model updates uploaded by clients after training and has no insight into the specific local training process of each client. However, the attacker is unable to interfere with the central server's operations, such as modifying the global model aggregation rules or tampering with the model updates from other benign clients.
 
 
 \section{Methodology}
-Our SecFFT method consists of two major Instantaneous Attack Behavior Perception with Frequency-domain Deep Outlier Feature Semantics
+Our SecFFT method consists of two major modules: Instantaneous Attack Behavior Perception and Long-term Attack Intention Detection, which are elaborated, respectively.
 
 \subsection{Instantaneous Attack Behavior Perception}
 \begin{figure}[!t]
@@ -264,16 +275,20 @@ Our SecFFT method consists of two major Instantaneous Attack Behavior Perception
 %^\textbf{Motivation:} 目前的防御策略主要集中于利用攻击的“浅层语义特征”来进行恶意节点识别，所谓浅层语义是指模型上传更新的方向\cite{foolsgold}，范数\ref{sun2019can}以及几何中心\cite{pillutla2022robust}等几何或者统计特性。然而，这些基于浅层特征的防御方法在高维空间中存在显著的局限性。
 % Multi-metrics adaptively identifies backdoors in Federated learning
 %首先，这些防御方式只能在特定假设条件下对某些类型的攻击起作用。例如，余弦距离能够检测出具有较大方向偏差的恶意更新，而欧几里得距离则用于检测通过扩大$L_2$范数影响全局模型的恶意更新。同时最新的研究表明\cite{huang2023multi}，基于欧几里得距离等传统的距离度量方法在高维空间中无法有效区分恶意和良性更新，因为这些方法往往受到维度灾难的影响。此外攻击策略也在不停的演变，现在的攻击者已经能够通过精心调整，使恶意更新在方向、范数等浅层特征上与良性更新相似，从而巧妙地避开这些基于浅层语义特征的防御措施，最终在全局模型中植入后门。但值得注意的是，后门攻击的本质在于让模型建立起预定义触发器和目标之间的联系，因此无论攻击者如何调整自己的攻击方式或策略，其上传的模型更新相较于良性用户始终在某种分布上具有偏移。
-\textbf{Motivation:} Current defense strategies primarily focus on identifying malicious nodes using “shallow semantic features” of attacks, such as geometric or statistical characteristics like the direction\cite{foolsgold}, norm\cite{sun2019can}, and geometric center\cite{pillutla2022robust} of node updates. However, these shallow feature-based defenses exhibit significant limitations in high-dimensional spaces. For instance, these methods often only work under specific assumptions and for certain types of attacks. For example, cosine distance can detect malicious updates with significant directional deviation, while Euclidean distance is typically employed to identify malicious updates that inflate the $L_2$ norm and influence the global model. Recent studies have also demonstrated \cite{huang2023multi} that traditional distance metrics like Euclidean distance are inadequate in distinguishing between malicious and benign updates in high-dimensional spaces due to the curse of dimensionality. Furthermore, attack strategies continue to evolve, with attackers now able to fine-tune their updates to resemble benign ones in terms of direction, norm, and other shallow features, thus effectively bypassing these shallow semantic-based defenses while still implanting backdoors into the global model. It is important to note, however, that the core of a backdoor attack lies in creating an association between a predefined trigger and the target. Regardless of how the attacker adjusts their attack methods or strategies, the uploaded updates will always exhibit a distributional shift compared to benign users.
+\textbf{Motivation:} 
+% Current defense strategies primarily focus on identifying malicious nodes using “shallow semantic features” of attacks, such as geometric or statistical characteristics like the direction\cite{foolsgold}, norm\cite{sun2019can}, and geometric center\cite{pillutla2022robust} of node updates. However, these shallow feature-based defenses exhibit significant limitations in high-dimensional spaces. For instance, these methods often only work under specific assumptions and for certain types of attacks. For example, cosine distance can detect malicious updates with significant directional deviation, while Euclidean distance is typically employed to identify malicious updates that inflate the $L_2$ norm and influence the global model. Recent studies have also demonstrated \cite{huang2023multi} that traditional distance metrics like Euclidean distance are inadequate in distinguishing between malicious and benign updates in high-dimensional spaces due to the curse of dimensionality. Furthermore, attack strategies continue to evolve, with attackers now able to fine-tune their updates to resemble benign ones in terms of direction, norm, and other shallow features, thus effectively bypassing these shallow semantic-based defenses while still implanting backdoors into the global model. It is important to note, however, that the core of a backdoor attack lies in creating an association between a predefined trigger and the target. Regardless of how the attacker adjusts their attack methods or strategies, the uploaded updates will always exhibit a distributional shift compared to benign nodes.
+Current defense strategies primarily focus on identifying malicious nodes using "shallow semantic features" of attacks, such as geometric or statistical characteristics like the direction\cite{foolsgold}, magnitude\cite{sun2019can}, and geometric center\cite{pillutla2022robust} of node updates. However, these shallow feature-based defenses have significant limitations in high-dimensional spaces. For instance, these methods often function effectively only under specific assumptions and for certain types of attacks. For example, cosine distance can detect malicious updates with significant directional deviations, while Euclidean distance is typically employed to identify malicious updates that inflate the $L_2$ norm and affect the global model. Recent studies have also shown \cite{huang2023multi} that traditional distance metrics like Euclidean distance are inadequate for distinguishing between malicious and benign updates in high-dimensional spaces due to the curse of dimensionality. Moreover, attack strategies continue to evolve, with attackers now able to fine-tune their updates to resemble benign ones in terms of direction, norm, and other shallow features, effectively bypassing these shallow semantic-based defenses while still implanting backdoors into the global model. It is important to note, however, that the core of a backdoor attack lies in establishing an association between a predefined trigger and the target. Regardless of how the attacker adjusts their attack methods or strategies, the uploaded updates will always display a distributional shift compared to benign nodes.
 
 
 %\textbf{Overview:} 在深度神经网络模型中，每个权重代表两个神经元之间连接的强度。权重分布及其相关的能量在训练过程中会经历动态演变，以缩小模型预测结果与训练数据中的真实目标之间的差距。当后门攻击迫使神经网络模型学习一种在正常数据中不存在的关联模式时，根据后门触发器的设计和实现方式，这种模式可能是微妙的，也可能是相当明显的，但无论如何，它都代表了与模型从正常数据中学习到的模式的偏离。因此，为解决基于浅层语义特征的防御方法在高维空间中面临的局限性，我们从后门攻击的本质出发\cite{zeng2021rethinking}，提出了一种基于深层语义特征的防御策略，重点分析模型更新在频率分布上的差异。通过将本地模型更新转换到频域，我们能够更深入地捕捉恶意更新在低频成分上的异常表现，这些异常通常难以通过传统的浅层特征检测方法发现。通过对频率域上的特征进行分析，我们可以有效地区分出恶意节点与良性节点，从而增强联邦学习系统在面对复杂后门攻击时的鲁棒性和检测精度。
-\textbf{Overview:} In deep neural networks, each weight represents the strength of the connection between two neurons. The distribution of these weights and their corresponding energy dynamically evolve during training to minimize the gap between the model's predictions and the ground truth in the training data. When a backdoor attack forces the neural network to learn an association pattern that does not exist in normal data, this pattern—depending on the design and implementation of the backdoor trigger—can be subtle or quite evident. Nonetheless, it always represents a deviation from the patterns learned from normal data. To address the limitations of shallow feature-based defenses in high-dimensional spaces, we propose a defense strategy rooted in the essence of backdoor attacks\cite{zeng2021rethinking}, focusing on deeper semantic features by analyzing differences in the frequency distribution of model updates. By transforming local model updates into the frequency domain, we can more effectively capture the anomalous behavior of malicious updates in low-frequency components, which are typically difficult to detect using traditional shallow-feature detection methods. Through frequency domain feature analysis, we can effectively distinguish malicious nodes from benign ones, thereby enhancing the robustness and detection precision of federated learning systems when facing sophisticated backdoor attacks.
+\textbf{Overview:} 
+% In deep neural networks, each weight represents the strength of the connection between two neurons. The distribution of these weights and their corresponding energy dynamically evolve during training to minimize the gap between the model's predictions and the ground truth in the training data. When a backdoor attack forces the neural network to learn an association pattern that does not exist in normal data, this pattern—depending on the design and implementation of the backdoor trigger—can be subtle or quite evident. Nonetheless, it always represents a deviation from the patterns learned from normal data. To address the limitations of shallow feature-based defenses in high-dimensional spaces, we propose a defense strategy rooted in the essence of backdoor attacks\cite{zeng2021rethinking}, focusing on deeper semantic features by analyzing differences in the frequency distribution of model updates. By transforming local model updates into the frequency domain, we can more effectively capture the anomalous behavior of malicious updates in low-frequency components, which are typically difficult to detect using traditional shallow-feature detection methods. Through frequency domain feature analysis, we can effectively distinguish malicious nodes from benign ones, thereby enhancing the robustness and detection precision of federated learning systems when facing sophisticated backdoor attacks.
+In deep neural networks, each weight signifies the strength of the connection between two neurons. The distribution of these weights and their corresponding energy dynamically evolves during training to minimize the gap between the model's predictions and the ground truth in the training data. When a backdoor attack compels the neural network to learn an association pattern that does not exist in normal data, this pattern depending on the design and implementation of the backdoor trigger can be subtle or quite evident. Nonetheless, it always signifies a deviation from the patterns learned from normal data. To address the limitations of shallow feature-based defenses in high-dimensional spaces, we propose a defense strategy grounded in the essence of backdoor attacks\cite{zeng2021rethinking}, focusing on deeper semantic features by analyzing differences in the frequency distribution of model updates. By transforming local model updates into the frequency domain, we can more effectively capture the anomalous behavior of malicious updates in low-frequency components, which are typically challenging to detect using traditional shallow-feature detection methods. Through frequency domain feature analysis, we can effectively distinguish malicious nodes from benign ones, thereby enhancing the robustness and detection accuracy of federated learning systems when confronted with sophisticated backdoor attacks. Figure \ref{fig2:instant} formalizes this method we proposed.
 
-\textbf{Frequency domain transformation:}
+\subsubsection{Frequency domain transformation}
 %%%% 相比于目前基于浅层语义特征的防御方法，我们利用DCT进行频域转换，将模型的更新向量映射到频域空间，以探究其在频率域上的分布差异。其主要过程如算法\ref{alg:malicious-node-detection}的4-7行所示，假设每个本地模型的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，通过一维的DCT-II将其转换为对应的频率分布，并提取低频分量，得到频率向量\(G_i^t\)。这里的 $Trunc$ 操作表示仅保留前 $m$ 个低频分量，以捕捉频域中更具代表性的特征用于后续的恶意节点检测。
 %受高维空间中维度灾难的影响，传统的基于距离度量的方法已无法有效识别恶意节点。相反，将模型更新转换到频率域后，其差异将主要集中在低频成分上。因此，专注于低频成分的分析，在提升识别准确率的同时，将显著的降低计算开销。假设每个节点上传的更新为 \(\triangledown \theta_i^t \in \mathbb{R}^d\)，其中 \(i\) 表示机器人节点，\(t\) 表示通信轮次，\(d\) 为本地模型上传更新的维度。对于每个更新 \(\triangledown \theta_i^t\)，对其进行归一化，然后通过一维的DCT-II\cite{ahmed1974discrete}变化将其转换为对应的频率分布，并提取$m$个低频分量，例如5000，得到低频向量\(G_i^t\)。
-Due to the curse of dimensionality in high-dimensional spaces, traditional distance-based methods are no longer effective in identifying malicious nodes. In contrast, by transforming model updates into the frequency domain, the discrepancies are primarily concentrated in the low-frequency components. Therefore, focusing on the analysis of low-frequency components not only improves identification accuracy but also significantly reduces computational overhead. Suppose each node uploads an update as \(\triangledown \theta_i^t \in \mathbb{R}^d\), where $i$ represents the robot node, $t$ denotes the communication round, and $d$ is the dimension of the local model update. For each update \(\triangledown \theta_i^t\), it is first normalized and then transformed into its corresponding frequency distribution using a one-dimensional DCT-II \cite{ahmed1974discrete}, from which $m$ low-frequency components (normally under 5000 \cite{fereidooni2023freqfed}) are extracted to form the low-frequency vector $G_i^t$.
+Due to the curse of dimensionality in high-dimensional spaces, traditional distance-based methods become ineffective in identifying malicious nodes. In contrast, by transforming model updates into the frequency domain, discrepancies primarily concentrate in the low-frequency components. Therefore, focusing on the analysis of low-frequency components not only enhances identification accuracy but also significantly reduces computational overhead. Suppose each node uploads an update \(\triangledown \theta_i^t \in \mathbb{R}^d\), where $i$ represents the robot node, $t$ denotes the communication round, and $d$ denotes the dimension of the local model update. For each update \(\triangledown \theta_i^t\), it is first normalized and then transformed into its corresponding frequency distribution using a one-dimensional DCT-II \cite{ahmed1974discrete}, from which $m$ low-frequency components\cite{fereidooni2023freqfed} (e.g. 5000 )\cite{fereidooni2023freqfed} are extracted to form the low-frequency vector $G_i^t$.
 
 
 %%___________________________________________________________________________________________________________________________
@@ -281,24 +296,26 @@ Due to the curse of dimensionality in high-dimensional spaces, traditional dista
 G_i^t = Trunc(DCT(Flatten(\frac{\triangledown \theta_i^t}{{\|\triangledown \theta_i^t\|}_2})), m)
 \label{eq:DCT}
 \end{equation}
+
 % 频域转换的主要过程如公式\ref{eq:DCT}所示，这里的 $Trunc$ 操作表示仅保留前$m$个低频分量。
 The main process of frequency domain transformation is shown in Equation \ref{eq:DCT}, where the $Trunc$ operation indicates retaining only the first $m$ low-frequency components.
 
-\textbf{Clean ingredient extraction:}
+\subsubsection{Clean ingredient extraction}
 % 在提取到节点更新对应的低频向量\(G_i^t\)后，我们使用流行的聚类算法例如HDBSCAN\cite{mcinnes2017hdbscan}对这些更新进行聚类，得到多个簇$C_0^t, C_1^t, \ldots, C_{\kappa}^t$，其中$\kappa$表示簇的数量。在大多数联邦学习场景中，良性节点的数量通常多于恶意节点的数量，且良性节点的更新通常更接近全局模型的方向并表现出更高的聚集性。基于这一观察，我们选择节点数量最多的簇$C_{max} = \{R_{i_0}, R_{i_1}, \ldots, R_{i_n}\}$作为主要分析对象。为了进一步提取该簇的主要特征或模式，我们对其中所有节点组成的矩阵进行奇异值分解\cite{wang2023scfl}。由于，SVD分解的左奇异向量$\tilde{G}^t$对应于数据的主要方向，因此，$\tilde{G}^t$可以作为良性节点在低频域内的主要特征。
-After extracting the corresponding low-frequency vectors \(G_i^t\) from node updates, we use popular clustering algorithms such as HDBSCAN \cite{mcinnes2017hdbscan} to cluster these updates, resulting in multiple clusters \(C_0^t, C_1^t, \ldots, C_{\kappa}^t\), where \(\kappa\) denotes the number of clusters. In most federated learning scenarios, the number of benign nodes is generally greater than that of malicious nodes, and the updates from benign nodes are usually closer to the direction of the global model and exhibit higher cohesion. Based on this observation, we select the cluster with the largest number of nodes, \(C_{max} = \{R_{i_0}, R_{i_1}, \ldots, R_{i_n}\}\), as the primary subject for analysis. To further extract the main features or patterns of this cluster, we perform singular value decomposition (SVD)\cite{wang2023scfl} on the matrix composed of all nodes in this cluster. Since the left singular vectors of the SVD decomposition, \(\tilde{G}^t\), correspond to the main directions of the data, \(\tilde{G}^t\) can be regarded as the primary feature of benign nodes in the low-frequency domain.
+After extracting the corresponding low-frequency vectors \(G_i^t\) from node updates, we employ popular clustering algorithms such as HDBSCAN \cite{mcinnes2017hdbscan} to cluster these updates, resulting in multiple clusters \(C_0^t, C_1^t, \ldots, C_{\kappa}^t\), where \(\kappa\) denotes the number of clusters. In most federated learning scenarios, the number of benign nodes is generally greater than that of malicious nodes, and the updates from benign nodes are usually closer to the direction of the global model and exhibit greater cohesion. Based on this observation, we select the cluster with the largest number of nodes, \(C_{max} = \{R_{i_0}, R_{i_1}, \ldots, R_{i_n}\}\), as the primary focus for analysis. To further extract the main features or patterns of this cluster, we perform singular value decomposition (SVD)\cite{wang2023scfl} on the matrix formed by all nodes in this cluster. Since the left singular vectors of the SVD decomposition, \(\tilde{G}^t\), represent the main directions of the data, \(\tilde{G}^t\) can be considered the primary feature of benign nodes in the low-frequency domain.
 
 
 \begin{equation}
 \tilde{G}^t = \frac{H^t \xi_{\text{max}^t}}{\sqrt{\lambda_{\text{max}^t}}}
 \label{eq:singular}
 \end{equation}
-% 公式\ref{eq:singular}展示了计算左奇异向量$\tilde{G}^t$的主要过程，其中\(H^t = ({G_{i_0}^t}, {G_{i_1}^t}, \ldots, {G_{i_n}^t}) \in \mathbb{R}^{m \times n}\)为该簇节点的低频向量堆叠而成的矩阵，其中每一列代表一个节点的低频向量，$\lambda_{max}^t$与$xi_{max}^t$分别对应了矩阵$\hat{H}^t \gets (H^t)^{T} H^t$的最大特征值及其特征向量。通过这种方式，我们有效地提取了反映良性节点全局更新在频域上的主要特征，并将$\tilde{G}^t$作为“干净成分”，为后续恶意节点检测提供基准依据。
-Equation \ref{eq:singular} illustrates the main process of computing the left singular vector $\tilde{G}^t$, where \(H^t = ({G_{i_0}^t}, {G_{i_1}^t}, \ldots, {G_{i_n}^t}) \in \mathbb{R}^{m \times n}\) is a matrix formed by stacking the low-frequency vectors of nodes in the cluster, with each column representing a node's low-frequency vector. $\lambda_{max}^t$ and $\xi_{max}^t$ correspond to the largest eigenvalue and its eigenvector of the matrix $\hat{H}^t \gets (H^t)^{T} H^t$, respectively. In this way, we effectively extract the main features that reflect the global updates of benign nodes in the frequency domain, and $\tilde{G}^t$ is used as the "clean component," providing a benchmark for subsequent malicious node detection.
 
-\textbf{Chi-square distance calculation:}
+% 公式\ref{eq:singular}展示了计算左奇异向量$\tilde{G}^t$的主要过程，其中\(H^t = ({G_{i_0}^t}, {G_{i_1}^t}, \ldots, {G_{i_n}^t}) \in \mathbb{R}^{m \times n}\)为该簇节点的低频向量堆叠而成的矩阵，其中每一列代表一个节点的低频向量，$\lambda_{max}^t$与$xi_{max}^t$分别对应了矩阵$\hat{H}^t \gets (H^t)^{T} H^t$的最大特征值及其特征向量。通过这种方式，我们有效地提取了反映良性节点全局更新在频域上的主要特征，并将$\tilde{G}^t$作为“干净成分”，为后续恶意节点检测提供基准依据。
+Equation \ref{eq:singular} illustrates the main process of computing the left singular vector $\tilde{G}^t$, where \(H^t = ({G_{i_0}^t}, {G_{i_1}^t}, \ldots, {G_{i_n}^t}) \in \mathbb{R}^{m \times n}\) is a matrix formed by stacking the low-frequency vectors of nodes in the cluster, with each column representing a node's low-frequency vector. $\lambda_{max}^t$ and $\xi_{max}^t$ correspond to the largest eigenvalue and its eigenvector of the matrix $\hat{H}^t \gets (H^t)^{T} H^t$, respectively. In this way, we effectively extract the main features that reflect the global updates of benign nodes in the frequency domain, and $\tilde{G}^t$ is used as the clean ingredient for subsequent malicious node detection.
+
+\subsubsection{Chi-square distance calculation}
 % 我们利用每个节点的低频向量与“干净成分”之间的差异度来作为衡量恶意节点和良性节点的依据。对于每个节点的低频向量 \(G_i^t\) 以及上一步中求得的“干净成分” \(\tilde{G}^t\)，通过卡方距离来计算两者之间的差异度，得到距离差异集合$S^t = Chi^t_i, Chi^t_2, \ldots, Chi^t_N$。卡方距离的计算公式为：
-We use the divergence between each node's low-frequency vector and the "clean component" as a basis for distinguishing between malicious and benign nodes. For each node's low-frequency vector \(G_i^t\) and the "clean component" \(\tilde{G}^t\) obtained in the previous step, we calculate their divergence using the Chi-square distance, resulting in a set of distance differences \(S^t = \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}\). The formula for calculating the Chi-square distance is given by:
+We use the divergence between each node's low-frequency vector and the clean ingredient as a basis for distinguishing between malicious and benign nodes. For each node's low-frequency vector \(G_i^t\) and the clean ingredient \(\tilde{G}^t\) obtained in the previous step, we calculate their divergence using the Chi-square distance, resulting in a set of distance differences \(S^t = \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}\). The formula for the Chi-square distance is expressed as:
 
 \begin{equation}
 {Chi^t_i}^2 = \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}
@@ -308,12 +325,14 @@ We use the divergence between each node's low-frequency vector and the "clean co
 where \(m\) is the dimension of the low-frequency vector, and \(\epsilon\) is a small constant to avoid division by zero. Compared to the traditional Euclidean distance, the Chi-square distance weights according to the magnitude of the corresponding components of the two vectors, making the influence of components with larger feature values more significant on the distance. This allows for a more accurate reflection of the differences between important features in the low-frequency vectors, while ignoring unimportant noise components.
 
 
-\textbf{Single-round malicious node detection:}
+\subsubsection{Single-round malicious behavior perception}
 % 为了准确地识别恶意节点，我们利用良性节点的更新与干净成分的频率分布高度相似这一特性，对距离差异集合$S^t$进一步进行聚类分析。具体而言，我们采用流行的KMeans聚类算法\cite{wan2023four}对距离差异集合$S^t$进行聚类，并将类别数设置为2，因此聚类结果为两个簇\(C'_1, C'_2\)。基于在每轮训练中良性节点的数量通常多于恶意节点，以及良性节点与干净成分之间的距离差异通常更小，我们将 \(C'_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)。对于另一簇\(C'_k\)（\(k \neq {max}\)），则将其中所有节点标记为恶意节点，记作\(U_{mal}\)。  
-To accurately identify malicious nodes, we leverage the characteristic that the updates of benign nodes exhibit a high degree of similarity in frequency distribution with the clean component. We perform a further clustering analysis on the set of distance differences \(S^t\). Specifically, we use the popular KMeans\cite{wan2023four} clustering algorithm to cluster the set \(S^t\), setting the number of clusters to 2. Consequently, the clustering results yield two clusters, \(C'_1, C'_2\). Based on the observation that in each round of training, the number of benign nodes is typically greater than that of malicious nodes, and the distance differences between benign nodes and the clean component are usually smaller, we label all nodes in \(C'_{max}\) as benign nodes, denoted as \(U_{nor}\). For the other cluster \(C'_k\) (\(k \neq {max}\)), all nodes within it are labeled as malicious nodes, denoted as \(U_{mal}\).
+To accurately identify malicious nodes, we leverage the fact that the updates of benign nodes exhibit a high degree of similarity in frequency distribution with the clean component. We conduct a further clustering analysis on the set of distance differences \(S^t\). Specifically, we employ the popular KMeans\cite{wan2023four} clustering algorithm to cluster the set \(S^t\), setting the number of clusters to 2. Consequently, the clustering algorithm produce two clusters, \(C'_1, C'_2\). Based on the observation that in each round of training, the number of benign nodes is typically greater than that of malicious nodes, and the distance differences between benign nodes and the clean component are generally smaller, we label all nodes in \(C'_{max}\) as benign nodes, denoted by \(U_{nor}\). For the other cluster \(C'_k\) (\(k \neq {max}\)), all nodes within it are labeled as malicious nodes, denoted by \(U_{mal}\).
 
 % 算法\ref{alg:malicious-node-detection}展示了单轮恶意用户识别的整体过程，其中3-6行代表了频率转换的计算过程，7-12行代表了“干净分量”$\tilde G^t$的计算过程，13-16行代表了每个用户与“干净分量”间的卡方差异度的计算过程，最后17-18行代表了通过KMeans聚类算法进行恶意用户检测的计算过程。
-Algorithm \ref{alg:malicious-node-detection} presents the overall process of Instantaneous Attack Behavior Perception. Lines 3-6 represent the computation process of frequency transformation, lines 7-12 represent the computation process of the clean component $\tilde{G}^t$, lines 13-16 represent the calculation of the Chi-square divergence between each user and the clean component, and finally, lines 17-18 represent the computation process of malicious user detection using the KMeans clustering algorithm.
+Algorithm \ref{alg:malicious-node-detection} outlines the overall process of Instantaneous Attack Behavior Perception. 
+% Lines 3-6 represent the computation process of frequency transformation, lines 7-12 represent the computation process of the clean component $\tilde{G}^t$, lines 13-16 represent the calculation of the Chi-square divergence between each user and the clean component, and finally, lines 17-18 represent the computation process of malicious user detection using the KMeans clustering algorithm.
+Lines 3-6 describe the computation process of frequency transformation, lines 7-12 detail the computation of the clean component $\tilde{G}^t$, lines 13-16 cover the calculation of the Chi-square divergence between each user and the clean component, and finally, lines 17-18 outline the computation process of malicious user detection using the KMeans clustering algorithm.
 
 \begin{algorithm}
 \caption{Instantaneous Attack Behavior Perception}
@@ -321,7 +340,7 @@ Algorithm \ref{alg:malicious-node-detection} presents the overall process of Ins
 \begin{algorithmic}[1]
 \State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each node update; $N$ is the number of the nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from nodes during the $t$-th round; $m$ is the length of low-frequency components}
 \State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
-
+\State{\color{CadetBlue}/* \textbf{Frequency Domain Transformation */}} 
 % \State Step 1: Frequency Domain Transformation
 \For {$R_i \in (R_1, \ldots, R_N)$}
     \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_i^t)$
@@ -329,7 +348,7 @@ Algorithm \ref{alg:malicious-node-detection} presents the overall process of Ins
 \EndFor
 
 % \State
-
+\State{\color{CadetBlue}/* \textbf{Clean Ingredient Extraction */}} 
 % \State Step 2: Clean Ingredient Extraction
 \State $(C_0^t, C_1^t, \ldots, C_{\kappa}^t) \gets Clustering (\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t)$ \Comment{$\kappa$ denotes the number of clusters}
 \State $ C_{max} \gets \underset{C_i}{\arg\max} \, |C_i|, \quad i = 1, 2, \ldots, \kappa $ \Comment{$|C_i|$ denotes the number of nodes in cluster $C_i$}
@@ -340,7 +359,7 @@ Algorithm \ref{alg:malicious-node-detection} presents the overall process of Ins
 \State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
 
 % \State
-
+\State{\color{CadetBlue}/* \textbf{Chi-square distance calculation */}} 
 % \State Step 3: Chi-square distance calculation
 % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {$R_i \in (R_1, \ldots, R_N)$}
@@ -349,8 +368,8 @@ Algorithm \ref{alg:malicious-node-detection} presents the overall process of Ins
 \State $S \gets \{Chi_1, Chi_2, \ldots, Chi_n\}$ \Comment{The Distance differences calculated by Chi-square distance.}
 
 % \State
-
-% \State Step 4: Malicious Node Detection
+\State{\color{CadetBlue}/* \textbf{Single-round malicious behavior perception */}} 
+% \State Step 4: Single-round malicious behavior perception
 \State $\{C_1, C_2\} \gets KMeans(S, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
 \State $U_{nor} \gets C_{\text{max}}$, $U_{mal} \gets \{C_i \, | \, i \neq \text{max}\}$
 
@@ -359,27 +378,24 @@ Algorithm \ref{alg:malicious-node-detection} presents the overall process of Ins
 
 
 \subsection{Long-term Attack Intention Detection}
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=\linewidth]{figures/fig3.png}
-    \caption{SecFFT's long-term attack intention detection module and secure aggregation}
-    \label{fig2:instant}
-\end{figure}
+
 % \textbf{Motivation}: 为了规避异常检测，有很多通过多轮次的组合攻击来植入后门的攻击。这些攻击很难在单轮次中检测出来，大致分为三类：1)限制大小的攻击，如\cite{geisler2024attacking, chen2024optimal}，这些攻击方法会限制单次攻击的大小，使得攻击并不是很明显，从而变得难以检测；2)限制角度的攻击，如\cite{you2023three, sagliano2024powered, dong2023adaptive}，这些攻击会限制每次攻击的角度，使其与正常的攻击类似从而变得难以识别；3)限制符号的攻击，如\cite{wan2023average, zhu2023boosting}，这些攻击通过梯度缩放或者梯度合成，控制恶意攻击的梯度与正常客户端梯度的正负维持一致，从而增加识别难度。本部分结合每个客户端的历史记录，通过识别攻击者最终的模型引导意图点来识别恶意节点。
 \textbf{Motivation}: To evade anomaly detection systems, many backdoor attacks employ multi-round composite strategies that are difficult to detect in a single round. These attacks can be broadly classified into three types: (1) \textbf{Size-Limited Attacks} (e.g., \cite{geisler2024attacking, chen2024optimal}), which constrain the magnitude of each attack to make it subtle and less conspicuous, thereby reducing its detectability; (2) \textbf{Angle-Limited Attacks} (e.g., \cite{you2023three, sagliano2024powered, dong2023adaptive}), which restrict the direction of each attack so that it appears similar to legitimate updates, making them harder to recognize; and (3) \textbf{Sign-Limited Attacks} (e.g., \cite{wan2023average, zhu2023boosting}), which use techniques such as gradient scaling or gradient composition to ensure that the signs of the malicious gradients align with those of legitimate clients, thereby increasing the difficulty of detection. This section presents an approach that leverages each client's historical records to identify malicious nodes by analyzing their ultimate intent to manipulate the global model.
 
+
+
 % 前面的防御已经可以有效地针对单轮次攻击进行识别，本部分主要结合客户端的历史记录对客户端进行有效的识别。本部分将保留历史$T$轮次的全局模型$\theta_g^{t'}$，其中$\max\{t-T+1, 1\}\leq  t'\leq t$，并将其Flatten后视为高维空间中的一个点；同时保留每个客户端的历史更新变化，将其视为高维空间中的一个向量，将其延伸后视为一个射线。对于每个客户端，使用最小覆盖球算法计算得到一个最小的超球，覆盖$\zeta$比例的射线。最终球心的位置可以被视为对应客户端对全局模型的意图引导点，球心的半径可以视为对应客户端的置信度。
 
-\textbf{Overview}: The previous defense mechanisms have effectively identified single-round attacks; this section focuses on leveraging clients' historical records for effective identification. We maintain the global models $\theta_g^{t'}$ from the past $T$ rounds, where $\max\{t-T+1, 1\}\leq t'\leq t$, and consider their flattened versions as points in a high-dimensional space. Simultaneously, we keep track of each client's historical updates, viewing them as vectors in the high-dimensional space and extending them as rays. For each client, we use the Minimum Enclosing Ball algorithm to compute a minimal hypersphere that covers a $\zeta$ proportion of the ray. The final position of the hypersphere's center can be regarded as the intended steering point of the global model for the corresponding client, and the radius of the hypersphere can be considered the confidence level of that client.
+\textbf{Overview}: The previous defense algorithms have effectively identified single-round attacks; this section focuses on leveraging clients' historical records for effective identification. We maintain the global models $\theta_g^{t'}$ from the past $T$ rounds, where $\max\{t-T+1, 1\}\leq t'\leq t$, and consider their flattened versions as points in a high-dimensional space. Simultaneously, we keep track of each client's historical updates, viewing them as vectors in the high-dimensional space and extending them as rays. For each client, we use the Minimum Enclosing Ball algorithm to compute a minimal hypersphere that covers a $\zeta$ proportion of the ray. The final position of the hypersphere's center can be regarded as the intended steering point of the global model for the corresponding node, and the radius of the hypersphere can be regarded as the reliability level.
 
 
 
 This section mainly consists of four steps:
 
-\subsubsection{Construction of Weights updates and model databases }
+\subsubsection{Construction of weights updates and model databases}
 
 % 像正常的联邦学习过程一样，中央服务器每次下发一个全局模型，每个客户端得到全局模型后使用本地数据进行训练，并将更新变化上传到中央服务器中。我们将第$t$轮次的全局模型记为$\theta_t$，将客户端$i$第$t$轮次训练后的模型记为$\theta^t_i$。客户端$i$将训练后的模型$\theta^t_{i}$减去训练前中央服务器下发的全局模型$\theta^t$，就得到了$t$轮次的更新变化$\triangledown \theta^t_{i}=\theta^t_{i}-\theta^t$。客户端将更新变化$\triangledown \theta^t_{i}$上传到中央服务器，中央服务器在聚合的同时，记录下每个客户端当前轮次的更新$\triangledown \theta^t_{i}$展平后的结果$\bar{\theta_i^t}$，同时存下中央服务器上轮次下发的全局模型$\theta^{t-1}$。中央服务器最多保留$T$轮次的模型和更新历史记录。“Keep T-rounds History”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的3-13行所示。
-As in a typical federated learning process, the central server distributes a global model in each round. Upon receiving the global model, each client trains on its local data and uploads the updates to the central server. Let the global model in the $t$-th round be denoted as $\theta_t$, and the model of client $i$ after training in the $t$-th round be denoted as $\theta^t_i$. Client $i$ computes its update in the $t$-th round as the difference between the trained model $\theta^t_{i}$ and the global model received before training $\theta^t$, i.e., $\triangledown \theta^t_{i} = \theta^t_{i} - \theta^t$. The client uploads the update $\triangledown \theta^t_{i}$ to the central server. While aggregating, the central server records the flattened result of each client's update in the current round, $\bar{\theta_i^t}$, as well as the global model $\theta^{t-1}$ distributed by the central server in the previous round. The central server retains the models and update histories for up to $T$ rounds.% The main algorithm process for "Keep T-rounds History" is shown in lines 3-13 of Algorithm \ref{alg:malicious-node-detection-history}. 
+As in a typical federated learning process, the central server distributes a global model in each round. Upon receiving the global model, each client trains on its local data and uploads the updates to the central server. Let the global model in the $t$-th round be denoted as $\theta_t$, and the model of client $i$ after training in the $t$-th round be denoted as $\theta^t_i$. Client $i$ computes its update in the $t$-th round as the difference between the trained model $\theta^t_{i}$ and the global model received before training $\theta^t$, i.e., $\triangledown \theta^t_{i} = \theta^t_{i} - \theta_g^t$. The client uploads the update $\triangledown \theta^t_{i}$ to the central server. While aggregating, the central server records the flattened result of each client's update in the current round, $\bar{\theta_i^t}$, as well as the global model $\theta^{t-1}$ distributed by the central server in the previous round. The central server retains the models and weights update histories for up to $T$ rounds.% The main algorithm process for "Keep T-rounds History" is shown in lines 3-13 of Algorithm \ref{alg:malicious-node-detection-history}. 
 
 \subsubsection{Construction of attack intention}
 % 这个问题可以抽象为高维空间中的一些具有起点的射线。射线的起点代表上轮次的全局模型，射线的方向代表本轮次展平后的更新变化。问题的优化目标是：找到一个最小的超球，至少覆盖$\zeta$比例的射线。
@@ -398,9 +414,11 @@ We use the symbol $O_i$ to represent the center of the hypersphere for client $i
     \quad\quad\max\{t-T+1, 1\}\leq  t'\leq t.
 \end{equation}
 % “Obtain the Purpose Intention”的主要算法过程如算法\ref{alg:malicious-node-detection-history}的14-18行所示。此部分又可以分为“Construct Ray Model”和“Minimum Enclosing Hypersphere Calculation”两部分。
-The main algorithm process for "Obtain the Purpose Intention" is shown in lines 14-18 of Algorithm \ref{alg:malicious-node-detection-history}. This section can be further divided into two parts: "Construct Ray Model" and "Minimum Enclosing Hypersphere Calculation."
+%The main algorithm process for "Obtain the Purpose Intention" is shown in lines 14-18 of Algorithm \ref{alg:malicious-node-detection-history}. This section can be further divided into two parts: "Construct Ray Model" and "Minimum Enclosing Hypersphere Calculation."
 % “Construct Ray Model”的主要过程如下。对于每个客户端 \(R_i\)，中央服务器保留了最近 \(T\) 轮的全局模型历史以及每轮次的更新变化历史。设 \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) 是最近 \(T\) 轮次的全局模型，且这些全局模被“展平”到了高维空间中的一个点。类似地，设 \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) 是最近 \(T\) 轮次客户端 \(i\) 上传的展平后的梯度变化向量。
-The main process of "Construct Ray Model" is as follows. For each client \(R_i\), the central server retains the global model history and the update history for the most recent \(T\) rounds. Let \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) represent the global models of the most recent \(T\) rounds, which have been "flattened" to a point in a high-dimensional space. Similarly, let \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) represent the flattened gradient update vectors uploaded by client \(i\) in the most recent \(T\) rounds.
+
+%The main process of "Construct Ray Model" is as follows. 
+For each client \(R_i\), the central server retains the global model history and the update history for the most recent \(T\) rounds. Let \( \theta_g^{t-T}, \theta_g^{t-T+1}, \dots, \theta_g^{t-1} \) represent the global models of the most recent \(T\) rounds, which have been "flattened" to a point in a high-dimensional space. Similarly, let \( \overline{\triangledown\theta_{i}^{t-T}}, \overline{\triangledown\theta_{i}^{t-T+1}}, \dots, \overline{\triangledown\theta_{i}^{t-1}} \) represent the flattened gradient update vectors uploaded by client \(i\) in the most recent \(T\) rounds.
 % 对于每一轮 \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \))，我们将每个射线的起点表示为展平后的全局模型 \( \theta_g^{t'} \)，并将每个射线的方向向量表示为展平后的梯度变化 \( \overline{\triangledown\theta_{i}^{t'}} \)。因此，射线模型可以构建如下：
 For each round \( t' \) (\( \max\{t-T+1, 1\}\leq  t'\leq t \)), the starting point of each ray is represented by the flattened global model \( \theta_g^{t'} \), and the direction vector of each ray is represented by the flattened gradient update \( \overline{\triangledown\theta_{i}^{t'}} \). Thus, the ray model can be constructed as follows:
 
@@ -419,7 +437,7 @@ l_i^{t'}=\widetilde{\theta_{i}^{t'-1}}+\alpha {v}_{i}^{t'},
 % 其中，$\alpha\in [0, +\infty)$为射线的自变量参数。
 where $\alpha\in [0, +\infty)$ is the parameter of the ray.
 % “Minimum Enclosing Hypersphere Calculation”的主要过程如下。基于构建的射线模型，使用最小覆盖球算法找到一个能够覆盖至少 \( \zeta \) 比例的射线的最小超球。首先，设定初始球心 \( O_{i,0} \) 为所有射线起点的几何中心，计算公式如下：
-The main process of "Minimum Enclosing Hypersphere Calculation" is as follows. Based on the constructed ray model, the Minimum Enclosing Hypersphere Ball (MEHB) algorithm is used to find the smallest hypersphere that can cover at least a \( \zeta \) proportion of the rays. First, the initial center of the hypersphere \( O_{i,0} \) is set to the geometric center of all ray starting points, calculated as follows:
+Therefore, we approximate the attack intention hiddden behind the series of behaviors based on Minimum Enclosing Hypersphere Ball (MEHB) construction as follows. Based on the constructed ray model, the MEHB model is adopted to find the smallest hypersphere that can cover at least a \( \zeta \) proportion of the rays, which denotes the intention of the current node. First, the initial center of the hypersphere \( O_{i,0} \) is set to the geometric center of all ray starting points, calculated as follows:
 
 \begin{equation}
     O_{i,0} = \frac{1}{\min\{T, t\}} \sum_{t'=\max\{t-T+1, 1\}}^{t} \widetilde{\theta_g^{t'-1}}.
@@ -452,6 +470,13 @@ O_{i,k+1} = O_{i,k} + \eta' (\tilde{O}_{i,k}^{t_{max}'}-O_{i,k}),
 % 其中$\eta'$为学习率。移动后的球心半径为：
 where $\eta'$ is the learning rate. 
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig3.png}
+    \caption{Long-term attack intention detection module and secure aggregation}
+    \label{fig3:longterm}
+\end{figure}
+
 The radius of the moved center is:
 
 \begin{equation}
@@ -463,9 +488,9 @@ r_{i,k+1} =  \{ \max\{\| O_{i,k+1}-\tilde O_{i,k+1}^{t'} \|\}, t'\in \tilde T\} 
 % 其中$\tilde O_{i,k+1}^{t'}$为更新后的球心$O_{i,k+1}$到被保留射线的最近点。当更新后的半径 \( r_{i,k+1} \) 与上一次的半径 \( r_{i,k} \) 相差小于一个预设的阈值 \( \lambda \)，或者达到预设的最大迭代次数$k_{max}$时，停止迭代。
 where $\tilde O_{i,k+1}^{t'}$ is the nearest point from the updated center $O_{i,k+1}$ to the retained rays. When the difference between the updated radius \( r_{i,k+1} \) and the previous radius \( r_{i,k} \) is smaller than a predefined threshold \( \lambda \), or when the maximum number of iterations $k_{max}$ is reached, the iteration stops.
 
-\subsubsection{driven malicious intention detection}
+\subsubsection{LOF-driven malicious intention detection}
 % “Abnormal Detection”的主要过程基于局部离群因子（Local Outlier Factor, LOF）得到异常点。LOF算法是一种基于密度的异常检测方法，算法的核心思想是通过计算一个数值$lof_i$来反应节点$i$的异常程度。$lof_i$大致意思是节点$i$目的意图点$O_i$周围意图点所处位置的平均密度比上$O_i$所在位置的密度。比值越大于$1$，则$O_i$所在位置的密度越小于周围其他意图点所在位置的密度，即$O_i$越有可能是异常点。首先定义意图点$O_i$的$q$距离$\widetilde{dis_i^q}$，假设高维空间中存在节点$j$的意图点$O_j$，则有$O_j$与$O_i$之间的距离为$\|O_i-O_j\|$，如果满足以下两个条件，我们就认为$\widetilde{dis_i^q}=\|O_i-O_j\|$：
-The main process of "Abnormal Detection" identifies outliers based on the Local Outlier Factor (LOF). The LOF algorithm is a density-based anomaly detection method. Its core idea is to calculate a value $lof_i$ to reflect the degree of abnormality of node $i$. The value of $lof_i$ represents the ratio of the average density of the intention points around the intention point $O_i$ to the density at the location of $O_i$. The greater this ratio is than $1$, the lower the density around $O_i$ compared to the surrounding intention points, indicating that $O_i$ is more likely to be an outlier. First, we define the $q$-distance $\widetilde{dis_i^q}$ of the intention point $O_i$. Assume there is an intention point $O_j$ for node $j$ in the high-dimensional space, and the distance between $O_j$ and $O_i$ is $\|O_i-O_j\|$. If the following two conditions are satisfied, we have $\widetilde{dis_i^q} = \|O_i-O_j\|$:
+The main process of Abnormal Detection identifies outliers based on the Local Outlier Factor (LOF). The LOF algorithm is a density-based anomaly detection method. Its core idea is to calculate a value $lof_i$ to reflect the degree of abnormality of node $i$. The value of $lof_i$ represents the ratio of the average density of the intention points around the intention point $O_i$ to the density at the location of $O_i$. The greater this ratio is than $1$, the lower the density around $O_i$ compared to the surrounding intention points, indicating that $O_i$ is more likely to be an outlier. First, we define the $q$-distance $\widetilde{dis_i^q}$ of the intention point $O_i$. Assume there is an intention point $O_j$ for node $j$ in the high-dimensional space, and the distance between $O_j$ and $O_i$ is $\|O_i-O_j\|$. If the following two conditions are satisfied, we have $\widetilde{dis_i^q} = \|O_i-O_j\|$:
 
 % \begin{itemize}
 %     \item 在样本空间中，至少存在$q$个意图点$O_j'$，使得$\|O_i-O_j'\|\leq \|O_i-O_j\|$, 其中$j'\neq i$；
@@ -483,8 +508,9 @@ In summary, the $q$-distance $\widetilde{dis_i^q}$ of $O_i$ represents the dista
 \begin{equation}
 rea_{i,j}=\max\{\widetilde{dis_i^q}, \|O_i-O_j\|\},
 \end{equation}
+
 % 也就是说，如果意图点$O_j$远离意图点$O_i$，则两者之间的可达距离就是他们之间的实际距离$\|O_i-O_j\|$；而如果二者距离足够近，则可达距离用意图点$O_i$的$q$距离$\widetilde{dis_i^q}$代替。之后定义意图点$O_i$的局部可达密度$lrd_i$为其$Nei_i$所有意图点的平均可达距离的倒数，即：
-That is, if the intention point $O_j$ is far from the intention point $O_i$, the reachable distance between them is their actual distance $\|O_i-O_j\|$; if they are close enough, the reachable distance is replaced by the $q$-distance $\widetilde{dis_i^q}$ of the intention point $O_i$. Next, we define the local reachable density $lrd_i$ of the intention point $O_i$ as the reciprocal of the average reachable distance of all intention points in its $Nei_i$:
+In another word, if the intention point $O_j$ is far from the intention point $O_i$, the reachable distance between them is their actual distance $\|O_i-O_j\|$; if they are close enough, the reachable distance is replaced by the $q$-distance $\widetilde{dis_i^q}$ of the intention point $O_i$. Next, we define the local reachable density $lrd_i$ of the intention point $O_i$ as the reciprocal of the average reachable distance of all intention points in its $Nei_i$:
 
 \begin{equation}
 lrd_i=1/(\frac{\sum_{j\in Nei_i} rea_{i,j}}{|Nei_i|})
@@ -502,7 +528,7 @@ If $lof_i$ is close to $1$, it indicates that the density of intention point $O_
 % “Abnormal Detection”的主要过程如算法\ref{alg:malicious-node-detection-history}的19-30行所示。
 % The main process of "Abnormal Detection" is shown in lines 19-30 of Algorithm \ref{alg:malicious-node-detection-history}.
 
-\subsubsection{Gradients Aggregation}
+\subsubsection{Secure Aggregation}
 % 剔除了异常节点后，依据正常节点的置信度$cre$进行聚合。其中定义：
 After removing abnormal nodes, the aggregation is performed based on the confidence $cre$ of normal nodes. The definition is as follows:
 
@@ -524,14 +550,16 @@ Consider the following scenario: suppose two nodes have very small minimum enclo
 \begin{equation}
     cre_i'=\tanh(cre_i),
 \end{equation}
+
 % 激活函数Tanh在$0$到$\infty$范围内是一个上升又快到慢的单调递增函数。当$cre_i\to 0$时$cer_i'\to 0$，也就是说节点$i$的最小覆盖球半径$r_i$很大时该节点在聚合时的权重很小；当$cre_i\to \infty$时$cer_i'\to 1$，也就是说节点$i$的最小覆盖球半径$r_i$很小时该节点在聚合时的权重较大。这样，我们就可以对每个加权处理过的置信度$cer_i'$进行归一化处理，得到权重$w_i$。其中：
 The Tanh activation function is a monotonic increasing function that rises quickly at first and then slowly within the range of $0$ to $\infty$. When $cre_i \to 0$, $cer_i' \to 0$, which means that when the minimum enclosing hypersphere radius $r_i$ of node $i$ is large, its weight during aggregation is small. Conversely, when $cre_i \to \infty$, $cer_i' \to 1$, which indicates that when the radius $r_i$ is small, the weight of node $i$ in the aggregation is larger. This allows us to normalize each adjusted confidence $cer_i'$ to obtain the weight $w_i$. The formula is:
 
 \begin{equation}
     w_i=\frac{cre_i'}{\sum_{i=1}^{N}cre_i'},
 \end{equation}
+
 % 因此第$t$轮模型的梯度聚合公式为：
-Thus, the gradient aggregation formula for the model in the $t$-th round is:
+Thus, the secure aggregation formula for the model in the $t$-th round is:
 
 \begin{equation}
     \theta_g^t = \theta_g^{t-1}+\sum_{i=1}^{N}w_i\triangledown \theta_i^t,
@@ -568,33 +596,34 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 \State \textbf{Input:} Global model history $\{\theta_g^{t-T}, \dots, \theta_g^{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \dots, \triangledown \theta_{i}^{t-1}\}$
 \State \textbf{Output:} Sets of normal clients $U_{nor}$ and malicious clients $U_{mal}$
 
-\State \textbf{Step 1: Keep T-rounds History}
-\For {Client $i$}
-    \State $\bar{\theta_i^t} \gets Flatten(\triangledown \theta_{i}^t)$ \Comment{Record flattened gradients  and models $\theta_g^{t-1}$}
-    % \State $\widetilde{\theta_{i}^{t'-1}}  \gets Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'}  \gets \overline{\triangledown\theta_{i}^{t'}}$ for $t'  \gets \max\{t-T+1, 1\}, \ldots, t$ \Comment{Construct rays}
-    \State $\widetilde{\theta_{i}^{t'-1}}  \gets Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'}  \gets \overline{\triangledown\theta_{i}^{t'}}$ , $\max\{t-T+1, 1\}\leq t' \leq t$ \Comment{Construct rays}
-\EndFor
 
-\State \textbf{Step 2: Obtain the Purpose Intention}
 \For {Client $i$}
+\State{\color{CadetBlue}/* \textbf{Construction of updates and model databases */}} 
+    \State Record flattened gradients $\bar{\theta_i^t}$ and models $\theta_g^{t-1}$
+    % \State $\widetilde{\theta_{i}^{t'-1}}  \gets Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'}  \gets \overline{\triangledown\theta_{i}^{t'}}$ for $t'  \gets \max\{t-T+1, 1\}, \ldots, t$ \Comment{Construct rays}
+    \State Construct rays for each $'$, $\max\{t-T+1, 1\}\leq t' \leq t$
+
+
+\State{\color{CadetBlue}/* \textbf{Construction of attack intention */}} 
+
     \State Initialize center $O_{i,0}$ and radius $r_{i,0}$
     \While {Not Converged}
         \State Update center $O_{i,k+1}$ and radius $r_{i,k+1}$
     \EndWhile
     \State  $cre_i  \gets \frac{1}{r_i + \rho}$ \Comment{Calculate confidence}
-\EndFor
 
-\State \textbf{Step 3: Abnormal Detection}
-\For {Client $i$}
+
+\State{\color{CadetBlue}/* \textbf{LOF-driven malicious intention detection*/}} 
+
     \For {Each point $O_j \neq O_i$}
         \State Calculate distance $\|O_i - O_j\|$
     \EndFor
     \State Determine $q$-distance $\widetilde{dis_i^q}$ for $O_i$
     \State Find neighbors $Nei_i$ within $\widetilde{dis_i^q}$
     \State $rea_{i,j}  \gets \max\{\widetilde{dis_i^q}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$  \Comment{Compute reachability distance}
-    \State  $lrd_i  \gets \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$ \Comment{Calculate local reachability density}
+    \State  $lrd_i  \gets \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$ \Comment{Calculate reachability density}
     \State $lof_i  \gets \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
-\EndFor
+
 % \For {Client $i$}
 %     \State Compute $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
 %     \If {$lof_i > 1$}
@@ -607,13 +636,12 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 % \State $U_{nor} = \{i \,|\, lof_i \leq 1\}$
 \State $U_{mal}, U_{nor}  \gets \{i \,|\, lof_i > 1\}, \{i \,|\, lof_i \leq 1\}$
 
-\State \textbf{Step 4: Gradients Aggregation}
-\For {Client $i\in U_{nor}$}
+\State{\color{CadetBlue}/* \textbf{Secure aggregation of global FFT model*/}} 
         \State $cre_i'  \gets \tanh(cre_i)$\Comment{Compute adjusted confidence}
         \State $w_i  \gets \frac{cre_i'}{\sum_{i \in U_{nor}} cre_i'}$\Comment{Normalize weights}
 \EndFor
 
-\State \textbf{Output:} $\theta_g^t \gets \theta_g^{t-1} + \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i^t$\Comment{Aggregated global model update}
+\State \textbf{Output:} $\theta_g^t \gets \theta_g^{t-1} + \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i^t$\Comment{Aggregate global model}
 \end{algorithmic}
 \end{algorithm}
 
@@ -640,100 +668,188 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 %     \label{fig4:before-agg}
 % \end{figure}
 
+
+
 \section{Experimental evaluation}
 % This section presents a thorough evaluation of SecFFT on two benchmark datasets, aiming to illustrate its effectiveness. 本实验在一台Windows操作系统的服务器上进行，28核心128GB内存，以及2块NVIDIA GeForce RTX 3090 GPU(24G)。
-This section thoroughly evaluates SecFFT on the benchmark dataset to illustrate its effectiveness, which begins by detailing the experimental setup and environment, followed by a presentation and analysis of the experimental results.
+This section thoroughly evaluates SecFFT on the benchmark dataset to illustrate its effectiveness, which begins by detailing the experimental setup and environment, followed by the analysis of the experimental results.
 
 \subsection{Experimental Setup}
 % 在本实验中，我们采用了常用的联邦学习场景进行评估。具体设置如下：
 We used the widely adopted FedAvg framework for evaluation. The experiments were conducted on a server running the Windows operating system with 28 cores, 128GB of memory, and two NVIDIA GeForce RTX 3090 GPUs (24GB). The specific settings are as follows:
 
 
-%\textbf{数据集}：我们使用FMNIST\cite{minist}作为实验数据集。FMNIST数据集包含60,000张28x28像素的灰度时尚商品图像，共分为10个类别，其中50,000张为训练集，10,000张为测试集。
 
+%\textbf{数据集}：我们使用FMNIST\cite{minist}作为实验数据集。FMNIST数据集包含60,000张28x28像素的灰度时尚商品图像，共分为10个类别，其中50,000张为训练集，10,000张为测试集。
 
 
 \textbf{Dataset:} We used the FMNIST\cite{minist} dataset as the experimental dataset. The FMNIST dataset contains 60,000 grayscale images of fashion items with a resolution of 28x28 pixels, divided into 10 categories, with 50,000 images for training and 10,000 for testing.
 
+
+
+
+
  % \textbf{微调模型}：我们采用CLIP的CLIP-ViT-B/32\cite{huggingface_clip}模型作为微调所使用的预训练模型。CLIP是一种通过对比学习在文本和图像数据上进行预训练的模型，能将自然语言和视觉信息映射到同一特征空间中。CLIP-ViT-B/32基于ViT\cite{vit}架构，包含12层Transformer编码器，隐藏层维度为768，多头注意力头数为12，使用32x32的图像块作为输入。在微调过程中，我们使用LORA\cite{lora}方案仅在Vision Encoder模块插入低秩矩阵，保持Textual Encoder模块不变。我们设定低秩矩阵的秩为16，学习率为$10^{-4}$，以在有限计算资源下高效微调模型，使其更好地适应特定任务的数据分布。
-\textbf{Fine-tuning model:} We adopted the \textbf{CLIP-ViT-B/32}\cite{huggingface_clip} model from \cite{clip} as the pre-trained model for federated fine-tuning. CLIP is a model pre-trained on both text and image data through contrastive learning, capable of mapping natural language and visual information into the same feature space. CLIP-ViT-B/32 is based on the ViT\cite{vit} architecture and contains 12 layers of Transformer encoders, with a hidden dimension of 768 and 12 attention heads, using 32x32 image patches as input. During fine-tuning, we used the \textbf{LORA}\cite{lora} method to insert low-rank matrices only in the Vision Encoder module, keeping the Textual Encoder module unchanged. We set the rank of the low-rank matrices to 16 and the learning rate to \textbf{$10^{-4}$} to efficiently fine-tune the model under limited computational resources, allowing it to better adapt to the data distribution of specific tasks.
+\textbf{Models:} 
+% We adopted the \textbf{CLIP-ViT-B/32}\cite{huggingface_clip} model from \cite{clip} as the pre-trained model for federated fine-tuning. CLIP is a vision language model pre-trained on both text and image data through contrastive learning, capable of mapping natural language and visual information into the same feature space. CLIP-ViT-B/32 is based on the ViT\cite{vit} architecture and contains 12 layers of Transformer encoders, with a hidden dimension of 768 and 12 attention heads, using 32x32 image patches as input. During fine-tuning, we used the \textbf{LORA}\cite{lora} method to insert low-rank matrices only in the Vision Encoder module, keeping the Textual Encoder module unchanged. We set the rank of the low-rank matrices to 16 and the learning rate to \textbf{$10^{-4}$} to efficiently fine-tune the model under limited computational resources, allowing it to better adapt to the data distribution of specific tasks.
+We adopted the \textbf{CLIP-ViT-B/32}\cite{huggingface_clip} model from \cite{clip} as the pre-trained model for federated fine-tuning. CLIP is a vision-language model pre-trained on both text and image data through contrastive learning, capable of mapping natural language and visual information into a shared feature space. CLIP-ViT-B/32 is based on the ViT\cite{vit} architecture and consists of 12 layers of Transformer encoders, with a hidden dimension of 768 and 12 attention heads, processing 32x32 image patches as input. During fine-tuning, we employed the \textbf{LORA}\cite{lora} method to introduce low-rank matrices only into the Vision Encoder module, while keeping the Textual Encoder module unchanged. We set the rank of the low-rank matrices to 16 and the learning rate to \textbf{$10^{-4}$} to efficiently fine-tune the model under limited computational resources, enabling it to better adapt to the data distribution of specific tasks.
 
-% \textbf{攻击方式}：对于单轮恶意用户检测，我们使用包括MR\cite{MR}、EDGE CASE\cite{EDGE_CASE}、以及NEUR\cite{zhang2022neurotoxin}在内的三种针对联邦学习场景的最新攻击。MR攻击通过将中毒图像与正常图像混合来创建恶意数据集，并使用投影梯度下降法进行本地训练来达到植入后门的效果；EDGE CASE攻击利用罕见的“边缘情况”样本，通过数据或模型投毒在联邦学习模型中插入后门；Neurotoxin攻击则尝试通过识别在正常节点训练中不常更新的参数，并利用这些参数插入后门，以提高后门的持久性。
-\textbf{Attack methods:} For Instantaneous Attack Behavior Perception, we used three of the latest attacks targeting federated learning scenarios, including \textbf{MR}\cite{MR}, \textbf{EDGE CASE}\cite{EDGE_CASE}, and \textbf{NEUR}\cite{zhang2022neurotoxin}. The MR attack creates a malicious dataset by mixing poisoned images with normal ones and uses the projected gradient descent method for local training to implant backdoors; the EDGE CASE attack utilizes rare "edge-case" samples to insert backdoors into the federated learning model through data or model poisoning; the NEUR attack attempts to identify parameters that are rarely updated during normal node training and uses these parameters to insert backdoors, enhancing the persistence of the backdoor.
+% \textbf{攻击方式}：对于单轮恶意用户检测，我们使用包括MR\cite{MR}、EDGE CASE\cite{EDGE_CASE}、以及NEUR\cite{zhang2022neurotoxin}在内的三种针对联邦学习场景的最新攻击。MR攻击通过将中毒图像与正常图像混合来创建恶意数据集，并使用投影梯度下降法进行本地训练来达到植入后门的效果；EDGE CASE攻击利用罕见的“边缘情况”样本，通过数据或模型投毒在联邦学习模型中插入后门；Neurotoxin攻击则尝试通过识别在正常节点训练中不常更新的参数，并利用这些参数插入后门，以提高后门的持久性。For Instantaneous Attack Behavior Perception,?
+\textbf{Attack paradigms:} we employed three state-of-the-art attacks targeting federated learning scenarios, namely \textbf{MR}\cite{MR}, \textbf{EDGE CASE}\cite{EDGE_CASE}, and \textbf{NEUR}\cite{zhang2022neurotoxin}. The MR attack generates a malicious dataset by combining poisoned images with normal ones and employing the projected gradient descent method for local training to implant backdoors; the EDGE CASE attack employs rare "edge-case" samples to inject backdoors into the federated learning model through data or model poisoning; the NEUR attack seeks to identify parameters that are seldom updated during normal node training and uses these parameters to insert backdoors, thereby enhancing the persistence of the backdoor.
 
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/lab1-combined.pdf}
+    \caption{ASR and TSR of various defense mechanisms (FedAVG, FLTrust, Foolsgold, Flame, SecFFT) under three attacks (MR, NEUR, Edge case).}
+    \label{fig:lab1}
+\end{figure*}
 
 % \textbf{对比算法}：对于单轮恶意用户检测算法，我们对比了三种聚合算法：FedAVG\cite{FedAVG}、FLTrust\cite{FLTrust}和Flame\cite{FLAME}。其中FedAVG根据每个节点数据集的大小对其上传的更新进行加权聚合；FLTrust利用一个干净的数据集，仅聚合那些上传更新与该干净数据集上训练所得更新余弦相似度较高的节点；而Flame则通过模型聚类和权重剪裁来估计并注入适量噪声，有效消除联邦学习中的后门攻击。
-\textbf{Baseline defense algorithms:} For Instantaneous Attack Behavior Perception, we compared four aggregation algorithms: \textbf{FedAVG}\cite{FedAVG}, \textbf{Foolsgold}\cite{foolsgold}, \textbf{FLTrust}\cite{FLTrust}, and \textbf{Flame}\cite{FLAME}. FedAVG performs weighted aggregation of the updates uploaded by each node based on the size of their dataset; FoolsGold distinguishes between benign and malicious clients by assessing pairwise similarity among model updates, subsequently down-weighting abnormal updates on the FL server; FLTrust uses a clean dataset and only aggregates updates from nodes whose updates have a high cosine similarity with the updates obtained from the clean dataset; Flame estimates and injects an appropriate amount of noise through model clustering and weight clipping to effectively eliminate backdoor attacks in federated learning.
+\textbf{Baseline defense mechanisms:} 
+% For Instantaneous Attack Behavior Perception, we compared four aggregation algorithms: \textbf{FedAVG}\cite{FedAVG}, \textbf{Foolsgold}\cite{foolsgold}, \textbf{FLTrust}\cite{FLTrust}, and \textbf{Flame}\cite{FLAME}. FedAVG performs weighted aggregation of the updates uploaded by each node based on the size of their dataset; FoolsGold distinguishes between benign and malicious clients by assessing pairwise similarity among model updates, subsequently down-weighting abnormal updates on the FL server; FLTrust uses a clean dataset and only aggregates updates from nodes whose updates have a high cosine similarity with the updates obtained from the clean dataset; Flame estimates and injects an appropriate amount of noise through model clustering and weight clipping to effectively eliminate backdoor attacks in federated learning.
+we compared four aggregation mechanisms: \textbf{FedAVG}\cite{FedAVG}, \textbf{Foolsgold}\cite{foolsgold}, \textbf{FLTrust}\cite{FLTrust}, and \textbf{Flame}\cite{FLAME}. FedAVG conducts weighted aggregation of updates uploaded by each node based on the size of its dataset. FoolsGold differentiates between benign and malicious clients by evaluating pairwise similarity among model updates and subsequently down-weighting anomalous updates on the FL server. FLTrust employs a clean dataset and aggregates only those updates from nodes that exhibit high cosine similarity with the updates derived from the clean dataset. Flame estimates and injects an appropriate amount of noise via model clustering and weight clipping to mitigate backdoor attacks in federated learning effectively.
     
 \textbf{Evaluation metrics:}
 % 就像其他文章中的评价指标一样，我们使用两个关键指标来评估投毒攻击与防御方法的效果，即ASR（攻击成功率）和 TSR（测试成功率）。ASR表示恶意节点成功诱导全局模型成功预测指定目标的概率。攻击者的目标是最大化ASR，而有效的防御措施则旨在防止ASR上升。TSR表示全局模型在测试集上的预测正确率。攻击者的目标是尽量维持模型的TSR不变，以避免被轻易检测到，而有效的防御措施则不应显著降低全局模型的TSR。
-Similar to evaluation metrics used in other works\cite{tang2023port, jin2024learning, rong2023special}, we use two key metrics to assess the effectiveness of poisoning attacks and defense methods: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR represents the probability that malicious nodes successfully induce the global model to predict the specified target. The goal of the attacker is to maximize ASR, while effective defense measures aim to prevent an increase in ASR. TSR represents the accuracy of the global model on the test set. The attacker's goal is to maintain the TSR of the model as unchanged as possible to avoid easy detection, while effective defense measures should not significantly reduce the TSR.
-
-\subsection{Model integrity and poisoning resistance}
-% 为了验证我们所提方法“Instantaneous Attack Behavior Perception”的有效性，我们分别在MR、EDGE CASE、NEUR三种攻击下进行实验，并与FedAVG(Baseline)、Foolsgold、FLTrust、Flame进行对比，比较不同防御算法下相应的TSR以及ASR。图\ref{fig:lab1}分别展示了攻击相应的实验结果。
-To validate the effectiveness of our proposed method, we conducted experiments under three types of attacks: MR, Edge case, and NEUR. We compared our method with FedAVG (Baseline), FoolsGold, FLTrust, and Flame to evaluate the corresponding TSR and ASR under different defense algorithms. The experimental results are shown in Figure \ref{fig:lab1}.
-
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=\linewidth]{figures/lab1-combined.pdf}
-    \caption{ASR and TSR of various defense algorithms (FedAVG, FLTrust, Foolsgold, Flame, SecFFT) under three attacks (MR, NEUR, Edge case).}
-    \label{fig:lab1}
-\end{figure}
-
-
-% 从图中可以看出，SecFFT在面对三种攻击场景（MR、NEUROTOXIN、EDGE_CASE）时展现了最强的鲁棒性和出色的模型性能。在所有场景下，SecFFT的攻击成功率（ASR）始终接近于零，测试准确率（TSR）依然维持在高位，这意味着该算法能够有效防御攻击，能够成功识别并防御恶意用户，同时保持全局模型的性能和准确性。相比之下，其他防御算法表现则较为逊色。虽然Flame在降低ASR方面同样表现优异，能有效识别出恶意用户，但其在识别过程中引入了较多噪声，导致全局模型的准确率（TSR）下降，特别是在MR攻击下，性能损失更为显著。FLTrust在应对MR攻击时几乎完全失效，ASR迅速上升，未能有效防御；尽管在NEUROTOXIN和EDGE_CASE场景下表现有所改善，但防御效果依然不够稳定。Foolsgold在MR和NEUROTOXIN攻击下的防御效果较差，ASR依旧很高，仅在EDGE case下表现出一些效果，但并不显著。总体而言，这些算法在抵御攻击时未能同时兼顾模型的性能，进一步突显了SecFFT在联邦学习攻击防御中的显著优势，成为最优的防御选择。
-As shown in the figure, SecFFT demonstrates the strongest robustness and excellent model performance when faced with three types of attack scenarios (MR, NEUR, EDGE CASE). In all scenarios, SecFFT's ASR remains close to zero, while the TSR stays high, indicating that the algorithm can effectively defend against attacks by successfully identifying and mitigating malicious users while maintaining the performance and accuracy of the global model. In contrast, other defense algorithms perform less favorably. Although Flame also performs well in reducing ASR and effectively identifying malicious users, it introduces a significant amount of noise during the identification process, which leads to a decrease in the global model's accuracy (TSR), particularly under the MR attack, where the performance loss is more pronounced. FLTrust nearly fails to defend against MR attacks, with ASR rising rapidly, rendering it ineffective. While its performance improves under NEUR and EDGE CASE scenarios, the defense effectiveness remains unstable. FoolsGold exhibits poor defense performance under MR and NEUR attacks, with ASR still high, showing some effectiveness only in the EDGE CASE scenario, but not significantly. Overall, these algorithms fail to balance model performance while defending against attacks, further highlighting SecFFT's significant advantage in federated learning attack defense, making it the optimal choice for defense.
-
-\subsection{Performance of Attack Behavior Perception}
-% 为了验证我们所提方法在恶意用节点识别方面具有较高的准确度，我们总结了在三种攻击(MR, Edge case, NEUR)下所有轮次中SecFFT对恶意节点的识别情况，并与FoolsGold, FLTrust, and Flame三种防御算法进行了对比。具体对比结果如图\ref{fig:lab2}所示，我们利用t-sne算法将所有轮次中节点的更新降维到了二维平面，图中红色点表示被错误识别的节点，包括恶意节点被识别成良性节点以及良性节点被错误识别成恶意节点。对于无法直接获得节点识别情况的Foolsgold防御算法，我们通过利用KMeans聚合算法将该防御算法过程中分配给每个用户的聚合权重聚成两类，并取最大类作为良性节点其余作为恶意节点的结果作为统计标准。
-To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, Edge Case, NEUR) across all rounds and compared them with three defense algorithms: FoolsGold, FLTrust, and Flame. The specific comparison results are shown in Figure \ref{fig:lab2}. We used the t-SNE algorithm to reduce the dimensionality of the nodes' updates from all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. For the Foolsgold defense algorithm, which does not directly provide node identification results, we used the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
+% Similar to evaluation metrics used in other works\cite{tang2023port, jin2024learning, rong2023special}, we use two key metrics to assess the effectiveness of poisoning attacks and defense methods: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR represents the probability that malicious nodes successfully induce the global model to predict the specified target. The goal of the attacker is to maximize ASR, while effective defense measures aim to prevent an increase in ASR. TSR represents the accuracy of the global model on the test set. The attacker's goal is to maintain the TSR of the model as unchanged as possible to avoid easy detection, while effective defense measures should not significantly reduce the TSR.
+Similar to the evaluation metrics employed in other studies\cite{tang2023port, jin2024learning, rong2023special}, we utilize two key metrics to assess the effectiveness of poisoning attacks and defense mechanisms: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR denotes the probability that malicious nodes successfully manipulate the global model to predict a specified target. The attacker aims to maximize the ASR, whereas effective defense mechanisms strive to prevent an increase in ASR. TSR indicates the accuracy of the global model on the test set. The attacker aims to keep the TSR of the model as stable as possible to avoid easy detection, whereas effective defense mechanisms should not significantly degrade the TSR.
 
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=\linewidth]{figures/lab2-combined.pdf}
-    \caption{Visualization of node identification results under three different attack scenarios (MR, Edge Case, NEUR) for various defense algorithms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE dimensionality reduction. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. }
-
+    \caption{Visualization of node identification results under three different attack scenarios (MR, Edge Case, NEUR) for various defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE dimensionality reduction. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. }
     \label{fig:lab2}
 \end{figure*}
-% 如图所示，SecFFT 的错误识别率最低，仅为 3%，表明其在各种攻击模式下具有更强的防御能力和鲁棒性，能够准确区分恶意节点和良性节点。而 Flame、FLTrust 和 FoolsGold 的错误识别率分别为 12%、19.5% 和 37.5%，错误识别的节点分布较为广泛，尤其是 FoolsGold 的错误识别率最高，显示出其在应对复杂攻击场景时的防御效果较差。相比之下，SecFFT 在应对多种攻击类型时表现最为优异，能有效降低错误识别率，展示了更好的泛化能力和准确性。
-As shown in the figure, SecFFT has the lowest misidentification rate, at only 3\%, indicating its stronger defense capability and robustness in various attack scenarios, accurately distinguishing between malicious and benign nodes. In contrast, the misidentification rates of Flame, FLTrust, and FoolsGold are 12\%, 19.5\%, and 37.5\%, respectively, with misidentified nodes more widely distributed. Notably, FoolsGold has the highest misidentification rate, demonstrating poor defense performance in handling complex attack scenarios. Comparatively, SecFFT performs the best in dealing with various attack types, effectively reducing the misidentification rate and showing better generalization ability and accuracy.
 
-\subsection{Performance of SecFFT}
+\subsection{Model integrity and poisoning resistance}
+% 为了验证我们所提方法“Instantaneous Attack Behavior Perception”的有效性，我们分别在MR、EDGE CASE、NEUR三种攻击下进行实验，并与FedAVG(Baseline)、Foolsgold、FLTrust、Flame进行对比，比较不同防御算法下相应的TSR以及ASR。图\ref{fig:lab1}分别展示了攻击相应的实验结果。
+To validate the effectiveness of our proposed method, we conducted experiments under three types of attacks: MR, Edge case, and NEUR. We compared our method with FedAVG (Baseline), FoolsGold, FLTrust, and Flame to evaluate the corresponding TSR and ASR under different defense mechanisms. The experimental results are shown in Figure \ref{fig:lab1}.
+
+
+
+
+% 从图中可以看出，SecFFT在面对三种攻击场景（MR、NEUROTOXIN、EDGE_CASE）时展现了最强的鲁棒性和出色的模型性能。在所有场景下，SecFFT的攻击成功率（ASR）始终接近于零，测试准确率（TSR）依然维持在高位，这意味着该算法能够有效防御攻击，能够成功识别并防御恶意用户，同时保持全局模型的性能和准确性。相比之下，其他防御算法表现则较为逊色。虽然Flame在降低ASR方面同样表现优异，能有效识别出恶意用户，但其在识别过程中引入了较多噪声，导致全局模型的准确率（TSR）下降，特别是在MR攻击下，性能损失更为显著。FLTrust在应对MR攻击时几乎完全失效，ASR迅速上升，未能有效防御；尽管在NEUROTOXIN和EDGE_CASE场景下表现有所改善，但防御效果依然不够稳定。Foolsgold在MR和NEUROTOXIN攻击下的防御效果较差，ASR依旧很高，仅在EDGE case下表现出一些效果，但并不显著。总体而言，这些算法在抵御攻击时未能同时兼顾模型的性能，进一步突显了SecFFT在联邦学习攻击防御中的显著优势，成为最优的防御选择。
+% As shown in the figure, SecFFT demonstrates the strongest robustness and excellent model performance when faced with three types of attack scenarios (MR, NEUR, EDGE CASE). In all scenarios, SecFFT's ASR remains close to zero, while the TSR stays high, indicating that the algorithm can effectively defend against attacks by successfully identifying and mitigating malicious users while maintaining the performance and accuracy of the global model. In contrast, other defense mechanisms perform less favorably. Although Flame also performs well in reducing ASR and effectively identifying malicious users, it introduces a significant amount of noise during the identification process, which leads to a decrease in the global model's accuracy (TSR), particularly under the MR attack, where the performance loss is more pronounced. FLTrust nearly fails to defend against MR attacks, with ASR rising rapidly, rendering it ineffective. While its performance improves under NEUR and EDGE CASE scenarios, the defense effectiveness remains unstable. FoolsGold exhibits poor defense performance under MR and NEUR attacks, with ASR still high, showing some effectiveness only in the EDGE CASE scenario, but not significantly. Overall, these mechanisms fail to balance model performance while defending against attacks, further highlighting SecFFT's significant advantage, making it the optimal choice for defense.
+As depicted in the figure, SecFFT exhibits the highest robustness and superior model performance when confronted with three types of attack scenarios (MR, NEUR, EDGE CASE). Across all scenarios, SecFFT's ASR remains near zero, whereas the TSR remains high, indicating that the algorithm effectively defends against attacks by accurately identifying and mitigating malicious nodes while preserving the performance and accuracy of the global model. Conversely, other defense algorithms perform less effectively. Although Flame is also effective in reducing ASR and identifying malicious nodes, it introduces substantial noise during the identification process, leading to a decline in the global model's accuracy (TSR), especially under the MR attack, where the performance degradation is more pronounced. FLTrust almost fails to defend against MR attacks, with ASR rising rapidly, rendering it ineffective. While its performance improves under NEUR and EDGE CASE scenarios, its defense effectiveness remains inconsistent. FoolsGold demonstrates weak defense performance under MR and NEUR attacks, with ASR remaining high, showing limited effectiveness only in the EDGE CASE scenario. Overall, these algorithms fail to balance model performance and defense against attacks, further underscoring SecFFT's substantial advantage, establishing it as the optimal choice for defense.
+
+
+
+\subsection{Performance of Attack Behavior Perception}
+% 为了验证我们所提方法在恶意用节点识别方面具有较高的准确度，我们总结了在三种攻击(MR, Edge case, NEUR)下所有轮次中SecFFT对恶意节点的识别情况，并与FoolsGold, FLTrust, and Flame三种防御算法进行了对比。具体对比结果如图\ref{fig:lab2}所示，我们利用t-sne算法将所有轮次中节点的更新降维到了二维平面，图中红色点表示被错误识别的节点，包括恶意节点被识别成良性节点以及良性节点被错误识别成恶意节点。对于无法直接获得节点识别情况的Foolsgold防御算法，我们通过利用KMeans聚合算法将该防御算法过程中分配给每个用户的聚合权重聚成两类，并取最大类作为良性节点其余作为恶意节点的结果作为统计标准。
+% To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, Edge Case, NEUR) across all rounds and compared them with three defense mechanisms: FoolsGold, FLTrust, and Flame. The specific comparison results are shown in Figure \ref{fig:lab2}. We used the t-SNE algorithm to reduce the dimensionality of the nodes' updates from all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. For the Foolsgold defense algorithm, which does not directly provide node identification results, we used the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
+To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, EDGE CASE, NEUR) across all rounds and compared them with three defense mechanisms: FoolsGold, FLTrust, and Flame. The specific comparison results are illustrated in Figure \ref{fig:lab2}. We employed the t-SNE algorithm to reduce the dimensionality of the nodes' updates across all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes mistakenly identified as benign and benign nodes mistakenly identified as malicious. For the FoolsGold defense algorithm, which does not directly provide node identification results, we employed the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
+
+
+% 如图所示，SecFFT 的错误识别率最低，仅为 3%，表明其在各种攻击模式下具有更强的防御能力和鲁棒性，能够准确区分恶意节点和良性节点。而 Flame、FLTrust 和 FoolsGold 的错误识别率分别为 12%、19.5% 和 37.5%，错误识别的节点分布较为广泛，尤其是 FoolsGold 的错误识别率最高，显示出其在应对复杂攻击场景时的防御效果较差。相比之下，SecFFT 在应对多种攻击类型时表现最为优异，能有效降低错误识别率，展示了更好的泛化能力和准确性。
+% As shown in the figure, SecFFT has the lowest misidentification rate, at only 3\%, indicating its stronger defense capability and robustness in various attack scenarios, accurately distinguishing between malicious and benign nodes. In contrast, the misidentification rates of Flame, FLTrust, and FoolsGold are 12\%, 19.5\%, and 37.5\%, respectively, with misidentified nodes more widely distributed. Notably, FoolsGold has the highest misidentification rate, demonstrating poor defense performance in handling complex attack scenarios. Comparatively, SecFFT performs the best in dealing with various attack types, effectively reducing the misidentification rate and showing better generalization ability and accuracy.
+As illustrated in the figure, SecFFT achieves the lowest misidentification rate, at only 3\%, indicating its superior defense capability and robustness across various attack scenarios, accurately distinguishing between malicious and benign nodes. Conversely, the misidentification rates of Flame, FLTrust, and FoolsGold are 12\%, 19.5\%, and 37.5\%, respectively, with misidentified nodes more broadly distributed. Notably, FoolsGold exhibits the highest misidentification rate, demonstrating suboptimal defense performance in managing complex attack scenarios. Comparatively, SecFFT outperforms other methods in handling various attack types, effectively reducing the misidentification rate and demonstrating superior generalization ability and accuracy.
+
+\vspace{-0.28cm}
+\subsection{Performance of Attack intention detection}
 
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=\linewidth]{figures/lab3-combined.pdf}
-    \caption{lab3}
+    \caption{Detection performance of different defense technologies against intelligent attackers with sophisticated multi-round strategies}
     \label{fig:lab3}
 \end{figure*}
 
+%为了验证SecFFT面对具有复杂攻击策略的高级隐蔽后门攻击时候的攻击意图构建和有效防御能力，我们在NEUR攻击的基础之上，分别加上了Size约束跟Angle约束等多轮次策略。如图\ref{fig:lab3}所示，通过对比Foolsgold、Fltrust、Flame等仅基于行为的典型防御机制可以看出，基于意图的SecFFT能够显著提升攻击识别能力。即便部分防御手段如Flame能够对一些高隐蔽攻击行为进行有效识别，在叠加了复杂的多轮次攻击策略后，防御机制的识别能力迅速被绕过。而与之相反，我们的方法即便在面对最复杂的“size+angle”策略时，虽然绝对值变小，但是差距依然显著，因而依旧能够区分出攻击者与正常节点之间意图的不同。
+%表\ref{tab:detect} 则详细列出了四种防御手段面对不同策略时的分类量化指标情况，可见，SecFFT不仅能够保持较好的抵御后门攻击的能力，同时也维持了相对最好的判别精度，误判率得到很好限缩，可靠性有保障。
+To validate the capability of SecFFT in constructing attack intent and effectively defending against advanced covert backdoor attacks employing complex strategies, we added Size and Angle constraints to the NEUR attack over multiple rounds. As shown in Fig. \ref{fig:lab3}, by comparing with typical behavior-based defense mechanisms such as Foolsgold, FLTrust, and Flame, it is evident that the intent-based SecFFT significantly enhances attack detection capabilities. Even though certain defense methods like Flame can effectively identify some highly covert attack behaviors, their detection performance is quickly bypassed when more complex multi-round attack strategies are introduced. In contrast, our method, even when facing the most sophisticated "size+angle" strategy, maintains a notable difference, enabling the continued distinction between the attacker's intent and that of benign nodes, despite a decrease in absolute values.
 
-\subsection{}
+Table \ref{tab:detect} provides a detailed quantitative analysis of the classification metrics for the four defense mechanisms against different strategies. It is clear that SecFFT not only consistently preserves its strong backdoor attack mitigation capability but also achieves the best detection accuracy, with significantly reduced false positive rates, ensuring reliable and robust performance.
 
-\begin{table*}[h!]
+
+\begin{table}[h!]
 \small
 \centering
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\caption{Metrics results with different attack and defense methods.}
+\begin{tabular}{c|c|c|c|c|c|c|c}
 \hline
-Attack & Defense & TP & FP & TN & FN & Accuracy & Precision & Recall & Specificity & FPR & FNR & AUC & MCC \\ \hline
+Strategy & Defense & Acc. & Rec. & FPR & FNR & AUC & MCC \\ \hline
 
-\multirow{4}{*}{Original} & Foolsgold & 10 & 0 & 35 & 5 & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & FLTrust   & 6  & 0 & 35 & 9 & 0.82 & 1.00 & 0.40 & 1.00 & 0.00 & 0.60 & 0.70 & 0.56 \\ \cline{2-14}
-                      & Flame     & 10 & 0 & 35 & 5  & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & SecFFT    & \textbf{15} & 0 & 35 & 0  & \textbf{1.00} & 1.00 & \textbf{1.00} & 1.00 & 0.00 & 0.00 & \textbf{1.00} & \textbf{1.00} \\ \hline
-\multirow{4}{*}{Size} & Foolsgold & 10 & 0 & 35 & 5 & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & FLTrust   & 6  & 0 & 35 & 9 & 0.82 & 1.00 & 0.40 & 1.00 & 0.00 & 0.60 & 0.70 & 0.56 \\ \cline{2-14}
-                      & Flame     & 10 & 0 & 35 & 5  & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & SecFFT    & \textbf{15} & 0 & 35 & 0  & \textbf{1.00} & 1.00 & \textbf{1.00} & 1.00 & 0.00 & 0.00 & \textbf{1.00} & \textbf{1.00} \\ \hline
-\multirow{4}{*}{Angle} & Foolsgold & 10 & 0 & 35 & 5 & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & FLTrust   & 6  & 0 & 35 & 9 & 0.82 & 1.00 & 0.40 & 1.00 & 0.00 & 0.60 & 0.70 & 0.56 \\ \cline{2-14}
-                      & Flame     & 10 & 0 & 35 & 5  & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ \cline{2-14}
-                      & SecFFT    & \textbf{15} & 0 & 35 & 0  & \textbf{1.00} & 1.00 & \textbf{1.00} & 1.00 & 0.00 & 0.00 & \textbf{1.00} & \textbf{1.00} \\ \hline
+\multirow{4}{*}{None} & Foolsgold & 0.90 & 0.67 & 0.00 & 0.33 & 0.83 & 0.76 \\
+                      & FLTrust   & 0.82 & 0.40 & 0.00 & 0.60 & 0.70 & 0.56 \\
+                      & Flame     & 0.90 & 0.67 & 0.00 & 0.33 & 0.83 & 0.76 \\
+                      & SecFFT    & \textbf{1.00} & \textbf{1.00} & 0.00 & \textbf{0.00} & \textbf{1.00} & \textbf{1.00} \\ \hline
+
+\multirow{4}{*}{Size} & Foolsgold & 0.92 & 0.80 & 0.03 & 0.20 & 0.88 & 0.72 \\ 
+                      & FLTrust   & 0.82 & 0.53 & 0.06 & 0.47 & 0.74 & 0.61 \\ 
+                      & Flame     & 0.92 & 0.73 & \textbf{0.00} & 0.27 & 0.87 & 0.78 \\ 
+                      & SecFFT    & \textbf{0.98} & \textbf{0.93} & \textbf{0.00} & \textbf{0.07} & \textbf{0.96} & \textbf{0.91} \\ \hline
+
+\multirow{4}{*}{Angle} & Foolsgold & 0.88 & 0.73 & 0.06 & 0.27 & 0.84 & 0.68 \\ 
+                       & FLTrust   & 0.86 & 0.60 & 0.03 & 0.40 & 0.80 & 0.65 \\ 
+                       & Flame     & 0.90 & 0.67 & \textbf{0.00} & 0.33 & 0.83 & 0.76 \\ 
+                       & SecFFT    & \textbf{0.96} & \textbf{0.87} & \textbf{0.00} & \textbf{0.13} & \textbf{0.94} & \textbf{0.88} \\ \hline
 \end{tabular}
-\caption{Classification metrics results under different attack and defense methods}
-\end{table*}
+\vspace{1em}
+\begin{tablenotes}
+\scriptsize
+\item ``Acc." stands for Accuracy, ``Rec." for Recall, ``FPR" for False Positive Rate, ``FNR" for False Negative Rate, ``AUC" for Area Under Curve, and ``MCC" for Matthews Correlation Coefficient. The strategies are abbreviated as ``None" (No strategy), ``Size" (Size-limited strategy), and ``Angle" (Angle-limited strategy).
+\end{tablenotes}
+
+\label{tab:detect}
+\end{table}
 
 
+
+
+% \begin{table}[h!]
+% \small
+% \centering
+% \begin{tabular}{c|c|c|c|c|c|c|c|c|c}
+% \hline
+% \makecell{Attack \\ strategy} & Defense & Accuracy & Precision & Recall & \makecell{Specificity} & FPR & FNR & AUC & MCC \\ \hline
+
+% \multirow{4}{*}{\makecell{No \\ strategy}} & Foolsgold & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\
+%                       & FLTrust   &  0.82 & 1.00 & 0.40 & 1.00 & 0.00 & 0.60 & 0.70 & 0.56 \\
+%                       & Flame     &  0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\
+%                       & SecFFT    &  \textbf{1.00} & 1.00 & \textbf{1.00} & 1.00 & 0.00 & \textbf{0.00} & \textbf{1.00} & \textbf{1.00} \\ \hline
+
+% \multirow{4}{*}{\makecell{Size-limited \\ strategy}} & Foolsgold &  0.92 & 0.92 & 0.80 & 0.97 & 0.03 & 0.20 & 0.88 & 0.72 \\ 
+%                       & FLTrust   & 0.82 & 0.80 & 0.53 & 0.94 & 0.06 & 0.47 & 0.74 & 0.61 \\ 
+%                       & Flame     & 0.92 &1.00 & 0.73 & 1.00 & 0.00 & 0.27 & 0.87 & 0.78 \\ 
+%                       & SecFFT    & \textbf{0.98} & 1.00 & \textbf{0.93} & 1.00 & 0.00 & \textbf{0.07} & \textbf{0.96} & \textbf{0.91} \\ \hline
+
+% \multirow{4}{*}{\makecell{Angle-limited \\ strategy}} & Foolsgold &  0.88 & 0.85 & 0.73 & 0.94 & 0.06 & 0.27 & 0.84 & 0.68 \\ 
+%                        & FLTrust   &  0.86 & 0.90 & 0.60 & 0.97 & 0.03 & 0.40 & 0.80 & 0.65 \\ 
+%                        & Flame     &  0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ 
+%                        & SecFFT    &  \textbf{0.96} & 1.00 & \textbf{0.87} & 1.00 & 0.00 & \textbf{0.13} & \textbf{0.94} & \textbf{0.88} \\ \hline
+% \end{tabular}
+% \vspace{1em}
+% \caption{Classification metrics results with different attack and defense methods}\label{tab:detect}
+% \end{table}
+
+
+
+
+% \begin{table*}[h!]
+% \small
+% \centering
+% \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+% \hline
+% \makecell{Attack \\ strategy} & Defense & TP & FP & TN & FN & Accuracy & Precision & Recall & \makecell{Specificity} & FPR & FNR & AUC & MCC \\ \hline
+
+% \multirow{4}{*}{\makecell{No \\ strategy}} & Foolsgold & 10 & 0 & 35 & 5 & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\
+%                       & FLTrust   & 6  & 0 & 35 & 9 & 0.82 & 1.00 & 0.40 & 1.00 & 0.00 & 0.60 & 0.70 & 0.56 \\
+%                       & Flame     & 10 & 0 & 35 & 5  & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\
+%                       & SecFFT    & \textbf{15} & 0 & 35 & \textbf{0}  & \textbf{1.00} & 1.00 & \textbf{1.00} & 1.00 & 0.00 & \textbf{0.00} & \textbf{1.00} & \textbf{1.00} \\ \hline
+
+% \multirow{4}{*}{\makecell{Size-limited \\ strategy}} & Foolsgold & 12 & 1 & 34 & 3 & 0.92 & 0.92 & 0.80 & 0.97 & 0.03 & 0.20 & 0.88 & 0.72 \\ 
+%                       & FLTrust   & 8  & 2 & 33 & 7 & 0.82 & 0.80 & 0.53 & 0.94 & 0.06 & 0.47 & 0.74 & 0.61 \\ 
+%                       & Flame     & 11 & 0 & 35 & 4  & 0.92 &1.00 & 0.73 & 1.00 & 0.00 & 0.27 & 0.87 & 0.78 \\ 
+%                       & SecFFT    & \textbf{14} & 0 & 35 & \textbf{1}  & \textbf{0.98} & 1.00 & \textbf{0.93} & 1.00 & 0.00 & \textbf{0.07} & \textbf{0.96} & \textbf{0.91} \\ \hline
+
+% \multirow{4}{*}{\makecell{Angle-limited \\ strategy}} & Foolsgold & 11 & 2 & 33 & 4 & 0.88 & 0.85 & 0.73 & 0.94 & 0.06 & 0.27 & 0.84 & 0.68 \\ 
+%                        & FLTrust   & 9  & 1 & 34 & 6 & 0.86 & 0.90 & 0.60 & 0.97 & 0.03 & 0.40 & 0.80 & 0.65 \\ 
+%                        & Flame     & 10 & 0 & 35 & 5  & 0.90 & 1.00 & 0.67 & 1.00 & 0.00 & 0.33 & 0.83 & 0.76 \\ 
+%                        & SecFFT    & \textbf{13} & 0 & 35 & \textbf{2}  & \textbf{0.96} & 1.00 & \textbf{0.87} & 1.00 & 0.00 & \textbf{0.13} & \textbf{0.94} & \textbf{0.88} \\ \hline
+% \end{tabular}
+% \vspace{1em}
+% \caption{Classification metrics results with different attack and defense methods}\label{tab:detect}
+% \end{table*}
 
 % As a preeminent collaborative artificial intelligence paradigm, Federated Learning (FL) has garnered substantial research focus \cite{ETT2}. 
 % By effectively mobilizing a substantial number of participants with a discrete distribution, FL can concurrently enhance learning performance, resource utilization, and data security. 
@@ -1712,9 +1828,11 @@ Attack & Defense & TP & FP & TN & FN & Accuracy & Precision & Recall & Specifici
 % One of the important drawbacks of existing security technologies is unfairness. As shown in the second columns of Figure \ref{results_EMNIST_flip} to \ref{results_Cifar_Backdoor}, except for the low accuracy, AAD and FLTrust also assign vastly different selection probabilities to benign UAV nodes. Different from existing methods, MR-FFL employs a Sigmoid function to optimize the selection strategy, resulting in a clearer distinction between attackers and normal users (e.g., Figure \ref{result3:credit-MRFFL} and \ref{result4:credit-MRFFL}). Hence, the probabilities of legitimate clients being selected are approximate (e.g., Figure \ref{result1:prob-MRFFL} and \ref{result2:prob-MRFFL}), ensuring fairness among benign UAV nodes.
 
 \section{Conclusion}
-%随着泛在通信和技术的发展，UAV网络得到越来越广泛的应用。基于无人机的联邦学习等智能化方法能够自适应地优化部署和业务，成为重要发展趋势之一。然而，受限于有限的巡航范围，UAV设备往往高度异构，同时UAV设备资源和能量极其有限，这些约束均导致现有安全技术难以移植到UAV网络中。因此，在本文中，我们针对异构和资源受限的UAV网络下的公平联邦学习的安全问题进行了研究。基于一种分层社区构建机制，我们提出了双向可信的公平联邦学习架构，来应对异构UAV网络中的攻击威胁。在公有数据集上的系列实验表明，我们的方案相比现有技术，在异构缓解、隐私增强和污染防治方面均取得明显提升。
-With the development of ISCC and SAGIN, UAV networks are experiencing increasingly widespread applications. AI technologies such as FL based on UAV enable adaptive optimization of deployment and operations, emerging as a crucial development trend. However, due to the restricted patrol area, UAV devices exhibit high heterogeneity, and their resources and energy are also extremely limited. These constraints make it challenging to directly implant existing high-consumption security methods in UAV networks. Therefore, in this paper, we investigate the security issues of FFL in heterogeneous and resource-constrained UAV networks. Leveraging a stratified community construction mechanism, we propose a mutual reliability FFL framework (MR-FFL) to address multiple security threats. %in heterogeneous UAV networks. 
-A series of experiments on public datasets demonstrate significant improvements of MR-FFL in heterogeneity remission, fairness guarantee, and poisoning resistance compared to existing technologies.
+%。本文聚焦于Covert backdoor attacks对于IoRT网络中进行视觉大模型联邦微调过程的威胁，针对性地提出了SecFFT防御架构。不同于现有的浅层信息捕捉的防御方法，我们抓住了频域分布差异中隐含的深层语义进行攻击感知，在此基础上创新地重构出攻击者的意图，从而在保障微调业务模型精度的同时，有效识别和阻断后门攻击，提升可靠性和完整性。在公有数据集上的系列实验表明，我们的方案相比现有技术，在性能提升、误判控制和污染防治方面均取得明显提升。未来方向方面，尽管SecFFT实现了对攻击意图的良好捕捉，但是目前仅仅是较为单一的网络场景。真实IoRT网络中的诸多特性，比如异构、多模态等因素并未纳入考虑，可能对防御性能产生影响。因此，未来将会更加贴近真实网络环境，设计实现异构容忍、抗噪声扰动的强鲁棒意图识别和防御方案。
+This paper focuses on the threat posed by covert backdoor attacks during the federated fine-tuning of large vision language models within IoRT networks and proposes the SecFFT defense framework. Unlike existing defense methods that capture only shallow-level information, our approach leverages the latent deep semantic differences in frequency-domain distributions to enhance attack detection. Building on this, we innovatively reconstruct the attacker’s intent, enabling effective backdoor attack detection while preserving the fine-tuning model's accuracy and improving its reliability and integrity. 
+A series of experiments demonstrate that our approach significantly outperforms existing techniques. %in terms of performance improvement, false-positive control, and backdoor mitigation. 
+
+Regarding future directions, although SecFFT demonstrates effective intent detection, it currently targets relatively homogeneous network scenarios. Real-world IoRT networks exhibit characteristics such as heterogeneity and multimodality, which are not yet fully considered and may impact defense performance. Hence, future work will focus on designing and implementing robust intent recognition and defense strategies that are tolerant to heterogeneity and resilient to noise disturbances, closely aligning with real network environments.
 
 
 
@@ -1801,15 +1919,9 @@ This work is partially supported by China Postdoctoral Science Foundation (grant
 %  your own custom macro containing the $\backslash${\tt{includegraphics}} command to make things
 %  simpler here.)
 
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Zan Zhou.jpg}}]{Zan Zhou} (Student Member, IEEE)
-received his Ph.D. degree in Computer Science from the Beijing University of Posts and Telecommunications (BUPT) in 2022. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Zan Zhou.jpg}}]{Zan Zhou} received his Ph.D. degree in Computer Science from the Beijing University of Posts and Telecommunications (BUPT) in 2022. 
 From 2021 to 2022, he was a visiting student at Nanyang Technology University (NTU), Singapore. 
 He is currently a Postdoc researcher with the State Key Laboratory of Networking and Switching Technology, BUPT, Beijing, China. His research interests include data privacy, active defense, and federated learning. %He is Student member of IEEE.
-\end{IEEEbiography}
-
-\vspace{11pt}
-
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Shujie Yang.jpg}}]{Shujie Yang} received the Ph.D. degree from the Institute of Network Technology, Beijing University of Posts and Telecommunications, Beijing, China, in 2017. He is currently a lecturer with the State Key Laboratory of Networking and Switching Technology. His major research interests include network security and artificial intelligence.
 \end{IEEEbiography}
 
 \vspace{11pt}
@@ -1818,6 +1930,32 @@ He is currently a Postdoc researcher with the State Key Laboratory of Networking
 (Senior Member, IEEE) received the Ph.D. degree from the Institute of Software, Chinese Academy of Sciences (ISCAS) in Jan. 2009. He was a researcher at Athlone Institute of Technology and Joint Training PhD at Dublin City University, Ireland during 2007-2009. %He joined BUPT in Dec. 2009. 
 Currently, he is a Professor with the State Key Laboratory of Networking and Switching Technology, and Director of the Network Architecture Research Center at BUPT. His research interests include Network Security, Mobile Networking, Multimedia Communications, and Future Internet Technology. He has edited two books and published over 200 technical papers in prestigious international journals and conferences, including IEEE Comm. Magazine, IEEE/ACM ToN, IEEE TMC, INFOCOM, ACM Multimedia, etc. He has served a number of international conferences and workshops as a Co-Chair and TPC member. He is currently serving as the Editor-in-Chief of Transactions on Emerging Telecommunications Technologies (Wiley).
 \end{IEEEbiography}
+
+\vspace{11pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/bowang.jpg}}]{Bo Wang} received his B.E. degree from the School of Computer Science, Beijing University of Posts and Telecommunications, Beijing, China, in 2023. He is currently pursuing the Ph.D. degree at the same institution. His major research interests include network security and artificial intelligence.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/tengfeili.jpg}}]{Tengfei Li} received his B.E. degree from Beijing University of Chemical Technology, Beijing, China, in 2023. He is currently pursuing the M.E. degree at the School of Computer Science, Beijing University of Posts and Telecommunications, Beijing, China. His major research interests include network security and artificial intelligence.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Sizhe Huang.jpg}}]{Sizhe Huang} is currently pursuing a Bachelor's degree in the School of Computer Science, BUPT. He is also a research assistant with the State Key Laboratory of Networking and Switching Technology, BUPT. His research interests include network security and active defense.  
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/Shujie Yang.jpg}}]{Shujie Yang} received the Ph.D. degree from the Institute of Network Technology, Beijing University of Posts and Telecommunications, Beijing, China, in 2017. He is currently a lecturer with the State Key Laboratory of Networking and Switching Technology. His major research interests include network security and artificial intelligence.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in, clip,keepaspectratio]{photos/Su Yao.jpg}}]{Su Yao} received the Ph.D. degree from the National Engineering Laboratory for Next Generation Internet Interconnection Devices, Beijing Jiaotong University. Currently, he is with the Beijing National Research Center for Information Science and Technology (BNRist), Tsinghua University, as an Assistant Research Fellow. His research interests include future network architecture, IoT security, and artificial intelligence for network systems.
+\end{IEEEbiography}
+
 % \bf{If you include a photo:}\vspace{-33pt}
 % \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{fig1}}]{Michael Shell}
 % Use $\backslash${\tt{begin\{IEEEbiography\}}} and then for the 1st argument use $\backslash${\tt{includegraphics}} to declare and link the author photo.
