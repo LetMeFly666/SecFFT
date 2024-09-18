@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
  * @LastEditors: LetMeFly
- * @LastEditTime: 2024-09-08 09:51:09
+ * @LastEditTime: 2024-09-15 11:15:03
 -->
 # SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
 
@@ -18,6 +18,7 @@ LLM的FL安全性相关实验。
 + [paper](https://github.com/LetMeFly666/SecFFT/tree/paper): 论文分支，论文的latex源码，论文中所需的一些图片最终也会添加到这里
 + [z.001.tip-adapter](https://github.com/LetMeFly666/SecFFT/tree/z.001.tip-adapter): 先[使用Tip-Adapter](https://github.com/LetMeFly666/SecFFT/blob/d2b385e040117cdc776e856a2f899c711cce9b78/README.md?plain=1#L329-L331)，并融入了联邦学习框架
 + [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/Pesuking)使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)。（`git push Let main:wb.001.lora`）
++ [wb.002.clip_lora](https://github.com/LetMeFly666/SecFFT/tree/wb.002.clip_lora): wb使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)的分支[f](https://github.com/Pesuking/SecFFT/tree/f)。（`git push Let f:wb.002.clip_lora`）
 
 ## Log
 
@@ -323,9 +324,89 @@ LOF是一种现有方法，使用置信度调整是ChatGPT想出来的。（置�
 
 文字描述
 
-### Log013 - 2024.9.8_8:45-2024.9.8晚
+### Log013 - 2024.9.8_8:45-2024.9.9_0:30
 
 代码及实验
+
+1. 实验设置
+
+简略即可
+
+2. 基本
+
+数据集 模型  联邦相关机制（聚合算法）  一定有引用
+参数比如学习率 本地轮次 神经元之类的
+
+甚至列表
+
+参数取值表、
+
+3. 攻防：
+
+具体有啥   xx咋了
+
+### Log013 - 2024.9.9_9:30-2024.9.9_20:50
+
+昨晚从8:50和周老师、wb开会到11:32，然后又和wb一起改理论部分到0:30
+
+### Log014 - 2024.9.9_21:40-2024.9.10_2:41
+
+总体任务：
+
+1. 聚合图、理论、代码（今晚）
+2. 不信任度融入信任评价（TODO:论文写完后）
+
+具体任务：
+
+- [x] 理论
+- [x] 聚合图
+- [x] 代码
+
+任务完成，回去睡觉。
+
+### Log015 - 略
+
+### Log016 - 2024.9.13_20:00-2024.9.14_4:54
+
+画实验结果图
+
++ 最终选用攻击：NEUROTOXIN、MR
++ 最终选用数据集：FMNIST
++ 最终选用防御：cosine、fltrust、flame
+
+实验三进度：
+
+- [x] 左上角：NEUR，COS
+- [x] 左下角：MR，COS
+- [ ] 一行左二：
+- [ ] 二行左二：
+- [ ] 一行左三：
+- [ ] 二行左三：
+- [ ] 右上角：
+- [ ] 右下角：
+
+### Log017 - 2024.9.14_12:00-2024.9.14_19:30
+
+赞哥又带我俩去吃饭了。
+
+[Log016](#log016---2024913_2000-2024914_454)废弃。
+
++ Motivation写长点
++ Motivation引用（限制大小、限制角度、限制符号）
++ 算法不每个部分都提，最后写  我们将算法写成伪代码，第几行到第几行
+
+### Log018 - 2024.9.14_20:10-2024.9.15_11:14
+
+画实验图
+
+和表
+
+和改
+
+和改
+
+和改
+和改
 
 ## End
 
