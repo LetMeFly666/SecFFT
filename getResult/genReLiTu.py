@@ -1,13 +1,7 @@
-'''
-Author: LetMeFly
-Date: 2024-09-13 23:43:25
-LastEditors: LetMeFly
-LastEditTime: 2024-09-14 01:52:38
-'''
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
+import numpy as np
 
 def plot_detection_heatmaps_3x4(*heatmap_params):
     """
@@ -46,6 +40,35 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
         
         return similarity_matrix
 
+    # 计算每组热力图数据的全局最小值和最大值
+    first_column_min_val, first_column_max_val = float('inf'), float('-inf')
+    other_columns_min_val, other_columns_max_val = float('inf'), float('-inf')
+
+    heatmap_arrays = []
+
+    for idx, heatmap_data in enumerate(heatmap_params):
+        # 如果是二维 tensor，直接转换为 numpy
+        if len(heatmap_data.shape) == 2:
+            if isinstance(heatmap_data, torch.Tensor):
+                heatmap_array = heatmap_data.cpu().numpy()
+            else:
+                heatmap_array = heatmap_data
+        # 如果是一维 tensor，计算相似度矩阵
+        elif len(heatmap_data.shape) == 1:
+            heatmap_array = compute_similarity_matrix(heatmap_data)
+        else:
+            raise ValueError("参数必须是 1D 或 2D 的 torch.Tensor。")
+        
+        # 根据图的位置更新不同的全局最小值和最大值
+        if idx % 4 == 0:  # 第一列的图
+            first_column_min_val = min(first_column_min_val, heatmap_array.min())
+            first_column_max_val = max(first_column_max_val, heatmap_array.max())
+        else:  # 其他列的图
+            other_columns_min_val = min(other_columns_min_val, heatmap_array.min())
+            other_columns_max_val = max(other_columns_max_val, heatmap_array.max())
+        
+        heatmap_arrays.append(heatmap_array)
+
     # 创建图像和子图
     fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(20, 15))
 
@@ -57,22 +80,18 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     for i in range(3):  # 三行，分别为不同的攻击
         for j in range(4):  # 四列，分别为四种防御方法
             ax = axes[i, j]
-            heatmap_data = heatmap_params[i * 4 + j]  # 获取每个参数对应的数据
+            heatmap_array = heatmap_arrays[i * 4 + j]  # 获取每个参数对应的数据
             
-            # 如果是二维 tensor，直接转换为 numpy
-            if len(heatmap_data.shape) == 2:
-                if isinstance(heatmap_data, torch.Tensor):
-                    heatmap_array = heatmap_data.cpu().numpy()
-                else:
-                    heatmap_array = heatmap_data
-            # 如果是一维 tensor，计算相似度矩阵
-            elif len(heatmap_data.shape) == 1:
-                heatmap_array = compute_similarity_matrix(heatmap_data)
-            else:
-                raise ValueError("参数必须是 1D 或 2D 的 torch.Tensor。")
+            # 确定 vmin 和 vmax
+            if j == 0:  # 第一列的图
+                vmin = first_column_min_val
+                vmax = first_column_max_val
+            else:  # 其他列的图
+                vmin = other_columns_min_val
+                vmax = other_columns_max_val
             
-            # 绘制热力图
-            sns.heatmap(heatmap_array, ax=ax, cmap='coolwarm', cbar=True, annot=False)
+            # 绘制热力图，使用统一的颜色条范围
+            sns.heatmap(heatmap_array, ax=ax, cmap='coolwarm', cbar=True, annot=False, vmin=vmin, vmax=vmax)
             
             # 设置标题和轴标签
             ax.set_title(f'{attacks[i]} - {methods[j]}', fontsize=12)
@@ -85,9 +104,8 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     # 调整子图布局
     plt.tight_layout()
 
-    # 保存为jpg文件
+    # 保存为pdf文件
     plt.savefig('detection_comparison_results_3x4.pdf', format='pdf')
-
 
 def generate_data_1dimension(num_clients, num_malicious):
     # 生成一维评分数组
@@ -104,8 +122,6 @@ if __name__ == '__main__':
     # 生成模拟数据
     num_clients = 50
     num_malicious = 20  # 前20个是恶意客户端
-
-    
 
     # 生成12个模拟数据 (可以是1D的评分数组，也可以是计算好的2D相似度矩阵)
     data_params = []
