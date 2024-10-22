@@ -1,0 +1,709 @@
+% !TeX encoding = UTF-8
+\documentclass[a4paper,twoside,11pt,dvipsnames]{reviewresponse}
+\usepackage{subcaption}
+% 1. Load and set up proper language packages
+\usepackage{amsbsy,amssymb,epsfig,bbm,mathrsfs,multirow,amsthm}
+\usepackage{algorithm,algpseudocode}
+\usepackage{amsmath}
+\usepackage{graphicx}
+% \usepackage[english]{babel}
+\usepackage{mathtools,xparse}
+\usepackage{array, multirow, graphicx}
+\usepackage{graphicx}
+\usepackage{graphics}
+% \usepackage{subfigure}
+\usepackage{epstopdf}
+\usepackage{color}
+\usepackage{natbib}
+\setcitestyle{numbers,square}
+\usepackage{bbm}
+\usepackage{comment}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+\usepackage{listings}
+
+% \usepackage{multirow}
+% \usepackage{amsmath}
+
+\usepackage{mathtools}
+
+\usepackage{caption}
+%\usepackage{vntex} 
+%\usepackage[vietnamese]{babel}
+%\usepackage[utf8]{vietnam}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+
+\newcommand{\clU}{{\cal U}}
+\newcommand{\clI}{{\mathbf I}}
+\newcommand{\clD}{{\cal D}}
+\newcommand{\bg}{\boldsymbol{g}}
+\newcommand{\bo}{\boldsymbol{\omega}}
+\newcommand{\bI}{\boldsymbol{I}}
+\newcommand{\bx}{\boldsymbol{x}}
+\newcommand{\by}{\boldsymbol{y}}
+\newcommand{\bw}{\boldsymbol{w}}
+\newcommand{\bz}{\mathbf{q}}
+\newcommand{\rw}{\rm{w}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bp}{\mathbf{p}_i}
+\newcommand{\bn}{\mathbf{n}}
+\newcommand{\bm}{\boldsymbol{m}}
+\newcommand{\clS}{{\cal S}}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\pik}{p_i^{(\kappa)}}
+\newcommand{\pjk}{p_j^{(\kappa)}}
+\newcommand{\rhok}{\rho^{(\kappa)}}
+\newcommand{\bpk}{\mathbf{p}_i^{(\kappa)}}
+\newtheorem{assumption}{Assumption}[section]
+
+\newtheorem{Definition}{\hskip 0pt Definition}%[section]
+\newtheorem{lemma}{Lemma}
+\newtheorem{observation}{Observation}
+\newtheorem{theorem}{\textbf{\textsc{Theorem}}}
+\newtheorem{mypro}{Proposition}
+\hyphenation{lists}
+
+
+\graphicspath{ {./figures/} }
+
+% 2. Complete the paper data
+\newcommand{\myAuthors}{{Tran The Anh$^{\displaystyle 1}$, ~Nguyen Cong Luong$^{\displaystyle 2}$, } \\ {~Dusit Niyato$^{\displaystyle 2}$}}
+\newcommand{\myAuthorsShort}{The Anh.~Tran et. al}
+\newcommand{\myEmail}{theanh.tran@ntu.edu.sg}
+\newcommand{\myTitle}{A Deep Reinforcement Learning Approach for Backscatter-Assisted Relay Communications}
+\newcommand{\myShortTitle}{}
+ \newcommand{\myJournal}{}
+\newcommand{\myDept}{{$^{\displaystyle 1}$School of Computer Science and Engineering, Nanyang Technological University, Singapore. \\ \url{}}\\
+{$^{\displaystyle 2}$School of Computer Science and Engineering, Nanyang Technological University. }\\}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[linktoc=all,bookmarks,bookmarksopen=true,bookmarksnumbered=true]{hyperref}
+
+\hypersetup{
+pdfauthor = {\myAuthorsShort},
+pdftitle = {\myTitle},
+pdfsubject = {\myJournal\xspace},
+colorlinks = true,
+linkcolor=black!70!green, 
+citecolor=black!70!green,       
+filecolor=magenta,      
+urlcolor=black!70!black           
+}
+
+\begin{document}
+
+
+\thispagestyle{plain}
+
+
+ {\Large We would like to thank the editor for the time and effort to gather insightful reviews for our submission to IEEE Transactions on Network Science and Engineering (TNSESI-2023-01-0074: \textit{Combating ``Drug Resistance" of Intelligent Attack: Hierarchical Network Traffic Moving Target Defense with Endogenous Security Enhancement}). In response to the comments from the Editor and the reviewers, we have revised the paper extensively. We also would like to thank the Editor and the reviewers for the valuable and constructive comments that help us improve the quality of the paper significantly. The followings are the detailed answers to the comments. %It is also noted that, we add the letter ` `R'' (i.e., Response) before the reference number of references which are added in this response, e.g., ``[R1]'', and ``[R2]''. This is to distinguish references in this response letter and those in the revised paper.
+ It is also noted that, as the whole manuscript has undergone substantial and comprehensive revisions, to facilitate clarity for the reviewers, we have marked the newly added or completely rewritten parts in {\color{blue}blue\color{black}} within the revised manuscript. The remaining sections, where only language and expression changes have been made, are still presented in black text.
+ }
+
+%\end{abstract}
+
+\newpage
+
+%=================================
+%=================================
+\section{Summary of changes}
+Based on the valuable feedback from the reviewers, we have made significant improvements to the manuscript in the following areas:
+\color{red}
+\begin{itemize}
+
+% 根据Reviewer 1's Comment 1，Comment 2以及Reviewer 2's Comment 1，我们修改了文章的部分公式以及重新构建了符号表，使文章的公式符号的意义更加清晰，优化阅读体验。
+\item \textbf{[Writing and expression:]} Based on \textbf{Reviewer 1's Comment 1, Comment 2}, and \textbf{Reviewer 2's Comment 1}, we have revised some of the formulas in the article and reconstructed the symbol table to make the meanings of the formula symbols clearer and to enhance the overall reading experience.
+
+% 根据Reviewer 1's Comment 3，我们对Threat models部分的基本假设做了进一步的假设，使得本文提出的概念更便于理解。
+\item \textbf{[Threat Models:]} Based on \textbf{Reviewer 1's Comment 3}, we made further assumptions in the \textbf{Threat Models} section regarding the basic assumptions, making the concepts proposed in this paper easier to understand.
+
+% 根据Reviewer 1's Comment 4，我们增加了额外的实验来说明了采样大小和模型准确率之间的关系。   
+
+% 根据Reviewer 1's Comment 5, 我们对DUPLEX PRIVACY AMPLIFICATION的auxiliary downlink privacy obfuscation部分做了修改，澄清了“社区导向框架”与"异质性情景下提高效率的意义“”之间联系。
+\item \textbf{[Duplex privacy amplification:]} Based on \textbf{Reviewer 1's Comment 5}, we revised the \textbf{Auxiliary downlink privacy obfuscation} section of \textbf{Duplex privacy amplification}, clarifying the connection between the \textbf{community-oriented framework} and the \textbf{significance of improving efficiency in heterogeneous scenarios}.
+
+
+% 根据Reviewer 2's Comment 2，
+\item \textbf{[Credit-based active poisoning resistance:]} Based on \textbf{Reviewer 2's Comment 5}, we supplemented the consideration of resource consumption by adding an analysis of communication efficiency and computational time complexity.
+
+
+% 根据Reviewer 2's Comment 3，我们对experimental Environment部分进行了相应的修改，解释了实验部分针对不同数据集选择对应模型结构和超参数的原因。根据Reviewer 2's Comment 4， 我们在实验结果描述部分添加了对CIFAR-100的实验结果以及相应的分析。
+\item \textbf{[Performance evaluation:]} Based on \textbf{Reviewer 2's Comment 3}, we made corresponding revisions to the \textbf{Experimental environment} section of \textbf{Performance evaluation}, explaining the rationale behind selecting the appropriate model structures and hyperparameters for different datasets in the experiments. Additionally, in response to \textbf{Reviewer 2's Comment 4}, we added the experimental results for CIFAR-100, along with the corresponding analysis, to the experimental results description section. Furthermore, in response to \textbf{Reviewer 1's Comment 4}, We conducted additional experiments to illustrate the relationship between sample size and model accuracy.
+
+\end{itemize}
+
+\color{black}
+The detailed responses to the comments are as follows. Thank you very much for your time again.
+
+\newpage
+
+%=================================
+\section{Responses to the Comments from Reviewer 1}
+%=================================
+%=================================
+%========================================================
+\rcomment{
+\color{red} The technical framework lacks sufficient explanatory detail. For example, the steps in Fig. 2 are explained too briefly, making them difficult to understand.
+}
+% 问题：技术框架解释性不足，比如Fig2步骤解释过于粗略，难以理解。
+\textbf{Response:} 
+We thanks the Reviewer for the comment.
+
+
+
+
+%========================================================
+\rcomment{
+\color{red} There are several errors and linguistic issues throughout the paper. For instance, on page 5, at the end of the second paragraph, citation [36] is repeated consecutively. Please carefully review and correct these issues.
+}
+% 问题：文中存在部分错误和语病，如在P5页第二段末尾，引用[36]连续重复出现，请认真检查
+
+\textbf{Response:} We thank the Reviewer for the constructive comment.  
+
+
+
+
+
+
+%========================================================
+\rcomment{
+\color{red} In Algorithm 1, there are unused variables in line 5.
+}
+% 问题：算法1第5行出现未使用变量。
+
+\textbf{Response:} We thank the Reviewer for the constructive comment, and
+% 非常抱歉，因为我们的疏忽，导致该算法出现让人无法理解的地方。根据您的建议，我们修改了该算法的相关部分，删除了未使用的变量。同时为了使整个算法过程更易理解，我们修改了另外一些跟原文不一致的地方，\ref{alg:malicious-node-detection}展示了修改后的结果。
+we sincerely apologize for the confusion caused by the oversight in our algorithm.
+Following your suggestion, we revised the relevant parts of the algorithm and removed unused variables.
+Additionally, to make the entire algorithm process easier to understand, we adjusted some parts that were inconsistent with the original text, and algorithm \ref{alg:malicious-node-detection} shows the modified result.
+% 最后，为了表现算法中某些变量会随训练轮次所变化，我们给一些变量添加时间$t$的上标，比如修改$C_{max},Chi_i^2,{C_1}', {C_2}'$至$C^t_{max},{Chi^t_i}^2,{C^t_1}', {C^t_2}'$
+Finally, to represent that certain variables in the algorithm change with the training rounds, we added the superscript of round $t$ to some variables, such as modifying $C_{max}, Chi_i^2, {C'_1}, {C'_2}$ to $C^t_{max}, {Chi^t_i}^2, {C^t_1}', {C^t_2}'$.
+
+\begin{algorithm}
+\caption{Instantaneous Attack Behavior Perception}
+\label{alg:malicious-node-detection}
+\begin{algorithmic}[1]
+\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency components}
+\State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
+\State{\color{CadetBlue}/* \textbf{Frequency Domain Transformation */}} 
+% \State Step 1: Frequency Domain Transformation
+\For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
+    \State \textcolor{blue}{$G_i^t \gets Trunc(DCT(Flatten(\triangledown \theta_i^t))), m)$}
+\EndFor
+
+% \State
+\State{\color{CadetBlue}/* \textbf{Clean Ingredient Extraction */}} 
+% \State Step 2: Clean Ingredient Extraction
+\State $(C_0^t, C_1^t, \ldots, C_{\kappa}^t) \gets Clustering\textcolor{blue}{ (G_0^t, G_1^t, \ldots, G_N^t)}$ \Comment{$\kappa$ denotes the number of clusters}
+\State \textcolor{blue}{$ C^t_{max} \gets \underset{C^t_j}{\arg\max} \, |C^t_j|$ \Comment{$|C^t_j|$ denotes the number of nodes in cluster $C^t_j$, $j = 1, 2, \ldots, \kappa $}}
+\State $H^t \gets (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n} $ \Comment{Stacking to form Matrix $H^t$, where $R_{i_0}, R_{i_1}, \ldots, R_{i_n} \in C^t_{max}$.}
+
+\State $\hat{H}^t \gets (H^t)^{T} H^t$
+\State $\lambda_{max}^t, \xi_{max}^t \gets \text{eig}(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
+\State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
+
+% \State
+\State{\color{CadetBlue}/* \textbf{Chi-square distance calculation */}} 
+% \State Step 3: Chi-square distance calculation
+% \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
+\For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
+    \State ${Chi_i^t}^2 \gets \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}$
+\EndFor
+\State \textcolor{blue}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
+
+% \State
+\State{\color{CadetBlue}/* \textbf{Single-round malicious behavior perception */}} 
+% \State Step 4: Single-round malicious behavior perception
+\State $\textcolor{blue}{\{C'_1, C'_2\}} \gets KMeans(S^t, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
+\State \textcolor{blue}{$U_{nor} \gets C'_{\text{max}}$, $U_{mal} \gets \{C'_i \, | \, i \neq \text{max}\}$}
+
+\end{algorithmic}
+\end{algorithm}
+
+%========================================================
+\rcomment{
+\color{red} Section 4 uses various metrics to demonstrate the improved defense performance of the proposed method against different types of attacks. However, there is insufficient explanation of the origin and calculation methods for these metrics, which makes it hard for readers to follow. It is recommended to add a brief explanation.
+}
+% 问题：实验数据大小的代表性引起了关注。应阐明所选值背后的基本原理，以加强实验结果的有效性和可靠性。（就是说实验设置为啥这样选，比如超参数啥的，需要说明道理，不然的话是不合理的）
+% 回复：确实应该写一段话描述一下这些指标都是什么意思。
+% 感谢你的建议，在实验四的部分，我们使用了ACC、Rec、FPR、FNR、AUC、MCC等指标作为我们方法的有效性验证依据。虽然这些指标是这些类似实验中常见的指标，但是为了论文的普适性以及为了方便更多读者的理解，还是应该简要介绍一下这些指标的含义。因此我们新增了一些描述，用来简要介绍这些指标的含义。 我们增加了如下的简单描述：
+
+% 这些指标用于评估模型性能。“Acc”表示准确率，衡量预测正确的比例；“Rec”是召回率，表示模型正确识别正例的能力；“FPR”是假阳性率，指错误将负例预测为正例的比例；“FNR”是假阴性率，指错误将正例预测为负例的比例；“AUC”是曲线下面积，表示模型区分正负例的整体能力；“MCC”是马修斯相关系数，综合评估模型预测结果的平衡性。
+
+\textbf{Response:} Thank you for your suggestion. In Section 4 of our experiments, we used metrics such as ACC, Rec, FPR, FNR, AUC, and MCC as the basis for validating the effectiveness of our method. Although these metrics are commonly used in similar experiments, for the sake of the paper's generality and to facilitate understanding for a broader audience, we believe it is necessary to briefly introduce the meaning of these metrics. Therefore, we have added some descriptions to provide a concise explanation of these metrics. The added description is as follows:
+
+"Acc" refers to accuracy, which measures the proportion of correct predictions; "Rec" stands for recall, representing the model's ability to correctly identify positive instances; "FPR" denotes the false positive rate, indicating the proportion of negative instances incorrectly predicted as positive; "FNR" refers to the false negative rate, which represents the proportion of positive instances incorrectly predicted as negative; "AUC" stands for the area under the curve, reflecting the model's overall ability to distinguish between positive and negative instances; and "MCC" represents the Matthews correlation coefficient, which provides a balanced evaluation of the model's predictions.
+
+%========================================================
+% 表格2的内容太长，超出了双栏的空间了，建议重新进行调整规划
+\rcomment{
+\color{red} The content in Table 2 is too long and exceeds the space available for a two-column layout. Please revise and reformat accordingly.
+}
+
+% 我将每次给你一个审稿意见，请你对于该审稿意见写一个回复（回复要包括中文版本和英文版本）。回复要展现自己良好的态度，越详细越好。
+你了解司法人工智能吗？请解
+
+% 谢谢你的建议，表格2的宽度确实有些过长，已经超出了半栏的范围，甚至已经与右侧栏目的内容产生了融合。我们对这个表格进行了调整，适当缩小了表格的宽度，使得表格在不影响整体观感的同时，保证了表格格式符合要求，且不超过单栏范围。
+
+Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive, exceeding the single-column limit and even merging with the content in the adjacent column. We have made adjustments to the table, reducing its width appropriately to ensure that the table fits within the required format while maintaining the overall visual quality without exceeding the single-column range.
+
+%========================================================
+\rcomment{
+\color{red} The paper may benefit from providing an explicit explanation of the relationship between the community-oriented framework and the significance of improving efficiency in heterogeneous scenarios. Clarifying this connection would contribute to a more comprehensive understanding of the proposed methodologies.
+}
+
+
+% 问题：需要详细阐释“社区导向框架”与"异质性情景下提高效率的意义“”之间的关系。澄清这种联系将有助于更全面地了解所提议的方法。
+%========================================================
+
+% 改法:暂时没想法，这个待定，先不用改。大家有想法了也可以跟我讨论
+
+%感谢您的建议。为了更好地表达“Community-oriented framework”对提高异构场景下效果的关系，我们做出了如下修改：
+
+%在异构场景下，在同一轮次更新中，异构的设备提交的梯度更新方向可能差异较大，设备间更新存在拮抗，导致全局模型无法达到最优解（引用CFL）。在本文第x章的公式xxx
+
+%，第一个公式表示全局模型已经到达驻点，各个设备的更新累加后得到的全局更新为零。然而，第二个公式体现了对于单个设备，它的本地模型仍然有更新。因此，在这种异构的场景下，单个设备的最优解与全局最优解差别较大。社区化框架将更新方向相近的设备划分到同一个社区中，使得社区的全局最优解与社区内设备的最优解之间的差距限缩在一定范围内，提高模型在本地设备的表现。
+
+%对于隐私框架，在差分隐私中，敏感度与所需添加的噪声量正相关:
+
+
+%对于敏感度而言，不同设备集合对应的敏感度差异较大，如图所示
+
+%经划分社区后，同一社区的设备梯度更新更加集中，敏感度较低，所需添加的差分隐私噪声方差就更小。对于社区划分的条件，由于社区划分时要求了单个设备的梯度更新范数的最大值，即xxx，因此，在CFL场景下的差分隐私噪声，其噪声量取决于划分社区时设置的超参数，因此所添加的差分隐私噪声可以根据CFL的设置控制在一定范围之内。
+
+%为了使得文章更易懂，我们在正文中添加了如下内容：
+
+\textbf{Response:} Thank you for your suggestions. The community-oriented framework can improve both convergence efficiency and privacy efficiency.
+
+\textbf{In improving convergence efficiency:}In heterogeneous scenarios, during the same round of updates, the gradient update directions submitted by heterogeneous devices may differ significantly, leading to conflicts between device updates, which prevents the global model from reaching the optimal solution. We explained this conclusion in Section VI:
+
+\color{blue}
+\begin{equation}\label{eq:3conditions-og}
+    \left\{
+    \begin{array}{rcr}
+    \frac{N}{K|D|} \sum_{P_i\in \mathcal{P}_t} |D_i| \cdot ||\Delta w^{i}_{t} || & <\beta,\\
+    \max_{P_i\in \mathcal{P}_t}||\Delta w^{i}_t|| &>\theta,\\
+    \alpha^{min}_{intra} - \alpha^{max}_{cross} & > 0
+    %\underset{P_{h},P_{k}\in C_m \subseteq \mathcal{C}}{\min } \alpha^{h, k}_t-\underset{P_{i} \in C_{1}, P_{j} \in C_{2}}{ \max} \alpha^{{i}, {j}}_t & >0,
+    \end{array}
+    \right.
+\end{equation}
+where $\theta>\beta>0$ are predefined constant thresholds, $\alpha^{min}_{intra}$ and  $\alpha^{max}_{cross}$ are the minimum internal cosine similarity and the maximum cosine similarity cross communities respectively\color{black}.
+
+The first formula indicates that the global model has reached a saddle point, where the aggregate updates from all devices approximate a global update close to zero. However, the second formula demonstrates that for individual devices, their local models still experience updates. Consequently, in this heterogeneous scenario, there is a significant disparity between the optimal solution of a single device and the global optimal solution. The community-based framework categorizes devices with similar update directions into the same community, thereby constraining the discrepancy between the community's global optimal solution and the optimal solutions of the devices within that community within a certain range, which enhances the model's performance on local devices.
+
+\textbf{In improving privacy efficiency:} In differential privacy, the sensitivity is positively correlated to the amount of noise that needs to be added. To guarantee $(\epsilon_i,\delta_i)-DP$, the standard deviation of noises $\sigma_i$ from Gaussian mechanism should satisfy:
+
+
+
+\begin{equation}
+    \sigma_i = \frac{Sen\sqrt{2qTln(1/\delta_i)}}{\epsilon_i},
+\end{equation}
+
+where $Sen$ is the sensitivity of the local training process.
+
+However, after community division, the gradient updates of devices within the same community are more concentrated, with lower sensitivity, resulting in smaller variance of the differential privacy noise that needs to be added. Regarding the conditions for community division, since the maximum norm of the gradient updates of individual devices is required during the division, i.e., $\theta$, therefore, in the CFL scenario, the amount of differential privacy noise depends on the hyperparameters set during community division. Thus, the differential privacy noise added can be controlled within a certain range according to the CFL settings.
+
+In order to make the article more understandable, we have added the following content to the main text:
+
+
+\color{blue}
+It is evident that the hyperparameters $\theta$ and $\gamma$ in community division determine the maximum sensitivity within the community, which in turn determines the amount of differential privacy noise required to be added. 
+\color{black}
+
+\newpage
+%=================================
+%=================================
+\section{Responses to the Comments from Reviewer 2}
+%=================================
+%========================================================
+
+
+\rcomment{
+\color{red} The variable f, n in line 52 on page 3 is missing a description. Similarly, multiple variables in this paper have not yet been described, so please check carefully.
+}
+% 问题：第3页第52行中的变量f, n缺少描述。同样，本文中有多个变量尚未描述，请仔细检查。
+
+%改法 : 跟上一个审稿人第一个问题提的差不多，就是先道歉，然后好好描述下这几个变量啥意思，然后提供个参数表。
+
+\textbf{Response:} We thank the Reviewer for the comment. 
+
+We apologize for overlooking the definition of some variables, which may have caused confusion for the readers. In response, we have supplemented the definitions of certain variables:
+
+In Section II, we have supplemented the definitions of $f$ and $n$ as follows:
+
+\color{blue} where $n$ is the number of clients and $f$ is the number of malicious clients\color{black}
+
+In Section II, we have supplemented the definitions of $\alpha^{min}_{intra}$ and  $\alpha^{max}_{cross}$ as follows:
+
+\color{blue}$\alpha^{min}_{intra}$ and  $\alpha^{max}_{cross}$ are the minimum internal cosine similarity and the maximum cosine similarity cross communities respectively.\color{black}
+
+In Section VII, we have supplemented the definitions of $t$ as follows:
+
+\color{blue}The real-time intimacy index in $t-th$ round  $\rho^{ij}_t$ between devices $P_i$ and $P_j$ is defined as:
+\color{black}
+
+In Section VII, we have supplemented the definitions of $\mu$ as follows:
+
+\color{blue}$\mu> 0$ represents the impact of interaction time intervals on credibility.\color{black}
+
+Additionally, to make the variables more easily searchable, we have added a parameter table on page four. We have provided this table in Reviewer 1's Comment 1. 
+
+
+%========================================================
+\rcomment{
+\color{red} Please specifically analyze the advantages of their privacy amplification mechanism. The authors' privacy amplification is achieved by limiting the sensitivity so that the epsilon is smaller at the same noise scale. Although this is not the same privacy mechanism I would expect, privacy enhancement is achieved. However, the authors seem to compare the effects of the different schemes only by comparing the accuracy of the experiments. Could the authors theoretically analyze the difference between their privacy amplification mechanism and other privacy enhancement schemes (such as DPFL as mentioned by the authors)?
+% 请具体分析其隐私放大机制的优势。作者的隐私放大是通过限制灵敏度来实现的，使得在相同的噪声尺度下，噪声放大更小。虽然这不是我所期望的相同的隐私机制，但可以实现隐私增强。然而，作者似乎只是通过比较实验的准确性来比较不同方案的效果。作者能否从理论上分析他们的隐私放大机制与其他隐私增强方案（如作者提到的DPFL）的区别？
+%改法：
+}
+% 非常感谢您的意见。
+
+\textbf{Response:} Thanks for the reviewer's valuable comment. 
+
+%本文提出的隐私增强策略与Reviewer提出的联邦学习中的隐私策略不同，主要侧重于针对异构联邦学习场景下的差分隐私机制。在异构联邦学习场景，由于个体间本地模型更新的差异较大，而高斯差分隐私机制添加噪声的方差大小取决于敏感度的大小，因此，
+
+\color{black}
+
+% \textbf{Intension:}\\
+% 1.Disrupting Neural Network Performance: The primary objective of the attacker is to impair the model's performance, causing it to produce incorrect outputs on certain inputs. This may pose a threat to the model's reliability and security, especially in critical domains such as intrusion detection.\\
+% 2.Bypassing Security Measures: Adversarial attacks can also be used to circumvent security measures deployed with the model, such as CAPTCHA or malware detection systems. By targeting these security measures, attackers can gain access to restricted resources or carry out malicious activities.
+
+% \textbf{Capabilities:}\\
+% 1.Generating Adversarial Examples: Attackers can employ various techniques to create adversarial examples that closely resemble the original input but are capable of deceiving neural networks. These techniques include gradient-based attacks, Generative Adversarial Networks (GANs), and evolutionary algorithms, among others.\\
+% 2.White-Box and Black-Box Attacks: Attackers can conduct white-box attacks (having full knowledge of the model's structure and parameters) or black-box attacks (only knowing the model's input and output but lacking detailed information about the model).\\
+% 3.Transferability: An adversarial example may have the ability to generalize across different models, making it applicable to multiple models. This enables attackers to leverage the same adversarial examples in diverse environments.\\
+% 4.Imperceptibility: Adversarial examples typically require being almost imperceptible to human observation. This necessitates careful crafting by attackers to ensure that they are indistinguishable from the original input in terms of visual or perceptual cues.
+
+%========================================================
+\newpage
+
+\rcomment{
+\color{red} What is the basis of the algorithm parameter setting, such as Table I and other parameters? % 架构
+}
+% 算法参数设置的依据是什么，如表I等参数？
+% 本文所使用的基础模型架构及相应的超参数设置参考了如FL-WBC和SFAT等论文中的实验设置。针对不同数据集的特性，模型结构和超参数进行了调整，以适应特定任务需求。
+
+% 对于MNIST和EMNIST数据集，这些数据集包含灰度手写数字图像，输入数据尺寸为28x28，且只有一个通道。为了有效提取图像的局部特征，模型使用了两层5x5的卷积层。第一层卷积层的输入通道为1（单通道灰度图像），输出通道设置为10，能捕捉图像的边缘和基本几何结构。第二层卷积层的输入为10个特征图，输出通道为20，进一步提取更高级的特征。每一层卷积之后，使用ReLU激活函数引入非线性，并通过2x2的最大池化层减少特征图的尺寸，从而降低计算复杂度并增强模型的泛化能力。此外，使用Dropout机制（在卷积层之后和全连接层之间）防止过拟合，特别是对于相对小规模的MNIST和EMNIST数据集，Dropout可以有效抑制模型在训练数据上表现过好而在测试数据上表现欠佳的问题。
+
+% 针对CIFAR-10和CIFAR-100数据集，这些数据集由32x32的彩色图像组成，输入为RGB三通道。因此，模型的第一层卷积层设计为接受3个输入通道，并输出6个特征图，卷积核大小同样为5x5。通过这一层卷积，模型能够提取低级的颜色和边缘特征。第二层卷积层接收6个输入特征图，输出16个特征图，这一层进一步提取中级特征，如图像的纹理和形状。每一层卷积之后同样使用ReLU激活函数和2x2最大池化层，减少特征图尺寸并保留最重要的特征信息。
+
+% 两种模型的不同之处在于，MNIST和EMNIST数据集为单通道灰度图像，结构相对简单，因此只需要10和20个特征通道即可有效提取图像信息。而对于CIFAR-10和CIFAR-100，由于其是彩色图像，且包含更多的复杂性（如多种颜色、形状和纹理），卷积层的通道数相对增加。此外，MNIST和EMNIST中的全连接层参数为320到50，再到最终的分类输出，而在CIFAR中，由于图像尺寸稍大，全连接层从1655（400个节点）开始，逐步减少至120，再到84，最后输出类别数。对于CIFAR-10和CIFAR-100，类别数分别为10和100，因此在最后的输出层中，分类节点数量根据数据集的不同进行了调整。
+
+% 在所有数据集中，超参数如学习率、batch size、Dropout率等也根据实验调整，以确保在不同的数据集上都能获得最优性能，确保模型在有效学习数据特征的同时具备良好的泛化能力。
+
+% FL-WBC: Enhancing Robustness against Model Poisoning Attacks in Federated Learning from a Client Perspective
+% COMBATING EXACERBATED HETEROGENEITY FOR ROBUST MODELS IN FEDERATED LEARNING
+%感谢您的提议。
+\textbf{Response:} Thanks for the reviewer's valuable comment. 
+
+The basic model architecture and corresponding hyperparameter settings used in this paper were based on experimental setups from papers such as \cite{sun2021fl}, \cite{zhu2023combating}, \cite{liang2020think}, \cite{zhu2024isfl} and \cite{zhou2022adversarial}. The model structure and hyperparameters were adjusted to suit the characteristics of different datasets and meet the specific task requirements. To effectively capture the unique features of each dataset, we designed specific model architectures as detailed below.
+
+\textbf{CNN architecture for MNIST and EMNIST}: For the MNIST and EMNIST datasets, which consist of grayscale handwritten digit images with an input size of 28x28 and a single channel, the model uses two 5x5 convolutional layers to effectively extract local features from the images. The first convolutional layer has 1 input channel (for the grayscale images) and 10 output channels, capturing edges and basic geometric structures. The second convolutional layer takes in 10 feature maps as input and outputs 20 channels, extracting more advanced features. After each convolutional layer, a ReLU activation function introduces nonlinearity, and a 2x2 max-pooling layer reduces the size of the feature maps, lowering computational complexity and enhancing the model’s generalization ability. Additionally, a Dropout mechanism (applied after the convolutional layers and between the fully connected layers) is used to prevent overfitting. This is particularly effective for relatively small-scale datasets like MNIST and EMNIST, where Dropout helps mitigate the issue of the model performing too well on training data but poorly on test data.
+
+\textbf{CNN architecture for CIFAR-10}: For the CIFAR-10 datasets, which consist of 32x32 color images, the input is RGB with three channels. Thus, the first convolutional layer is designed to accept 3 input channels and outputs 6 feature maps, with the same 5x5 kernel size. This layer extracts low-level features like colors and edges. The second convolutional layer takes in 6 input feature maps and outputs 16, further extracting mid-level features such as textures and shapes. Each convolutional layer is followed by a ReLU activation function and a 2x2 max-pooling layer to reduce the size of the feature maps while retaining the most important information.
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/resnet_all.png}
+    \caption{The architecture of ResNet-34}
+    \label{fig:resnet34}
+\end{figure}
+
+\textbf{ResNet34 for CIFAR-100}: For the CIFAR-100 dataset, it contains 100 classes, and each image is a 32x32x3 image. A simple CNN structure is not suitable, so we used the ResNet34 model as the base model for our experiments. As Figure \ref{fig:resnet34} depicted, ResNet34 is a convolutional neural network with 34 layers, consisting of one convolutional layer (Conv1), one max-pooling layer (Maxpool), four residual blocks (Conv1\_x, Conv2\_x, Conv3\_x, Conv4\_x), one average pooling layer (Avgpool), and one fully connected layer (FC).
+
+\textbf{Summary of differences between these models}: The key differences between the models lie in the input channels, model complexity, and number of output classes. For MNIST and EMNIST, the input consists of single-channel grayscale images, while for CIFAR-10 and CIFAR-100, the input consists of three-channel RGB images. Due to this, the first convolutional layer in the CNN models for MNIST and EMNIST has 1 input channel and outputs 10 feature maps, whereas for CIFAR-10, the first layer has 3 input channels and outputs 6 feature maps. Additionally, CIFAR-100 uses the more complex ResNet34 architecture, which is deeper and more capable of handling the greater complexity of color images and the larger number of output classes. The number of output classes also differs: MNIST, EMNIST, and CIFAR-10 each have 10 output classes, whereas CIFAR-100 has 100 output classes, necessitating a larger model and more complex feature extraction layers. Thus, the models are adjusted to capture the unique characteristics of the respective datasets, with simpler architectures for grayscale images and more complex architectures like ResNet34 for datasets with more classes and higher input complexity.
+
+Across all datasets, hyperparameters such as learning rate, batch size, and Dropout rate were also adjusted based on experiments to ensure optimal performance. This allows the model to learn the data features effectively while maintaining good generalization ability.
+
+% 为了在文章中准确表达模型选择的原因，我们进行了以下修改
+To accurately explain the reasons for model selection in the article, we have made the following modifications:
+\begin{table}[b]\scriptsize
+\setlength{\abovecaptionskip}{0cm}
+\setlength{\belowcaptionskip}{0.2cm}
+\renewcommand{\arraystretch}{1.2}
+    \caption{\centering{Neural network structures}}\label{table:NN-structure}
+\centering
+\begin{tabular}{l|l}
+\hline
+\makecell[l]{MNIST/EMNIST} & 
+\makecell[l]{
+$28^{2}\times1 \xrightarrow{Conv(f=5,s=1)} 24^{2}\times10 \xrightarrow{Pool(f=2)} $
+$12^{2}\times10  \xrightarrow{Conv(f=5,s=1)} 8^{2}\times20\xrightarrow{Pool(f=2)} $\\
+$4^{2}\times20 \xrightarrow{} 320 \xrightarrow{FC} 50 \xrightarrow{FC} 10\times1$
+}\\ 
+\hline
+ 
+CIFAR-10 & 
+\makecell[l]{
+$ 32^{2}\times3 \xrightarrow{Conv(f=5,s=1)} 28^{2}\times6 \xrightarrow{Pool(f=2,s=2)} $
+$14^{2}\times6 \xrightarrow{Conv(f=5,s=1)} 10^{2}\times16 \xrightarrow{Pool(f=2,s=2)}$\\
+$5^{2}\times16 \xrightarrow{} 400 \xrightarrow{FC} 120 \xrightarrow{FC} 84 \xrightarrow{FC} 10\times1$
+}\\ 
+\hline
+
+\textcolor{blue}{CIFAR-100}& 
+\makecell[l]{ \color{blue}
+$32^{2}\times3 \xrightarrow{Conv1(f=7,s=2)} 16^{2}\times64 \xrightarrow{Maxpool(f=3,s=2)} $
+$8^{2}\times64 \xrightarrow{Conv2\_x} 8^{2}\times64 \xrightarrow{Conv3\_x}$\\ \color{blue}
+$4^{2}\times128 \xrightarrow{Conv4\_x} 2^{2}\times256 \xrightarrow{Conv5\_x}$
+$1^{2}\times512 \xrightarrow{Avgpool} 1^{2}\times512 \xrightarrow{} 512 \xrightarrow{FC} 100 \times 1$ \color{black}
+}
+\\ \hline
+\end{tabular}
+\end{table}
+
+\color{blue}Based on existing researches such as \cite{sun2021fl}, \cite{zhu2023combating}, \cite{liang2020think}, \cite{zhu2024isfl} and \cite{zhou2022adversarial}, we construct different convolutional neural network (CNN) models to cater above image identification learning tasks. The key differences between the models are the input channels (single-channel grayscale for MNIST/EMNIST vs. three-channel RGB for CIFAR-10/CIFAR-100), model complexity (simpler CNNs for MNIST/EMNIST/CIFAR-10 vs. the deeper ResNet34 for CIFAR-100), and the number of output classes (10 for MNIST, EMNIST, and CIFAR-10 vs. 100 for CIFAR-100), with adjustments made to suit the specific characteristics and complexity of each dataset. \color{black}
+
+
+\color{black}
+%========================================================
+\rcomment{
+\color{red} The authors conducted experiments on three public data, MNIST, EMNIST, and CIFAR, and achieved good experimental results. However, the article does not specify whether CIFAR-10 or CIFAR-100 is used, although it can be known that the authors used CIFAR-10 by observing Table I, it is better to describe it clearly in the article. What will be the effect of CIFAR-100? Is it possible to simply test it?
+}
+% 作者在MNIST、EMNIST和CIFAR三个公共数据上进行了实验，取得了良好的实验结果。但文中并未明确使用的是CIFAR-10还是CIFAR-100，虽然通过观察表I可知作者使用的是CIFAR-10，但还是在文中描述清楚为好。CIFAR-100的效果如何？有没有可能简单地测试一下？
+\textbf{Response:} Thanks for the reviewer's valuable comment. 
+
+%针对cifar-100数据集，为了验证cos-hfl在隐私增强上面的表现，我们额外增加了在正常、异构、不诚实用户三种场景下的实验，其具体实验结果如图1，图2，图3所示。同时为了验证cos-hfl在包含噪声和异构环境下的表现，我们也额外进行了相应的实验，具体实验结果如图3，图4所示。
+To evaluate the privacy-amplification performance of Cos-HFL on the CIFAR-100 dataset, we additionally conducted experiments under three different scenarios: normal, heterogeneous, and dishonesty. The specific experimental results are shown in Figures \ref{result1:CIFAR100-normal-acc}, \ref{result1:CIFAR100-hetero-acc}, and \ref{result1:CIFAR100-dishonest-acc}. Additionally, to verify the performance of Cos-HFL in noisy \& heterogeneous environments, we also conducted corresponding experiments, with the specific results displayed in Figures \ref{result2:CIFAR100-hetero-norm} and \ref{result2:CIFAR100-hetero-acc}. 
+
+For CIFAR-100, the dataset size and the number of categories are much larger than those of CIFAR-10, MNIST, and EMNIST. Therefore, we used ResNet34 for our experiments. By observing the experimental results, we found that our method is less affected by noise in CIFAR-100. In particular, for dishonest users, it is evident that the accuracy of NbAFL and DPFL is significantly lower than that of CoS-HFL. Furthermore, for CFL, due to the noise affecting the clustering judgment, we observed that CFL falls into a local optimum, resulting in a lower final accuracy compared to the correctly clustered CoS-HFL.
+% 对于CIFAR100来说，数据集大小与类型数量远大于CIFAR-10与MNIST、EMNIST，因此，我们采用了ResNet34进行实验。通过观察实验图发现，在CIFAR-100中，我们的方法受噪声影响较小。尤其是对于不诚实的用户，可以发现NbAFL与DPFL的Accuracy明显低于CoS-HFL。此外，对于CFL，由于噪声影响了分簇的判断，可以发现CFL陷入了局部最优解，导致收敛后的准确率低于分簇正确的CoS-HFL。
+
+
+% 同时，我们在文章实验部分进行了以下修改，增加了对cifar-100数据集实验结果的描述：
+At the same time, we made the following modifications in the experimental section of the article, adding a description of the experimental results on the CIFAR-100 dataset:
+
+
+\color{blue}
+Firstly, we demonstrate the accuracy in the normal situation without heterogeneous or dishonest participants in Figures 5, 8 and 11 (MNIST/CIFAR-10/CIFAR-100). Based on the results, we can see that private obfuscation causes a certain amount of accuracy decline in the beginning. Although, because CoS-HFL injects less noise than the other two peers, the purple line gradually outperforms green and red ones over time. 
+
+Secondly, Figures 6, 9 and 12 show the results under heterogeneous environments, where we replace 5 normal participants with 5 heterogeneous ones. We can tell that CoS-HFL still achieves better performance from the figures within merely 200 slots. With a greater heterogeneity degree and a much larger duration in real-world distributed learning scenarios, the amplification effect will be more significant. 
+
+Besides, we also consider the impact of dishonest devices. In like manner, we let 10 devices dishonestly exaggerate the data variances for additional privacy benefits, while the other 90 participants remain unchanged.  As shown in Figures 7, 10 and 13, the orange lines are almost unaffected, as FL injects no noise. Meanwhile, due to the unnecessarily overlarge sensitivity caused by exaggerated data variances, both DPFL and NbAFL suffer great performance degradation. 
+By contrast, with the help of privacy amplification, CoS-HFL limits the noise scale to some extent and obtains better accuracy.
+
+In HFL scenarios, dynamic and varied data characteristics or differentiated learning tasks present significant obstacles to model convergence and accuracy. 
+Worse still, existing security designs such as data obfuscation and DP noise injection may further complicate the situation by introducing huge variance into weight updates of HFL model parameters. 
+To verify the availability of CoS-HFL, we first deploy two different multitask scenarios, and assume that all devices can perturb local updates before uplink transmission, to simulate the heterogeneity and dynamic randomness, respectively. Then, we compare the model accuracy and max-norm/$Q$ of CoS-HFL with CFL and DPFL. 
+
+First, for EMNIST, as shown in Figure 1 (b), we rotate the images ($0^{\circ},90^{\circ},180^{\circ},270^{\circ}$) to create four classes of heterogeneous participants (25 devices per class). Based on Figure 14, our method can correctly partition the device set (blue vertical dashed lines) into different communities, and eventually outperform both CFL and DPFL after correct partition. Hence, as shown in Figure 15, CoS-HFL minimizes the $Q$ over time, while the other two methods' max norms remain high.
+
+%\begin{comment}%13注释（6）-2
+Then, for CIFAR-10 and CIFAR-100, as shown in Figure 1 (a), we create two classes of heterogeneous participants (50 devices per class) by extracting color features or profile features. 
+Similar to Figures 14, 15 and 18, based on Figures 16, 17 and 19, CoS-HFL also divides participants to correct communities and converges to higher accuracy of the global model. Especially for CIFAR-100, since the ResNet34 model it uses has significantly more parameters compared to CNN, the impact of noise increases dramatically when noise is added. This can mislead the clustering of CFL, resulting in a noticeable decrease in the accuracy of CFL.
+
+\color{black}
+%\end{comment}%13注释（6）-2
+
+
+\begin{figure}[tb]
+	\captionsetup{font=tiny} % 调整图片字幕的大小
+	\begin{minipage}[!t]{0.333\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{./figures/cifar100_acc_norm.pdf}
+		\vspace{-0.5em}
+		\caption{{\color{red}Accuracy vs normality on CIFAR-100}}
+		\label{result1:CIFAR100-normal-acc}
+	\end{minipage}%
+	\begin{minipage}[!t]{0.333\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{./figures/cifar100_acc_heterog.pdf}
+		\vspace{-0.5em}
+		\caption{\textcolor{red}{Accuracy vs heterogeneity on CIFAR-100}}
+		\label{result1:CIFAR100-hetero-acc}
+	\end{minipage}
+	\begin{minipage}[!t]{0.333\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{./figures/cifar100_acc_dishonest.pdf}
+		\vspace{-0.5em}
+		\caption{\textcolor{red}{Accuracy vs dishonesty on CIFAR-100}}
+		\label{result1:CIFAR100-dishonest-acc}
+	\end{minipage}
+	\vspace{-0.3cm}
+\end{figure}
+
+
+
+\begin{figure}[tb]
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth} % 调整第一张图片的宽度
+        \centering
+        \includegraphics[width=\textwidth]{./figures/cifar100_acc_2.pdf}
+        \caption{\textcolor{red}{Accuracy on CIFAR-100}} % 替换序号为(b)
+        \label{result2:CIFAR100-hetero-norm}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth} % 调大第二张图片的宽度
+        \centering
+        \includegraphics[width=\textwidth]{./figures/cifar100_dw.pdf}
+        \caption{\textcolor{red}{Max-norm/$Q$ on CIFAR-100}} % 替换序号为(a)
+        \label{result2:CIFAR100-hetero-acc}
+    \end{subfigure}
+    \vspace{-0.3cm}
+    \caption{Results of Accuracy(a) and Max-norm/$Q$(b) on CIFAR-100}
+    \label{fig:cifar100-comparison}
+\end{figure}
+
+%========================================================
+\rcomment{
+\color{red} The authors do not seem to have considered the issue of communication overhead in federated learning, and I would ask the authors to think hard about whether this question needs to be answered.
+}
+% 作者似乎没有考虑到联邦学习中的通信开销问题，我想请作者认真思考这个问题是否需要回答。
+% 感谢您的comment。根据您的提问，我们认真考虑了CoS-HFL的开销问题。在联邦学习中，客户端通常作为计算与通信能力较差的计算节点，主要有通信开销与计算开销。在通信层面，通常假设联邦学习的服务器拥有丰富的通信资源，故通常不考虑服务器的通信开销。因此，联邦学习的通信开销取决于模型的参数量、客户端与服务器通信轮次、额外的传递信息。对于CoS-HFL，假设深度学习模型为$\omega$,其参数量为$\|\omega\|$，对于单个通信轮次，其通信量相较于传统的联邦学习只增加了部分非超参数的传递，如$\mathbf{\lambda},\theta, \epsilon,\delta$等，这些参数相较于深度学习模型的大小可以忽略不记。因此，在单个轮次上，CoS-HFL的通信开销与传统的CFL并无明显差异。
+
+%对于模型的收敛速率，通过观察实验数据，CoS-HFL的收敛速率与DPFL、FedAvg、CFL并无明显区别。同时，经过证明[]，FedAvg的收敛速率为$O(\frac{1}{\sqrt{TE})$，其中$T$为全局训练轮次，$E$为客户端本地的迭代次数。同时，CoS-HFL作为一种基于CFL的改进，收敛速度近似于$O(\frac{\sqrt{TME}})$，其中$M$为聚类个数。然而在实践中，聚类个数通常较低，可视作常数。因此，CFL与FedAvg收敛速度并无明显差异。
+
+%综上所述，CoS-HFL与传统的FedAvg在通信开销上并无实质性差异，为
+
+
+
+\textbf{Response:}Thank you for your comment! Based on your question, we have carefully considered the overhead of CoS-HFL in federated learning. In federated learning, clients typically serve as nodes with limited computational and communication capabilities, so the overhead mainly includes communication and computational costs.
+
+\textbf{Communication overhead}: It is generally assumed that the server in federated learning has abundant communication resources, so the server's communication cost is not a primary concern. The communication overhead mainly depends on the following factors:
+
+\textit{The number of model parameters:} The parameters that need to be transmitted in federated learning.
+
+\textit{The number of communication rounds between clients and the server:} The frequency of communication determines the total communication burden.
+Additional transmitted information: For example, extra parameters or auxiliary data in meta-learning.
+For CoS-HFL, assuming the deep learning model is denoted as $\omega$, with parameter size $|\omega|$, in a single communication round, the communication load only slightly increases compared to traditional federated learning due to the transmission of non-hyperparameters like $\mathbf{\lambda}$, $\theta$, $\epsilon$, and $\delta$. Since the size of these parameters is negligible compared to the deep learning model, the communication overhead in a single round of CoS-HFL is not significantly different from that of traditional federated learning.
+
+\begin{table}[t]\scriptsize
+\setlength{\abovecaptionskip}{0cm}
+\setlength{\belowcaptionskip}{0.2cm}
+\renewcommand{\arraystretch}{1.2}
+    \caption{\centering{Communication convergence of algorithms}}\label{table:Convergence}
+\centering
+\begin{tabular}{l|l}
+\hline
+\makecell[l]{FedAvg\cite{9377960}} & 
+\makecell[l]{$\frac{1}{\sqrt{TE}}$
+}\\ 
+\hline
+ 
+CFL\cite{CoRR} & 
+\makecell[l]{$\frac{1}{\sqrt{TME}}$
+}\\ 
+\hline
+
+PSASGD\cite{wang2021cooperative} & 
+\makecell[l]{ $\frac{1}{\sqrt{TE}}$
+}
+\\ \hline
+CoS-HFL & 
+\makecell[l]{ $\frac{1}{\sqrt{TME}}$
+}
+\end{tabular}
+\end{table}
+
+Regarding the convergence rate of the models, through observing experimental data, we found that the convergence rate of CoS-HFL shows no significant difference compared to classic federated learning algorithms such as DPFL, FedAvg, and CFL. At the same time, research has proven [citation needed] that the convergence rate of FedAvg is $O(\frac{1}{\sqrt{TE}})$\cite{CoRR}, where $T$ represents the number of global training rounds, and $E$ is the number of local iterations on the client side. This suggests that FedAvg achieves a good balance between global and local computations, especially when an increase in local iterations can accelerate the model’s convergence.
+
+
+\textbf{Computation overhead:}
+As an improvement based on CFL, CoS-HFL’s convergence rate is approximately $O(\frac{1}{\sqrt{TME}})$\cite{9377960}, where $M$ is the number of clusters. Although this formula indicates that increasing $M$ could accelerate convergence, in practice, $M$ is usually small and can be treated as a constant. Therefore, in most cases, the convergence rates of CoS-HFL and CFL are similar, and there is no significant difference compared to FedAvg.
+
+What's more, considering the computational cost, our method includes uplink privacy calculation, auxiliary downlink privacy calculation, community construction and credit calculation.
+As the model's parameter size is $S$, clients number is $N$, the time complexity of each step is as follows:
+\begin{itemize}
+    \item Uplink privacy: $O(SN)$
+    \item Auxiliary downlink privacy: $O(SN)$
+    \item Community construction: $O(SN^2)$
+    \item Credit calculation: $O(SN^2)$
+\end{itemize}
+
+
+
+For the whole workflow, the time complexity is $O(SN^2)$. Our method differs from traditional methods\cite{9377960} in terms of time complexity by only a constant factor.
+In this article, we mainly focus on the privacy and security of federated learning, and for the next step, we will pay attention to the communication cost for the integration of our work. Our modifications are as follows:
+
+\color{blue}
+Let the number of model parameters be denoted as $S$. In a single round, our method shows no significant difference compared to traditional federated learning, both having a complexity of O($SK$). Furthermore, in terms of convergence rounds, as analyzed in \cite{CoRR} and \cite{9377960}, our method makes modifications to the clustering conditions compared to \cite{9377960}, yet only introduces a constant factor's change in communication efficiency. Additionally, the time complexity of the proposed method is the same as CFL, both being $O(SN^2)$, which provides security guarantees for federated learning without imposing an unacceptable computational burden.
+\color{black}
+% \begin{assumption}
+% Local gradient $\Delta \mathcal{L}(w_t^i)$ is Lipschitz continuous with respect to $w$, i.e., $\|\Delta \mathcal{L}(w_t^i)-\Delta \mathcal{L}(w_{t+1}^i)\|\leq L\|w_{t}^i-w_{t+1}^i\|$, where $L$ is a positive constant.
+% \end{assumption}
+% \begin{assumption}
+%     Local loss function $\mathcal{L}(w)$ is strongly convex with respect to $w$, i.e., $\mathcal{L}(w_t^i)\geq \mathcal{L}(w_{t+1}^i)+(w-w^{t+1})^T\Delta \mathcal{L}(w_t^i)+(\mu/2)\|w_t^i-w^{i}_{t+1}\|^2$,
+% \end{assumption}
+% \begin{assumption}
+%     Training loss of cluster $s$ is defined as $\mathcal{L}(w_t^s)$ which is twice-continuously differentiable, i.e., $\mu I \leq \nabla^2\mathcal{L_t^s}$ satisfies $\zeta_1^2 \leq \|\nabla \mathcal{L}(w_t^s)\|^2\leq \zeta^2_2$ with $\zeta_1,\zeta_2>0$.
+% \end{assumption}
+
+%对于CoS_HFL,我们有如下约束：
+% Due to weight clipping, we have:
+% \begin{equation}
+%     \begin{aligned}
+% 		||\eta^i_{t}\nabla_{w}  \mathcal{L}_{i}(w, \zeta^{i,\prime}_{k})|| \leq \max||\Delta w^i_t||\color{black}= \xi_i. %\forall j,
+% 		\end{aligned}
+% \end{equation}
+
+% So that 
+% \begin{equation}
+%     \| \nabla_{w}  \mathcal{L}_{i}(w, \zeta^{i,\prime}_{k})\| \leq \frac{\xi_i}{\eta_t^i}
+% \end{equation}
+
+% By L-smoothness of the loss function $\mathcal{L}$, we have
+% \begin{equation}
+% \begin{aligned}
+%     \mathbb{E} [\mathcal{L}(w_{t+1}^i)-\mathcal{L}(w_t^i)]\\
+%     \leq \mathbb{E}<\nabla\mathcal{L}(w_{t}^i),w_{t+1}^i-w_{t}^i >+\frac{L}{2}\mathbb{E}\|\|
+% \end{aligned}
+% \end{equation}
+
+
+\newpage
+% \begin{comment}
+
+% \bibliographystyle{apalike}
+% \bibliography{reference}
+
+\textbf{\hspace{6.5cm}References:}
+\bibliographystyle{IEEEtran}
+\bibliography{reference}
+
+% [R1] Achituve I, Shamsian A, Navon A, et al. Personalized federated learning with gaussian processes[J]. Advances in Neural Information Processing Systems, 2021, 34: 8392-8406.
+
+% [R2] Wei K, Li J, Ding M, et al. User-level privacy-preserving federated learning: Analysis and performance optimization[J]. IEEE Transactions on Mobile Computing, 2021, 21(9): 3388-3401.
+
+% [R3] Sun J, Li A, DiValentin L, et al. Fl-wbc: Enhancing robustness against model poisoning attacks in federated learning from a client perspective[J]. Advances in neural information processing systems, 2021, 34: 12613-12624.
+
+% [R4] Zhu J, Yao J, Liu T, et al. Combating exacerbated heterogeneity for robust models in federated learning[J]. arXiv preprint arXiv:2303.00250, 2023.
+
+% [R5] Zhang J, Hua Y, Wang H, et al. Fedala: Adaptive local aggregation for personalized federated learning[C]//Proceedings of the AAAI Conference on Artificial Intelligence. 2023, 37(9): 11237-11244.
+
+% [R6] Han S, Buyukates B, Hu Z, et al. FedSecurity: A Benchmark for Attacks and Defenses in Federated Learning and Federated LLMs[C]//Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining. 2024: 5070-5081.
+
+% [R7] Liu Z, He W, Chang C H, et al. SPFL: A Self-purified Federated Learning Method Against Poisoning Attacks[J]. IEEE Transactions on Information Forensics and Security, 2024.
+
+% [R8] Wei K, Li J, Ma C, et al. Personalized federated learning with differential privacy and convergence guarantee[J]. IEEE Transactions on Information Forensics and Security, 2023.
+
+% [R9] Ilhan F, Su G, Liu L. Scalefl: Resource-adaptive federated learning with heterogeneous clients[C]//Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2023: 24532-24541.
+
+% [R10] Wu X, Huang F, Hu Z, et al. Faster adaptive federated learning[C]//Proceedings of the AAAI conference on artificial intelligence. 2023, 37(9): 10379-10387.
+
+% [R11] Ye R, Wang W, Chai J, et al. Openfedllm: Training large language models on decentralized private data via federated learning[C]//Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining. 2024: 6137-6147.
+
+% [R12] Nguyen T D, Rieger P, De Viti R, et al. {FLAME}: Taming backdoors in federated learning[C]//31st USENIX Security Symposium (USENIX Security 22). 2022: 1415-1432.
+
+% [R13] Yang H, Xi W, Shen Y, et al. RoseAgg: Robust Defense Against Targeted Collusion Attacks in Federated Learning[J]. IEEE Transactions on Information Forensics and Security, 2024.
+
+
+
+
+
+% \end{comment}
+
+
+\end{document}
+
+
+
+% FedSecurity: A Benchmark for Attacks and Defenses in Federated Learning and Federated LLMs
+% SPFL: A Self-purified Federated Learning Method Against Poisoning Attacks
+% Personalized Federated Learning With Differential Privacy and Convergence Guarantee
+% ScaleFL: Resource-Adaptive Federated Learning with Heterogeneous Clients
+% Faster Adaptive Federated Learning
+% FedALA: Adaptive Local Aggregation for Personalized Federated Learning
+% OpenFedLLM: Training Large Language Models on Decentralized Private Data via Federated Learning
+% Every Parameter Matters: Ensuring the Convergence of Federated Learning with Dynamic Heterogeneous Models Reduction
+% FLAME: Taming Backdoors in Federated Learning
+% RoseAgg: Robust Defense Against Targeted Collusion Attacks in Federated Learning
