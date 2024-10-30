@@ -182,8 +182,8 @@ Despite the effectiveness of these methods in countering explicit backdoors, the
     $D_i$ & The private local dataset of node $R_i$.\\ \hline
     $\theta_g^t, \theta_i^t$ & The global model and local model of $R_i$ at round $t$. \\ \hline
     $\triangledown \theta_i^t$ & Local update of $R_i$ during round $t$. \\ \hline
-    $G_i^t $ & Frequency component of $R_i$'s update at round $t$. \\ \hline
-    $m$ & The length of the low-frequency components. \\ \hline
+    $G_i^t $ & Frequency vector of $R_i$'s update at round $t$. \\ \hline
+    $m$ & The length of the low-frequency vectors. \\ \hline
     $H^t$ & The matrix formed by stacking $G_i^t$. \\ \hline
     $\tilde{G}^t $ & The extracted global clean ingredient at round $t$. \\ \hline
     $\lambda_{max}^t$ & The largest singular value of matrix $H^t$ at round $t$. \\ \hline
@@ -312,7 +312,7 @@ The main process of frequency domain transformation is shown in Equation \ref{eq
 \subsubsection{Clean ingredient extraction}
 % 在提取到节点更新对应的低频向量\(G_i^t\)后，我们使用流行的聚类算法例如HDBSCAN\cite{mcinnes2017hdbscan}对这些更新进行聚类，得到多个簇$C_0^t, C_1^t, \ldots, C_{\kappa}^t$，其中$\kappa$表示簇的数量。在大多数联邦学习场景中，良性节点的数量通常多于恶意节点的数量，且良性节点的更新通常更接近全局模型的方向并表现出更高的聚集性。基于这一观察，我们选择节点数量最多的簇$C_{max} = \{R_{i_0}, R_{i_1}, \ldots, R_{i_n}\}$作为主要分析对象。为了进一步提取该簇的主要特征或模式，我们对其中所有节点组成的矩阵进行奇异值分解\cite{wang2023scfl}。由于，SVD分解的左奇异向量$\tilde{G}^t$对应于数据的主要方向，因此，$\tilde{G}^t$可以作为良性节点在低频域内的主要特征。
 After extracting the corresponding low-frequency vectors \(G_i^t\) from updates, we employ popular clustering algorithms such as HDBSCAN \cite{mcinnes2017hdbscan} to cluster these vectors, resulting in multiple clusters \(C_0^t, C_1^t, \ldots, C_{\kappa}^t\), where \(\kappa\) denotes the number of clusters. In most federated learning scenarios, the number of benign nodes typically exceeds that of malicious nodes, which is consistent with the assumptions outlined in our threat model. Moreover, the updates from benign nodes are generally closer to the direction of the global model and exhibit a higher degree of aggregation. This behavior is also evident in the frequency domain, where it becomes even more pronounced. 
-\textcolor{red}{Based on this observation, we select the largest cluster \(C_{max} = \{G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}\}\) as the primary subject for analysis. To further extract the main characteristics of this cluster, we perform singular value decomposition (SVD)\cite{wang2023scfl} on the matrix $H^t = (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n}$ formed by all nodes in this cluster. Since the left singular vectors of the SVD, denoted as \(\tilde{G}^t\), represent the principal directions of these vectors, \(\tilde{G}^t\) can be regarded as the principal component of benign nodes in the low-frequency domain.}
+\textcolor{red}{Based on this observation, we select the largest cluster \(C^t_{max} = \{G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}\}\) as the primary subject for analysis. To further extract the main characteristics of this cluster, we perform singular value decomposition (SVD)\cite{wang2023scfl} on the matrix $H^t = (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n}$ formed by all nodes in this cluster. Since the left singular vectors of the SVD, denoted as \(\tilde{G}^t\), represent the principal directions of these vectors, \(\tilde{G}^t\) can be regarded as the principal ingredient of benign nodes in the low-frequency domain.}
 
 
 \begin{equation}
@@ -321,34 +321,39 @@ After extracting the corresponding low-frequency vectors \(G_i^t\) from updates,
 \end{equation}
 
 
-Equation \ref{eq:singular} illustrates the main process of computing the left singular vector $\tilde{G}^t$. $\lambda^t_{max}$ and $\xi^t_{max}$ correspond to the largest eigenvalue and its eigenvector of the matrix $\hat{H}^t = (H^t)^{T} H^t$, respectively. In this way, we effectively extract the principal component that reflect the updates of benign nodes in the frequency domain, so $\tilde{G}^t$ can be used as the clean ingredient for subsequent malicious node detection.
+Equation \ref{eq:singular} illustrates the main process of computing the left singular vector $\tilde{G}^t$. $\lambda^t_{max}$ and $\xi^t_{max}$ correspond to the largest eigenvalue and its eigenvector of the matrix $\hat{H}^t = (H^t)^{T} H^t$, respectively. In this way, we effectively extract the principal ingredient that reflect the updates of benign nodes in the frequency domain, so $\tilde{G}^t$ can be used as the clean ingredient for subsequent malicious node detection.
 
 \subsubsection{Chi-square distance calculation}
 % 我们利用每个节点的低频向量与“干净成分”之间的差异度来作为衡量恶意节点和良性节点的依据。对于每个节点的低频向量 \(G_i^t\) 以及上一步中求得的“干净成分” \(\tilde{G}^t\)，通过卡方距离来计算两者之间的差异度，得到距离差异集合$S^t = Chi^t_i, Chi^t_2, \ldots, Chi^t_N$。卡方距离的计算过程为：
 We use the divergence between each node's low-frequency vector and the clean ingredient as a measureto distinguish between malicious and benign nodes. For each  low-frequency vector \(G_i^t\) and the clean ingredient \(\tilde{G}^t\) we calculate their divergence using the Chi-square distance, yielding \(S^t = \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}\). The calculation process for the Chi-square distance is:
 
+\textcolor{red}{
 \begin{equation}
-{Chi^t_i}^2 = \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}
+Chi^t_i = \sqrt{ \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{|\tilde G}^t[k]| + \epsilon} }
 \label{equation:KL}
-\end{equation}
+\end{equation}}
 % 其中 \(m\) 是低频向量的维度，\(\epsilon\) 是一个小的常数，用于避免分母为零。相比于传统的欧氏距离，卡方距离根据两个向量对应分量的大小进行加权，使得特征值较大的部分对距离的影响更大，从而能够更准确地反映低频向量中重要特征之间的差异，同时忽略不重要的噪声成分。
-where \(G_i^t[k]\) denotes the k-th element of vector \(G_i\) and \(\epsilon\) is a small constant to avoid division by zero. Compared to the traditional Euclidean distance, the Chi-square distance weights according to the magnitude of the corresponding components of the two vectors, making the influence of components with larger feature values more significant on the distance. This allows for a more accurate reflection of the differences between important features in the low-frequency vectors, while ignoring unimportant noise components.
+where \(G_i^t[k]\) denotes the k-th element of vector \(G_i\) and \(\epsilon\) is a small constant to avoid division by zero. 
 
+
+\textcolor{red}{
+Chi-square distance is usually used to measure whether a certain observed distribution conforms to a typical theoretical distribution, which is very consistent with our method because we use the calculated clean ingredient as a criterion for measuring benign and malicious nodes. Compared with the traditional Euclidean distance, the chi-square distance assigns weights according to the clean ingredient, giving greater importance to smaller components. On the other hand, cosine similarity measures the angle between two vectors and is usually used to evaluate their directional consistency, ignoring magnitude differences. However, in our method, we are concerned with the degree of deviation of each user's low-frequency vector $G_i^t$ from the clean ingredient $\tilde{G}^t$, including magnitude differences, so the chi-square distance is more suitable for capturing hidden malicious attacks than cosine similarity.
+}
 % 为什么要用卡方距离，不用欧式距离？实验论证？
 
 \subsubsection{Single-round malicious behavior perception}
 % 为了准确地识别恶意节点，我们利用良性节点的低频成分与干净成分之间的差异度相比于恶意节点与干净成分之间更为相似这一特性，对差异集合$S^t$进一步进行聚类分析。具体而言，我们采用流行的KMeans聚类算法\cite{wan2023four}对距离差异集合$S^t$进行聚类，并将类别数设置为2，得到聚类\(C'_1, C'_2\)，将用户数量较大的簇\(C'_{max}\)中的所有节点标记为良性节点， 记作为\(U_{nor}\)，将另一簇\(C'_k\) \(k \neq {max}\)中的所有节点标记为恶意节点，记作\(U_{mal}\)。  
-To accurately identify malicious nodes, we leverage the characteristic that the divergence between benign nodes' low-frequency components and the clean ingredient is more similar compared to that of malicious nodes. Based on this, we further perform cluster analysis on the divergence set \(S^t\). Specifically, we employ the popular clustering algorithm KMeans \cite{wan2023four} to \(S^t\), setting the number of clusters to 2, yielding two clusters \(C'_1, C'_2\). Based on the assumption before,  we label all nodes in the cluster with the larger number of nodes \(C'_{max}\) as benign nodes, denoted by \(U_{nor}\). while all nodes in the other cluster \(C'_k\) (\(k \neq {max}\)), are labeled as malicious nodes, denoted as \(U_{mal}\).
+To accurately identify malicious nodes, we leverage the characteristic that the divergence between benign nodes' low-frequency vectors and the clean ingredient is more similar compared to that of malicious nodes. Based on this, we further perform cluster analysis on the divergence set \(S^t\). Specifically, we employ the popular clustering algorithm KMeans \cite{wan2023four} to \(S^t\), setting the number of clusters to 2, yielding two clusters \(C'_1, C'_2\). Based on the assumption before,  we label all nodes in the cluster with the larger number of nodes \(C'_{max}\) as benign nodes, denoted by \(U_{nor}\). while all nodes in the other cluster \(C'_k\) (\(k \neq {max}\)), are labeled as malicious nodes, denoted as \(U_{mal}\).
 
 % 算法\ref{alg:malicious-node-detection}展示了单轮恶意用户识别的整体过程，其中3-6行代表了频率转换的计算过程，7-12行代表了“干净分量”$\tilde G^t$的计算过程，13-16行代表了每个用户与“干净分量”间的卡方差异度的计算过程，最后17-18行代表了通过KMeans聚类算法进行恶意用户检测的计算过程。
 Algorithm \ref{alg:malicious-node-detection} outlines the overall process of Instantaneous Attack Behavior Perception. 
-Lines 3-6 describe the computation process of frequency domain transformation, lines 7-12 detail the extraction process of clean component, lines 13-16 cover the calculation of the Chi-square divergence between each update and the clean ingredient, and finally, lines 17-18 outline the process of single-round malicious behavior perception using KMeans.
+Lines 3-6 describe the computation process of frequency domain transformation, lines 7-12 detail the extraction process of clean ingredient, lines 13-16 cover the calculation of the Chi-square divergence between each low-frequency vector and the clean ingredient, and finally, lines 17-18 outline the process of single-round malicious behavior perception using KMeans.
 
 \begin{algorithm}
 \caption{Instantaneous Attack Behavior Perception}
 \label{alg:malicious-node-detection}
 \begin{algorithmic}[1]
-\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency components}
+\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency vector}
 \State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
 \State{\color{CadetBlue}/* \textbf{Frequency Domain Transformation */}} 
 % \State Step 1: Frequency Domain Transformation
@@ -372,7 +377,7 @@ Lines 3-6 describe the computation process of frequency domain transformation, l
 % \State Step 3: Chi-square distance calculation
 % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {$R_i \in \textcolor{red}{\{R_1, \ldots, R_N\}}$}
-    \State ${Chi_i^t}^2 \gets \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}$
+    \State $Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|{\tilde G}^t[k]| + \epsilon}}$
 \EndFor
 \State \textcolor{red}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
 
@@ -765,7 +770,7 @@ As illustrated in the figure, SecFFT achieves the lowest misidentification rate,
 
 %为了验证SecFFT面对具有复杂攻击策略的高级隐蔽后门攻击时候的攻击意图构建和有效防御能力，我们在NEUR攻击的基础之上，分别加上了Size约束跟Angle约束等多轮次策略。如图\ref{fig:lab3}所示，通过对比Foolsgold、Fltrust、Flame等仅基于行为的典型防御机制可以看出，基于意图的SecFFT能够显著提升攻击识别能力。即便部分防御手段如Flame能够对一些高隐蔽攻击行为进行有效识别，在叠加了复杂的多轮次攻击策略后，防御机制的识别能力迅速被绕过。而与之相反，我们的方法即便在面对最复杂的“size+angle”策略时，虽然绝对值变小，但是差距依然显著，因而依旧能够区分出攻击者与正常节点之间意图的不同。
 %表\ref{tab:detect} 则详细列出了四种防御手段面对不同策略时的分类量化指标情况，可见，SecFFT不仅能够保持较好的抵御后门攻击的能力，同时也维持了相对最好的判别精度，误判率得到很好限缩，可靠性有保障。
-To validate the capability of SecFFT in constructing attack intent and effectively defending against advanced covert backdoor attacks employing complex strategies, we added Size and Angle constraints to the NEUR attack over multiple rounds. As shown in Fig. \ref{fig:lab3}, by comparing with typical behavior-based defense mechanisms such as Foolsgold, FLTrust, and Flame, it is evident that the intent-based SecFFT significantly enhances attack detection capabilities. Even though certain defense methods like Flame can effectively identify some highly covert attack behaviors, their detection performance is quickly bypassed when more complex multi-round attack strategies are introduced. In contrast, our method, even when facing the most sophisticated "size+angle" strategy, maintains a notable difference, enabling the continued distinction between the attacker's intent and that of benign nodes, despite a decrease in absolute values.
+To validate the capability of SecFFT in constructing attack intent and effectively defending against advanced covert backdoor attacks employing complex strategies, we added Size and Angle constraints to the NEUR attack over multiple rounds. As shown in \textcolor{red}{Figure \ref{fig:lab3}}, by comparing with typical behavior-based defense mechanisms such as Foolsgold, FLTrust, and Flame, it is evident that the intent-based SecFFT significantly enhances attack detection capabilities. Even though certain defense methods like Flame can effectively identify some highly covert attack behaviors, their detection performance is quickly bypassed when more complex multi-round attack strategies are introduced. In contrast, our method, even when facing the most sophisticated "size+angle" strategy, maintains a notable difference, enabling the continued distinction between the attacker's intent and that of benign nodes, despite a decrease in absolute values.
 
 Table \ref{tab:detect} provides a detailed quantitative analysis of the classification metrics for the four defense mechanisms against different strategies. It is clear that SecFFT not only consistently preserves its strong backdoor attack mitigation capability but also achieves the best detection accuracy, with significantly reduced false positive rates, ensuring reliable and robust performance.\textcolor{red}{ "Acc" refers to accuracy, which measures the proportion of correct predictions; "Rec" stands for recall, representing the model's ability to correctly identify positive instances; "FPR" denotes the false positive rate, indicating the proportion of negative instances incorrectly predicted as positive; "FNR" refers to the false negative rate, which represents the proportion of positive instances incorrectly predicted as negative; "AUC" stands for the area under the curve, reflecting the model's overall ability to distinguish between positive and negative instances; and "MCC" represents the Matthews correlation coefficient, which provides a balanced evaluation of the model's predictions.}
 

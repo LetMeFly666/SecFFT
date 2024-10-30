@@ -112,7 +112,7 @@ Based on the valuable feedback from the reviewers, we have made significant impr
 \begin{itemize}
 
 % 根据Reviewer 1's Comment 1，Comment 2以及Reviewer 2's Comment 1，我们修改了文章的部分公式以及重新构建了符号表，使文章的公式符号的意义更加清晰，优化阅读体验。
-\item \textbf{[Writing and expression:]} Based on \textbf{Reviewer 1's Comment 1, Comment 2}, and \textbf{Reviewer 2's Comment 1}, we have revised some of the formulas in the article and reconstructed the symbol table to make the meanings of the formula symbols clearer and to enhance the overall reading experience.
+\item \textbf{[Writing and expression:]} Based on \textbf{Reviewer 1's Comment 1, Comment 2}, and \textbf{Reviewer 2's Comment 1}, we have revised some of the formulas in the paper and reconstructed the symbol table to make the meanings of the formula symbols clearer and to enhance the overall reading experience.
 
 % 根据Reviewer 1's Comment 3，我们对Threat models部分的基本假设做了进一步的假设，使得本文提出的概念更便于理解。
 \item \textbf{[Threat Models:]} Based on \textbf{Reviewer 1's Comment 3}, we made further assumptions in the \textbf{Threat Models} section regarding the basic assumptions, making the concepts proposed in this paper easier to understand.
@@ -138,7 +138,7 @@ The detailed responses to the comments are as follows. Thank you very much for y
 \newpage
 
 %=================================
-\section{Responses to the Comments from Reviewer 1}
+\section{Responses to the Comments from Reviewer 3}
 %=================================
 %=================================
 %========================================================
@@ -157,8 +157,23 @@ We thanks the Reviewer for the comment.
 \color{red} There are several errors and linguistic issues throughout the paper. For instance, on page 5, at the end of the second paragraph, citation [36] is repeated consecutively. Please carefully review and correct these issues.
 }
 % 问题：文中存在部分错误和语病，如在P5页第二段末尾，引用[36]连续重复出现，请认真检查
+\textbf{Response:} Thank you for your valuable feedback on our paper. We greatly appreciate the time and effort you have taken to review our work.
 
-\textbf{Response:} We thank the Reviewer for the constructive comment.  
+Regarding the issue of errors and linguistic problems throughout the paper, especially the repeated citation [36] at the end of the second paragraph on page 5, we have carefully reviewed the entire manuscript and made the necessary corrections. The repeated citation has been removed, and we have conducted a thorough proofreading process to address any other linguistic issues that may have affected the clarity and quality of the paper.
+% 对存在的这类问题，我们深表歉意。我们已经删除了该处存在的重复引用的问题，同时，我们也修改了本文其他地方存在的表述不清或者语法错误等问题。以下为详细的修改内容：
+
+The following are the detailed modifications:
+
+\textcolor{blue}{
+To address the limitations faced by defense methods based on shallow semantic features in high-dimensional spaces, we propose a new defense strategy rooted in the essence of backdoor attacks [34], which leverages deep semantic features by focusing on the differences in model updates in the frequency domain. According to our experimental results, by transforming local model updates into the frequency domain, we can more accurately capture the abnormal behavior of malicious updates which is typically difficult to detect using traditional shallow feature-based defenses in low-frequency components. By analyzing the relevant features in the frequency domain, we can effectively distinguish between malicious and benign nodes, thereby enhancing the robustness and accuracy of federated learning in the face of sophisticated backdoor attacks.
+}
+
+\textcolor{blue}{......}
+
+\textcolor{blue}{
+Due to the curse of dimensionality in high-dimensional spaces, traditional methods based on shallow semantic
+feature can no longer effectively identify malicious nodes. In contrast, once model updates are transformed into the frequency domain, their differences are primarily concentrated in the low-frequency components. Focusing on the analysis of these low-frequency components not only improves identification accuracy but also significantly reduces computational overhead. For each update \(\triangledown \theta_i^t\), we apply one-dimensional DCT-II[35] to obtain its corresponding frequency distribution. Then we extract $m$ low-frequency components[36], such as 5000, yielding the low-frequency vector $G_i^t$.
+}
 
 
 
@@ -178,6 +193,10 @@ Following your suggestion, we revised the relevant parts of the algorithm and re
 Additionally, to make the entire algorithm process easier to understand, we adjusted some parts that were inconsistent with the original text, and algorithm \ref{alg:malicious-node-detection} shows the modified result.
 % 最后，为了表现算法中某些变量会随训练轮次所变化，我们给一些变量添加时间$t$的上标，比如修改$C_{max},Chi_i^2,{C_1}', {C_2}'$至$C^t_{max},{Chi^t_i}^2,{C^t_1}', {C^t_2}'$
 Finally, to represent that certain variables in the algorithm change with the training rounds, we added the superscript of round $t$ to some variables, such as modifying $C_{max}, Chi_i^2, {C'_1}, {C'_2}$ to $C^t_{max}, {Chi^t_i}^2, {C^t_1}', {C^t_2}'$.
+
+% 图1展示了算法修改后的结果
+The Algorithm \ref{alg:malicious-node-detection} shows the result of the modified algorithm.
+
 
 \begin{algorithm}
 \caption{Instantaneous Attack Behavior Perception}
@@ -199,7 +218,7 @@ Finally, to represent that certain variables in the algorithm change with the tr
 \State $H^t \gets (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n} $ \Comment{Stacking to form Matrix $H^t$, where $R_{i_0}, R_{i_1}, \ldots, R_{i_n} \in C^t_{max}$.}
 
 \State $\hat{H}^t \gets (H^t)^{T} H^t$
-\State $\lambda_{max}^t, \xi_{max}^t \gets \text{eig}(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
+\State $\lambda_{max}^t, \xi_{max}^t \gets eig(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
 \State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
 
 % \State
@@ -207,15 +226,15 @@ Finally, to represent that certain variables in the algorithm change with the tr
 % \State Step 3: Chi-square distance calculation
 % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
-    \State ${Chi_i^t}^2 \gets \frac{1}{2} \sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|G_i^t[k]|+|{\tilde G}^t[k]| + \epsilon}$
+    \State $Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{\tilde G}^t[k] + \epsilon}}$
 \EndFor
 \State \textcolor{blue}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
 
 % \State
 \State{\color{CadetBlue}/* \textbf{Single-round malicious behavior perception */}} 
 % \State Step 4: Single-round malicious behavior perception
-\State $\textcolor{blue}{\{C'_1, C'_2\}} \gets KMeans(S^t, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
-\State \textcolor{blue}{$U_{nor} \gets C'_{\text{max}}$, $U_{mal} \gets \{C'_i \, | \, i \neq \text{max}\}$}
+\State $\textcolor{blue}{\{{C^t_1}', {C^t_2}'\}} \gets KMeans(S^t, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
+\State \textcolor{blue}{$U_{nor} \gets C'_{max}$, $U_{mal} \gets \{C'_i \, | \, i \neq max\}$}
 
 \end{algorithmic}
 \end{algorithm}
@@ -232,8 +251,9 @@ Finally, to represent that certain variables in the algorithm change with the tr
 
 \textbf{Response:} Thank you for your suggestion. In Section 4 of our experiments, we used metrics such as ACC, Rec, FPR, FNR, AUC, and MCC as the basis for validating the effectiveness of our method. Although these metrics are commonly used in similar experiments, for the sake of the paper's generality and to facilitate understanding for a broader audience, we believe it is necessary to briefly introduce the meaning of these metrics. Therefore, we have added some descriptions to provide a concise explanation of these metrics. The added description is as follows:
 
+\textcolor{blue}{
 "Acc" refers to accuracy, which measures the proportion of correct predictions; "Rec" stands for recall, representing the model's ability to correctly identify positive instances; "FPR" denotes the false positive rate, indicating the proportion of negative instances incorrectly predicted as positive; "FNR" refers to the false negative rate, which represents the proportion of positive instances incorrectly predicted as negative; "AUC" stands for the area under the curve, reflecting the model's overall ability to distinguish between positive and negative instances; and "MCC" represents the Matthews correlation coefficient, which provides a balanced evaluation of the model's predictions.
-
+}
 %========================================================
 % 表格2的内容太长，超出了双栏的空间了，建议重新进行调整规划
 \rcomment{
@@ -267,7 +287,7 @@ Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive
 
 % \newpage
 % ```
-\section{Responses to the Comments from Reviewer 2}
+\section{Responses to the Comments from Reviewer 1}
 
 % comment6
 \rcomment{
@@ -275,6 +295,7 @@ Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive
 }
 
 Thank you for your suggestion.
+% 待定
 
 % comment7
 \rcomment{
@@ -282,6 +303,9 @@ Thank you for your suggestion.
 }
 
 % 感谢你指出这一点，我们的图3对应\ref{\section{Methodology}}部分的B部分的2)，我们只将图片放在了对应的文字介绍部分，但是并未对图片内容进行描述，甚至没有在文章中引用这段文字。现在，我们
+% 系统中断：先写合同去了
+% Log：昨天早上去答辩，在外面等待的时候背了会儿单词，B同学看我在看手机就说是不是在和兔米尼聊天，我说早上已经聊过了[害羞]，然后他“诶(撇嘴[撇嘴])”
+% 第二次是他说飞哥衣服好帅，然后我说对象送的[害羞]
 Thank you for pointing this out.
 
 % comment8
@@ -309,34 +333,57 @@ Thank you for your suggestion.
 \rcomment{
 \color{red} Some of the English expressions are difficult to understand. Improving the overall quality of writing is recommended.
 }
+Thank you for your feedback and suggestions for improving the clarity of our paper. We acknowledge that some English expressions may have been difficult to understand, and we appreciate your recommendation to enhance the overall quality of writing.To address this concern, we have revised the manuscript, focusing on improving the fluency and readability of the text. We have rephrased complex or unclear expressions to ensure that the language is more straightforward and easier to follow. Additionally, we have performed a detailed grammar and style check to improve the overall quality of writing.
 
-Thank you for your suggestion.
+The following are some of the modifications:
+
+\textcolor{blue}{The attacker has complete control over the local training process of the malicious robot nodes, meaning they can manipulate local data, trigger patterns, optimization strategies, and local updates at will. Additionally, the attacker may adopt a stealthy attack strategy, where the backdoor is not implanted in a single training round but gradually embedded into the global model through the cumulative effect of multiple rounds of training. This scenario is plausible in practice, as the central server only receives the updates uploaded by robot nodes and has no insight into the specific training process of each node. However, the attacker cannot interfere with the aggregation process of the central server (i.e., altering the global model aggregation rules) or tamper with the local updates of benign nodes.}
+
+\textcolor{blue}{......}
+
+\textcolor{blue}{Despite the increasingly sophisticated strategies employed by attackers, it is important to note that the essence of backdoor attacks lies in establishing a link between the predefined trigger and the target within the model. Thus, regardless of how attackers adjust their attack strategies, their updates will always exhibit some distributional shift compared to benign nodes.}
 
 \newpage
 
-\section{Responses to the Comments from Reviewer 3}
+\section{Responses to the Comments from Reviewer 4}
 
 % comment12
 \rcomment{
 \color{red} Why does the section on "Instantaneous Attack Behavior Perception" use the chi-square distribution to calculate outlier differences instead of cosine similarity? The manuscript lacks an explanation for this choice.
 }
 
-Thank you for your suggestion.
+We appreciate the reviewer’s insightful feedback. The decision to use the chi-square distribution instead of cosine similarity is rooted in the nature of the feature distribution in the frequency domain. Cosine similarity, while useful for comparing the angle between two vectors, would not appropriately capture the frequency domain’s distributional features in our model, where the outlier differences are more pronounced in the low-frequency components rather than in directional changes. The chi-square distribution allows us to better distinguish between malicious updates, which tend to introduce subtle but consistent deviations in these low-frequency features, and benign updates. This approach enhances detection accuracy by weighting the significant deviations while minimizing the impact of noise in the higher-frequency components. 
+
+To accurately explain the reasons for using the chi-square distribution in this paper, we have made the following modifications:
+
+
+% 卡方距离通常用来衡量某一种观测分布是不是符合某一类典型的理论分布，这一点与我们的方法非常契合，因为我们将计算出来的干净成分来作为衡量良性与恶意用户的标准。与传统的欧几里得距离相比，卡方距离根据干净分量分配权重，赋予较小分量更大的重要性。另一方面，余弦相似度测量两个向量之间的角度，通常用于评估它们的方向一致性，忽略数值差异。然而，在我们的方法中，我们关心的是每个用户的低频分量与干净分量的偏离程度，包括了数值差异，因此卡方距离比余弦相似度更适合捕捉隐蔽的恶意攻击。
+\textcolor{blue}{
+% Compared to traditional Euclidean distance, Chi-square distance assigns weights based on the magnitude of the corresponding components of two vectors, giving greater importance to components with larger feature values. This leads to a more accurate representation of differences in significant features within low-frequency vectors, while filtering out unimportant noise. On the other hand, Cosine similarity measures the angle between two vectors and is commonly used to evaluate their directional alignment in high-dimensional space. However, in our case, where the focus is on the magnitude and distribution of frequency-domain features, this method is less effective at capturing subtle variations in low-frequency components. These variations, which represent key differences between benign and malicious updates, are reflected more in the distribution and intensity of specific feature deviations than in directional alignment. As a result, Cosine similarity may overlook small but crucial frequency-based anomalies that can greatly affect the detection process. In contrast, the Chi-square distance emphasizes the magnitude of these differences, allowing for the detection of subtle yet meaningful shifts in data that signal covert attacks.
+Chi-square distribution is usually used to measure whether a certain observed distribution conforms to a typical theoretical distribution, which is very consistent with our method because we use the calculated clean ingredient as a criterion for measuring benign and malicious nodes. Compared with the traditional Euclidean distance, the chi-square distribution assigns weights according to the clean ingredient, giving greater importance to smaller components. On the other hand, cosine similarity measures the angle between two vectors and is usually used to evaluate their directional consistency, ignoring magnitude differences. However, in our method, we are concerned with the degree of deviation of each user's low-frequency vector $G_i^t$ from the clean ingredient $\tilde{G}^t$, including magnitude differences, so the chi-square distribution is more suitable for capturing hidden malicious attacks than cosine similarity.
+}
 
 % comment13
 \rcomment{
 \color{red} The manuscript uses inconsistent figure referencing styles (e.g., "Fig. 7" vs. "Figure 6"). Please standardize the citation format.
 }
 
-Thank you for pointing this out.
+Thank you for pointing out the inconsistency in figure referencing throughout the manuscript. We have carefully reviewed all figure references and standardized the citation format. Going forward, we have consistently used the term "Figure" when referencing figures, ensuring uniformity across the entire paper.
 
 % comment14
 \rcomment{
 \color{red} Several hyperparameters are used in the experiments, but their rationale and appropriateness are not explained. Please provide a justification for their settings.
 }
-
+`
 Thank you for your suggestion.
+% 1. 为啥只对visual-encoder部分进行lora微调
+% 我们的工作专注于联邦学习过程中的抗后门攻击，因此在CLIP模型微调这方面，我们采用了最基础的设置。参考CLIP-Adapter这篇文章，因为本文设定的场景是增加视觉大模型在zero-shot下对图像的识别能力，因此我们只对CLIP模型的visual-encoder部分进行lora微调，而对于text-encoder这部分，我们采用“a photo of a {CLASS}"作为文本方面的提示词模板。
+% 2. 为什么使用lora微调，而不用其他微调方式
+% 因为受限的计算资源导致对CLIP模型进行全量微调的时间成本非常之大，同时，我们的研究重点也不强调微调后的模型具有极高的性能，因此我们放弃了全量微调。目前也存在一些针对CLIP模型的微调方式，比如prompt engineering层面的CoOp、CoCoOp、MaPLe以及adapter层面的CLIP Adapter、TIP-Adapter，但这几个工作微调涉及到的参数量较小，与我们工作假设的高维场景不太契合。综上，我们选择了使用lora方式对CLIP模型进行微调，在微调成本和涉及到的参数量之间能够达到平衡。
+% 3. 使用lora对CLIP模型进行微调，相应超参数设置的理由
+% 我们所使用的超参数设置参考了CLIP-LORA这篇文章，
 
+% lora微调设置
 % comment15
 \rcomment{
 \color{red} Why is the condition $\zeta T$ set in the optimization problem in Section V.2? Clarification is needed.
@@ -348,12 +395,20 @@ Thank you for your suggestion.
 \rcomment{
 \color{red} There are numerous instances of incorrect symbol usage throughout the manuscript. A thorough review and correction are necessary.
 }
+Thank you for your valuable feedback regarding the incorrect symbol usage in the manuscript. We have conducted a thorough review and carefully corrected all instances of improper symbol usage to ensure accuracy and consistency throughout the paper.
 
-Thank you for your suggestion.
+The following are the detailed modifications: 
+
+\textcolor{blue}{Assume there are $N$ robot nodes in the system model, with each node denoted as $R_i$, where $i \in {1, 2, \ldots, N}$. Each robot node $R_i$ possesses a local dataset $D_i = {x_{i,j}, y_{i,j}}{j=1}^{|D_i|}$, where $x{i,j}$ represents a training sample, $y_{i,j}$ represents the corresponding label, and $|D_i|$ denotes the size of the dataset. The union of all local datasets across the nodes, $D = \bigcup_{i=1}^{N} D_i$, constitutes the overall dataset.}
+
+\textcolor{blue}{......}
+
+\textcolor{blue}{Based on this observation, we select the largest cluster \(C^t_{max} = \{G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}\}\) as the primary subject for analysis. To further extract the main characteristics of this cluster, we perform singular value decomposition (SVD)[38] on the matrix $H^t = (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n}$ formed by all nodes in this cluster. Since the left singular vectors of the SVD, denoted as \(\tilde{G}^t\), represent the principal directions of these vectors, \(\tilde{G}^t\) can be regarded as the principal component of benign nodes in the low-frequency domain.}
+
 
 \newpage
 
-\section{Responses to the Comments from Reviewer 4}
+\section{Responses to the Comments from Reviewer 2}
 
 % comment17
 \rcomment{
@@ -381,7 +436,9 @@ Thank you for your suggestion.
 \color{red} The manuscript’s language requires improvement, as there are multiple grammatical errors and unclear expressions. A thorough revision is suggested to enhance overall readability.
 }
 
-Thank you for your suggestion.
+Thank you for your valuable feedback. We appreciate your comments regarding the grammatical errors and unclear expressions in the manuscript.
+
+In response, we have undertaken a comprehensive revision of the paper, with particular attention to correcting grammatical mistakes and improving the clarity of the text. We have also simplified complex expressions and enhanced the overall readability to ensure the content is more accessible and coherent.
 
 \newpage
 
