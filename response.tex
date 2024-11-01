@@ -19,7 +19,9 @@
 \usepackage{bbm}
 \usepackage{comment}
 \usepackage{makecell}
+\PassOptionsToPackage{dvipsnames, svgnames, x11names}{xcolor}
 \usepackage{xcolor}
+\usepackage{threeparttable}
 
 \usepackage{listings}
 
@@ -135,6 +137,151 @@ Based on the valuable feedback from the reviewers, we have made significant impr
 \color{black}
 The detailed responses to the comments are as follows. Thank you very much for your time again.
 
+
+
+\newpage
+%=================================
+%=================================
+% 我给你一些审稿意见，请你按照格式返回latex源码：
+
+% ```
+% \section{Responses to the Comments from Reviewer 2}
+
+% % comment6
+% \rcomment{
+% \color{red} 审稿意见6
+% }
+
+% Thank you for your suggestion. 
+
+% % comment7
+% %...
+
+% \newpage
+% ```
+\section{Responses to the Comments from Reviewer 1}
+
+% comment6
+\rcomment{
+\color{red} The text in some experimental result figures is too small to be legible. Improving the clarity and resolution is recommended.
+}
+
+Thank you for your valuable feedback regarding the legibility of the experimental result figures. We have reviewed each figure in the manuscript and enhanced the resolution and clarity to ensure that all text and details are easily readable. Specifically, we have increased the font size within the figures and adjusted the image quality to provide a sharper, more distinct presentation of the experimental results.
+
+
+% comment7
+\rcomment{
+\color{red} Figure 3 is not cited in the manuscript. It is suggested to reference and explain the figure in the relevant section, as its absence hinders understanding.
+}
+
+% 系统中断：先写合同去了
+% 这是我回复的其中一个审稿意见，使用文章中的术语翻译这段话为英文
+% 感谢你指出这一点，我们的图3对应\ref{\section{Methodology}}部分的B部分的2)，我们只将图片放在了对应的文字介绍部分，但是并未对图片内容进行描述，甚至没有在文章中引用这段文字。现在，我们在文章中引用了该图片并对齐进行了一个简单的描述：
+% 图片3展示了Long-term Attack Intention Detection的前两步。这张图片总体上一共有3行，第一行展示了联邦学习的过程，很多机器人节点各自在下发的全局模型$G_{t-1}$的基础上训练并得到新的局部模型$\theta^t_{l_1}$，之后每个参与训练的客户端将自己的梯度变化上传到中央服务器的全局模型并聚合，从而形成新一轮的全局模型。第二行分为左右两个部分，左边部分展示了客户端多轮次中将更新的梯度展平后的结果，第一列代表某轮次的梯度更新，第二列代表$n$个客户端一轮次梯度更新展平后的结果，第三列则代表$n$个客户端$T$轮次梯度更新展平后的结果；右侧的图代表了每一轮次的全局模型。第三行则代表了如何根据多轮次的历史数据计算单个客户端的意图点，其中每条射线代表了模型更新展平后的结果，超球的球心则代表了当前客户端的意图点。
+
+Thank you for pointing this out. Our Figure 3 corresponds to Section B, 2) of the Methodology section. We placed the image alongside the related text but did not provide a description of the content, nor was the image referenced in the article. We have now cited this image in the text and provided a brief description:
+
+Figure 3 illustrates the first two steps of the Long-term Attack Intention Detection. The figure comprises three rows overall. The first row demonstrates the process of federated learning, where many robot nodes independently train their local models \( \theta^t_{l_1} \) based on the distributed global model \( G_{t-1} \). Each participating client then uploads its gradient updates to the central server's global model, which are aggregated to form the next global model iteration. The second row is divided into two sections: the left section shows the flattened gradients updated across multiple rounds for clients. The first column represents the gradient update of a specific round, the second column shows the flattened gradient updates from \( n \) clients in one round, and the third column displays the flattened updates across \( T \) rounds for \( n \) clients. The right section of the image represents the global model in each round. The third row depicts how a single client's intention point is calculated based on multi-round historical data, where each ray signifies the flattened results of the model updates, and the hypersphere's center represents the current client's intention point.
+
+% comment8
+\rcomment{
+\color{red} The steps in the final paragraph of Section 5 do not align with Algorithm 2. Please revise for consistency.
+}
+
+Thank you for your suggestion.
+
+% comment9
+\rcomment{
+\color{red} Some conditions in Algorithm 2 are unclear, such as "for Client i do", "while Not Converged do", and "for Each point Oj $\neq$ Oi do". Clarification and revision are needed.
+}
+
+\textbf{Response:}
+
+Thank you for your valuable feedback on Algorithm 2. We have reviewed the conditions and updated the descriptions to ensure they are clear and unambiguous. Specifically:
+
+\begin{itemize}
+    \item \textbf{"for Client $i$ do"}: We clarified this condition to indicate that the algorithm iterates over each client in the dataset, specifying how Client $i$ is selected and what actions are taken for each client.
+
+    \item \textbf{"while Not Converged do"}: We revised this condition to include the specific convergence criteria used in the algorithm. This provides a clear stopping condition, ensuring that readers understand when the loop will terminate.
+
+    \item \textbf{"for Each point $O_j \neq O_i$ do"}: We clarified that this loop iterates over all points in the dataset except for point $O_i$, and we specified the purpose of comparing each $O_j$ with $O_i$ in the context of the algorithm’s objective.
+\end{itemize}
+
+These modifications provide a more detailed and precise description of the algorithm’s flow. We appreciate your insights and believe these clarifications enhance the readability and understanding of Algorithm 2.
+
+
+% comment10
+\rcomment{
+\color{red} Section VI-C lacks quantitative analysis of the experimental results. The partitioning results in Fig. 6 are hard to distinguish, and the font size is too small. Moreover, the four subplots lack necessary labels, and the same issues are present in Fig. 7.
+}
+
+Thank you for your suggestion.
+
+% comment11
+\rcomment{
+\color{red} Some of the English expressions are difficult to understand. Improving the overall quality of writing is recommended.
+}
+Thank you for your feedback and suggestions for improving the clarity of our paper. We acknowledge that some English expressions may have been difficult to understand, and we appreciate your recommendation to enhance the overall quality of writing.To address this concern, we have revised the manuscript, focusing on improving the fluency and readability of the text. We have rephrased complex or unclear expressions to ensure that the language is more straightforward and easier to follow. Additionally, we have performed a detailed grammar and style check to improve the overall quality of writing.
+
+The following are some of the modifications:
+
+\textcolor{blue}{The attacker has complete control over the local training process of the malicious robot nodes, meaning they can manipulate local data, trigger patterns, optimization strategies, and local updates at will. Additionally, the attacker may adopt a stealthy attack strategy, where the backdoor is not implanted in a single training round but gradually embedded into the global model through the cumulative effect of multiple rounds of training. This scenario is plausible in practice, as the central server only receives the updates uploaded by robot nodes and has no insight into the specific training process of each node. However, the attacker cannot interfere with the aggregation process of the central server (i.e., altering the global model aggregation rules) or tamper with the local updates of benign nodes.}
+
+\textcolor{blue}{......}
+
+\textcolor{blue}{Despite the increasingly sophisticated strategies employed by attackers, it is important to note that the essence of backdoor attacks lies in establishing a link between the predefined trigger and the target within the model. Thus, regardless of how attackers adjust their attack strategies, their updates will always exhibit some distributional shift compared to benign nodes.}
+
+
+\newpage
+
+\section{Responses to the Comments from Reviewer 2}
+
+% comment17
+\rcomment{
+\color{red} The concept of intent recognition is a key innovation in this manuscript’s. However, the definition and construction of attacker intent are vague and need further elaboration to help readers better understand the core idea.
+}
+
+Thank you for your suggestion.
+
+% comment18
+\rcomment{
+\color{red} The description of the experiments is unclear. The titles and text in the figures are too small, making them difficult to read. For example, in Fig. 5, the data curves are hard to distinguish. It is recommended to enlarge key areas to better present the experimental results and analysis. Additionally, many figures lack sufficient explanation.
+}
+
+% 对于第一个实验：Model integrity and poisoning resistance，我们重新整理了相应数据，并修改了图片的表现形式。修改包括对图例字体格式以及大小的修改，同时为图中折现重合的部分加上了子图，使其更容易辨别。同时，我们也修改了原文中对于该实验结果的描述，使其更符合实验数据，同时更易于阅读和理解。
+Thank you for your detailed feedback regarding the clarity of our experimental descriptions and figures. We have carefully revised the manuscript to address each of the issues you raised. 
+
+Specifically, for the experiment \textbf{Model Integrity and Poisoning Resistance}, as dipicted in Figure \ref{fig:lab1}, we reorganized the relevant data and revised the presentation of the figures. These modifications include adjustments to the legend font style and size, as well as the addition of subplots for overlapping line segments, enhancing visual clarity. Furthermore, we refined the original description of the experimental results to align more closely with the experimental data, making it easier to read and understand.
+
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/lab1-combined.pdf}
+    \caption{ASR and TSR of various defense mechanisms (FedAVG, FLTrust, Foolsgold, Flame, SecFFT) under three attacks (MR, NEUR, EDGE CASE).}
+    \label{fig:lab1}
+\end{figure*}
+
+The corresponding modifications in the article are as follows:
+
+As depicted in the figure, in all attack scenarios, SecFFT consistently achieves an attack success rate (ASR) close to zero, while the test success accuracy (TSR) remains high. \textcolor{blue}{This indicates that SecFFT effectively defends against attacks by accurately identifying and neutralizing malicious users, all while preserving the performance and accuracy of the global model. In contrast, other defense mechanisms perform less effectively. Although Flame also shows strong performance in reducing ASR and mitigating malicious attack, it introduces considerable noise in the identification process, leading to a decrease in TSR, especially under MR attacks, where the performance degradation is more pronounced. FLTrust fails to defend effectively, with ASR initially low in MR attacks but quickly rising after several iterations, ultimately proving ineffective; against NEUR and EDGE CASE attacks, ASR remains high from the outset, demonstrating inadequate defense. Foolsgold also shows poor performance in defending against all three types of attacks, maintaining a high ASR from the beginning. Overall, the comparison highlights that other defense mechanisms either fail to effectively resist attacks or compromise model performance during defense. This further underscores SecFFT's significant advantage in federated fine-tuning for backdoor attack resistance, making it the optimal defense choice.}
+
+
+
+% comment19
+\rcomment{
+\color{red} For the third paragraph of left column on page 9, several "steps" are mentioned but not explained in the text.
+}
+
+Thank you for your suggestion.
+
+% comment20
+\rcomment{
+\color{red} The manuscript’s language requires improvement, as there are multiple grammatical errors and unclear expressions. A thorough revision is suggested to enhance overall readability.
+}
+
+Thank you for your valuable feedback. We appreciate your comments regarding the grammatical errors and unclear expressions in the manuscript.
+
+In response, we have undertaken a comprehensive revision of the paper, with particular attention to correcting grammatical mistakes and improving the clarity of the text. We have also simplified complex expressions and enhanced the overall readability to ensure the content is more accessible and coherent.
+
 \newpage
 
 %=================================
@@ -226,7 +373,7 @@ The Algorithm \ref{alg:malicious-node-detection} shows the result of the modifie
 % \State Step 3: Chi-square distance calculation
 % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
-    \State $Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{\tilde G}^t[k] + \epsilon}}$
+\State \textcolor{blue}{$Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{|\tilde G}^t[k]| + \epsilon}}$}
 \EndFor
 \State \textcolor{blue}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
 
@@ -267,81 +414,38 @@ The Algorithm \ref{alg:malicious-node-detection} shows the result of the modifie
 
 Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive, exceeding the single-column limit and even merging with the content in the adjacent column. We have made adjustments to the table, reducing its width appropriately to ensure that the table fits within the required format while maintaining the overall visual quality without exceeding the single-column range.
 
-\newpage
-%=================================
-%=================================
-% 我给你一些审稿意见，请你按照格式返回latex源码：
+\begin{table}[h!]
+\small
+\centering
+\caption{\textcolor{blue}{Metrics results with different attack and defense methods.}}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{c|c|c|c|c|c|c|c}
+\hline
+\textcolor{blue}{Strategy} & \textcolor{blue}{Defense} & \textcolor{blue}{Acc.} & \textcolor{blue}{Rec.} & \textcolor{blue}{FPR} & \textcolor{blue}{FNR} & \textcolor{blue}{AUC} & \textcolor{blue}{MCC} \\ \hline
 
-% ```
-% \section{Responses to the Comments from Reviewer 2}
+\multirow{4}{*}{\textcolor{blue}{None}} & \textcolor{blue}{Foolsgold} & \textcolor{blue}{0.90} & \textcolor{blue}{0.67} & \textcolor{blue}{0.00} & \textcolor{blue}{0.33} & \textcolor{blue}{0.83} & \textcolor{blue}{0.76} \\
+                      & \textcolor{blue}{FLTrust}   & \textcolor{blue}{0.82} & \textcolor{blue}{0.40} & \textcolor{blue}{0.00} & \textcolor{blue}{0.60} & \textcolor{blue}{0.70} & \textcolor{blue}{0.56} \\
+                      & \textcolor{blue}{Flame}     & \textcolor{blue}{0.90} & \textcolor{blue}{0.67} & \textcolor{blue}{0.00} & \textcolor{blue}{0.33} & \textcolor{blue}{0.83} & \textcolor{blue}{0.76} \\
+                      & \textcolor{blue}{SecFFT}    & \textbf{\textcolor{blue}{1.00}} & \textbf{\textcolor{blue}{1.00}} & \textcolor{blue}{0.00} & \textbf{\textcolor{blue}{0.00}} & \textbf{\textcolor{blue}{1.00}} & \textbf{\textcolor{blue}{1.00}} \\ \hline
 
-% % comment6
-% \rcomment{
-% \color{red} 审稿意见6
-% }
+\multirow{4}{*}{\textcolor{blue}{Size}} & \textcolor{blue}{Foolsgold} & \textcolor{blue}{0.92} & \textcolor{blue}{0.80} & \textcolor{blue}{0.03} & \textcolor{blue}{0.20} & \textcolor{blue}{0.88} & \textcolor{blue}{0.72} \\ 
+                      & \textcolor{blue}{FLTrust}   & \textcolor{blue}{0.82} & \textcolor{blue}{0.53} & \textcolor{blue}{0.06} & \textcolor{blue}{0.47} & \textcolor{blue}{0.74} & \textcolor{blue}{0.61} \\ 
+                      & \textcolor{blue}{Flame}     & \textcolor{blue}{0.92} & \textcolor{blue}{0.73} & \textbf{\textcolor{blue}{0.00}} & \textcolor{blue}{0.27} & \textcolor{blue}{0.87} & \textcolor{blue}{0.78} \\ 
+                      & \textcolor{blue}{SecFFT}    & \textbf{\textcolor{blue}{0.98}} & \textbf{\textcolor{blue}{0.93}} & \textbf{\textcolor{blue}{0.00}} & \textbf{\textcolor{blue}{0.07}} & \textbf{\textcolor{blue}{0.96}} & \textbf{\textcolor{blue}{0.91}} \\ \hline
 
-% Thank you for your suggestion. 
-
-% % comment7
-% %...
-
-% \newpage
-% ```
-\section{Responses to the Comments from Reviewer 1}
-
-% comment6
-\rcomment{
-\color{red} The text in some experimental result figures is too small to be legible. Improving the clarity and resolution is recommended.
+\multirow{4}{*}{\textcolor{blue}{Angle}} & \textcolor{blue}{Foolsgold} & \textcolor{blue}{0.88} & \textcolor{blue}{0.73} & \textcolor{blue}{0.06} & \textcolor{blue}{0.27} & \textcolor{blue}{0.84} & \textcolor{blue}{0.68} \\ 
+                       & \textcolor{blue}{FLTrust}   & \textcolor{blue}{0.86} & \textcolor{blue}{0.60} & \textcolor{blue}{0.03} & \textcolor{blue}{0.40} & \textcolor{blue}{0.80} & \textcolor{blue}{0.65} \\ 
+                       & \textcolor{blue}{Flame}     & \textcolor{blue}{0.90} & \textcolor{blue}{0.67} & \textbf{\textcolor{blue}{0.00}} & \textcolor{blue}{0.33} & \textcolor{blue}{0.83} & \textcolor{blue}{0.76} \\ 
+                       & \textcolor{blue}{SecFFT}    & \textbf{\textcolor{blue}{0.96}} & \textbf{\textcolor{blue}{0.87}} & \textbf{\textcolor{blue}{0.00}} & \textbf{\textcolor{blue}{0.13}} & \textbf{\textcolor{blue}{0.94}} & \textbf{\textcolor{blue}{0.88}} \\ \hline
+\end{tabular}
 }
-
-Thank you for your suggestion.
-% 待定
-
-% comment7
-\rcomment{
-\color{red} Figure 3 is not cited in the manuscript. It is suggested to reference and explain the figure in the relevant section, as its absence hinders understanding.
-}
-
-% 感谢你指出这一点，我们的图3对应\ref{\section{Methodology}}部分的B部分的2)，我们只将图片放在了对应的文字介绍部分，但是并未对图片内容进行描述，甚至没有在文章中引用这段文字。现在，我们
-% 系统中断：先写合同去了
-% Log：昨天早上去答辩，在外面等待的时候背了会儿单词，B同学看我在看手机就说是不是在和兔米尼聊天，我说早上已经聊过了[害羞]，然后他“诶(撇嘴[撇嘴])”
-% 第二次是他说飞哥衣服好帅，然后我说对象送的[害羞]
-Thank you for pointing this out.
-
-% comment8
-\rcomment{
-\color{red} The steps in the final paragraph of Section 5 do not align with Algorithm 2. Please revise for consistency.
-}
-
-Thank you for your suggestion.
-
-% comment9
-\rcomment{
-\color{red} Some conditions in Algorithm 2 are unclear, such as "for Client i do", "while Not Converged do", and "for Each point Oj $\neq$ Oi do". Clarification and revision are needed.
-}
-
-Thank you for your suggestion.
-
-% comment10
-\rcomment{
-\color{red} Section VI-C lacks quantitative analysis of the experimental results. The partitioning results in Fig. 6 are hard to distinguish, and the font size is too small. Moreover, the four subplots lack necessary labels, and the same issues are present in Fig. 7.
-}
-
-Thank you for your suggestion.
-
-% comment11
-\rcomment{
-\color{red} Some of the English expressions are difficult to understand. Improving the overall quality of writing is recommended.
-}
-Thank you for your feedback and suggestions for improving the clarity of our paper. We acknowledge that some English expressions may have been difficult to understand, and we appreciate your recommendation to enhance the overall quality of writing.To address this concern, we have revised the manuscript, focusing on improving the fluency and readability of the text. We have rephrased complex or unclear expressions to ensure that the language is more straightforward and easier to follow. Additionally, we have performed a detailed grammar and style check to improve the overall quality of writing.
-
-The following are some of the modifications:
-
-\textcolor{blue}{The attacker has complete control over the local training process of the malicious robot nodes, meaning they can manipulate local data, trigger patterns, optimization strategies, and local updates at will. Additionally, the attacker may adopt a stealthy attack strategy, where the backdoor is not implanted in a single training round but gradually embedded into the global model through the cumulative effect of multiple rounds of training. This scenario is plausible in practice, as the central server only receives the updates uploaded by robot nodes and has no insight into the specific training process of each node. However, the attacker cannot interfere with the aggregation process of the central server (i.e., altering the global model aggregation rules) or tamper with the local updates of benign nodes.}
-
-\textcolor{blue}{......}
-
-\textcolor{blue}{Despite the increasingly sophisticated strategies employed by attackers, it is important to note that the essence of backdoor attacks lies in establishing a link between the predefined trigger and the target within the model. Thus, regardless of how attackers adjust their attack strategies, their updates will always exhibit some distributional shift compared to benign nodes.}
+\vspace{1em}
+\begin{tablenotes}
+\scriptsize
+\item ``Acc." stands for Accuracy, ``Rec." for Recall, ``FPR" for False Positive Rate, ``FNR" for False Negative Rate, ``AUC" for Area Under Curve, and ``MCC" for Matthews Correlation Coefficient. The strategies are abbreviated as ``None" (No strategy), ``Size" (Size-limited strategy), and ``Angle" (Angle-limited strategy).
+\end{tablenotes}
+\label{tab:detect}
+\end{table}
 
 \newpage
 
@@ -374,16 +478,37 @@ Thank you for pointing out the inconsistency in figure referencing throughout th
 \rcomment{
 \color{red} Several hyperparameters are used in the experiments, but their rationale and appropriateness are not explained. Please provide a justification for their settings.
 }
-`
-Thank you for your suggestion.
-% 1. 为啥只对visual-encoder部分进行lora微调
-% 我们的工作专注于联邦学习过程中的抗后门攻击，因此在CLIP模型微调这方面，我们采用了最基础的设置。参考CLIP-Adapter这篇文章，因为本文设定的场景是增加视觉大模型在zero-shot下对图像的识别能力，因此我们只对CLIP模型的visual-encoder部分进行lora微调，而对于text-encoder这部分，我们采用“a photo of a {CLASS}"作为文本方面的提示词模板。
-% 2. 为什么使用lora微调，而不用其他微调方式
+% 1. 为什么使用lora微调，而不用其他微调方式
 % 因为受限的计算资源导致对CLIP模型进行全量微调的时间成本非常之大，同时，我们的研究重点也不强调微调后的模型具有极高的性能，因此我们放弃了全量微调。目前也存在一些针对CLIP模型的微调方式，比如prompt engineering层面的CoOp、CoCoOp、MaPLe以及adapter层面的CLIP Adapter、TIP-Adapter，但这几个工作微调涉及到的参数量较小，与我们工作假设的高维场景不太契合。综上，我们选择了使用lora方式对CLIP模型进行微调，在微调成本和涉及到的参数量之间能够达到平衡。
+% 2. 为啥只对visual-encoder部分进行lora微调
+% 我们的工作专注于联邦学习过程中的抗后门攻击，因此在CLIP模型微调这方面，我们采用了最基础的设置。参考CLIP-Adapter这篇文章，因为本文设定的场景是增加视觉大模型在zero-shot下对图像的识别能力，因此我们只对CLIP模型的visual-encoder部分进行lora微调，而对于text-encoder这部分，我们采用“a photo of a {CLASS}"作为文本方面的提示词模板。
 % 3. 使用lora对CLIP模型进行微调，相应超参数设置的理由
-% 我们所使用的超参数设置参考了CLIP-LORA这篇文章，
+% 在使用lora对CLIP模型进行微调时，我们所使用的超参数设置参考了CLIP-LORA这篇文章，相关的超参数例如learning rate, batch size等与该篇论文几乎相符合。而在lora参数秩的设置上，如果按照CLIP-LORA这篇文章进行设置则会导致最终微调涉及到的参数量较少，不符合本文设定的场景，因此我们进行了适当增大。
+% 4. 联邦训练过程相应的超参数设置理由
+% 对于联邦学习相关的超参数例如节点数量，我们的设置参考了\cite{wei2023personalized}, \cite{ilhan2023scalefl}, \cite{wu2023faster}, \cite{ye2024openfedllm}, \cite{zhou2024every}, \cite{nguyen2022flame}, and \cite{yang2024roseagg}等文章。这些工作所采用的节点数不尽相同，范围从20到200不等。因此，综合考虑时间成本，计算开销以及验证效果等方面，我们才采用相应的超参数设置。
+% Thank you for your valuable feedback. We appreciate your comments regarding the need for clarification and justification of the hyperparameter settings used in our experiments. Below, we provide a detailed response to address your concerns:
 
-% lora微调设置
+% \textbf{Rationale behind hyperparameter settings for LoRA fine-tuning of CLIP:}
+% We chose LoRA (Low-Rank Adaptation) for fine-tuning the CLIP model due to limited computational resources and the need to balance time cost and parameter efficiency. Full fine-tuning of the CLIP model is computationally expensive, and since our research does not prioritize pushing the fine-tuned model to peak performance, we selected LoRA to maintain computational efficiency while still allowing a sufficient degree of fine-tuning. LoRA enables us to adjust a smaller set of parameters, which is more practical for the high-dimensional data scenarios we explore in our work.
+% For the specific hyperparameters used in LoRA fine-tuning, we referred to the values suggested in the CLIP-LORA paper, such as learning rate and batch size. However, we found that the original rank setting of LoRA would have resulted in an insufficient number of parameters for our scenario. Thus, we adjusted the rank to increase the number of tunable parameters, ensuring that the model's capacity aligns with the complexity of the data used in our experiments.
+
+% Rationale behind the hyperparameter settings for federated training
+% For the federated training process, we carefully considered the hyperparameters, especially the number of participating nodes, which is a critical factor in federated learning. Informed by recent studies such as \cite{wei2023personalized}, \cite{ilhan2023scalefl}, and \cite{wu2023faster}, which tested node counts ranging from 20 to 200, we aimed to find a balance between computational cost, time efficiency, and model accuracy. After evaluating our available resources and validating our preliminary results, we settled on a configuration that fits the scope of our work while ensuring robust performance.
+
+Thank you for your insightful comments. We have carefully considered your concerns regarding the hyperparameter settings and provide a detailed explanation below:
+
+\textbf{LoRA was selected due to computational efficiency and alignment with our research goals:}
+Given the limited computational resources available, full-parameter fine-tuning of the CLIP model was impractical due to the substantial time and resource costs. Additionally, our research does not focus on achieving the highest possible performance but rather on efficiently conducting experiments. While other fine-tuning methods like CoOp\cite{zhou2022learning}, CoCoOp\cite{zhou2022conditional}, MaPLe, and adapter-based methods such as CLIP-Adapter\cite{gao2024clip} and TIP-Adapter\cite{zhang2021tip} are available, these involve fewer parameters and do not align well with the high-dimensional scenarios required in our study. LoRA offers a balanced solution, maintaining computational efficiency while optimizing parameter adjustment.
+
+\textbf{The visual encoder of the CLIP model was fine-tuned to meet the core focus of our research:}
+Our study primarily addresses backdoor attacks in federated learning, and thus we used a straightforward configuration for fine-tuning the CLIP model. In accordance with the approach from the CLIP-Adapter\cite{gao2024clip} paper, which enhances visual recognition capabilities, we applied LoRA exclusively to the visual encoder. For the text encoder, we retained the default prompt template (“a photo of a \{CLASS\}”) to guide text-based predictions, which met our research needs without introducing unnecessary complexity.
+
+\textbf{The hyperparameters for LoRA were adapted based on the demands of our experimental setup:}
+We adopted hyperparameters such as learning rate and batch size from the recommendations in the CLIP-LORA\cite{zanella2024low} paper. However, we determined that the default rank for LoRA parameters was insufficient to meet the high-dimensional requirements of our work. To better accommodate the parameter complexity in our experiments, we adjusted the rank to increase the number of tunable parameters, ensuring better fitting the requirements of our high-dimensional scenario.
+
+\textbf{Federated learning hyperparameters were informed by prior studies and practical considerations:}
+For the federated training aspect of our research, we relied on previous studies, including \cite{wei2023personalized}, \cite{ilhan2023scalefl}, and \cite{wu2023faster}, which suggested a participants range from 20 to 200. Considering the time cost, computational overhead, and  the effectiveness of experimental results, we selected the most suitable configuration for our experiments, optimizing both performance and resource use.
+
 % comment15
 \rcomment{
 \color{red} Why is the condition $\zeta T$ set in the optimization problem in Section V.2? Clarification is needed.
@@ -397,7 +522,7 @@ Thank you for your suggestion.
 }
 Thank you for your valuable feedback regarding the incorrect symbol usage in the manuscript. We have conducted a thorough review and carefully corrected all instances of improper symbol usage to ensure accuracy and consistency throughout the paper.
 
-The following are the detailed modifications: 
+The following are some of the detailed modifications: 
 
 \textcolor{blue}{Assume there are $N$ robot nodes in the system model, with each node denoted as $R_i$, where $i \in {1, 2, \ldots, N}$. Each robot node $R_i$ possesses a local dataset $D_i = {x_{i,j}, y_{i,j}}{j=1}^{|D_i|}$, where $x{i,j}$ represents a training sample, $y_{i,j}$ represents the corresponding label, and $|D_i|$ denotes the size of the dataset. The union of all local datasets across the nodes, $D = \bigcup_{i=1}^{N} D_i$, constitutes the overall dataset.}
 
@@ -406,39 +531,6 @@ The following are the detailed modifications:
 \textcolor{blue}{Based on this observation, we select the largest cluster \(C^t_{max} = \{G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}\}\) as the primary subject for analysis. To further extract the main characteristics of this cluster, we perform singular value decomposition (SVD)[38] on the matrix $H^t = (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n}$ formed by all nodes in this cluster. Since the left singular vectors of the SVD, denoted as \(\tilde{G}^t\), represent the principal directions of these vectors, \(\tilde{G}^t\) can be regarded as the principal component of benign nodes in the low-frequency domain.}
 
 
-\newpage
-
-\section{Responses to the Comments from Reviewer 2}
-
-% comment17
-\rcomment{
-\color{red} The concept of intent recognition is a key innovation in this manuscript’s. However, the definition and construction of attacker intent are vague and need further elaboration to help readers better understand the core idea.
-}
-
-Thank you for your suggestion.
-
-% comment18
-\rcomment{
-\color{red} The description of the experiments is unclear. The titles and text in the figures are too small, making them difficult to read. For example, in Fig. 5, the data curves are hard to distinguish. It is recommended to enlarge key areas to better present the experimental results and analysis. Additionally, many figures lack sufficient explanation.
-}
-
-Thank you for your suggestion.
-
-% comment19
-\rcomment{
-\color{red} For the third paragraph of left column on page 9, several "steps" are mentioned but not explained in the text.
-}
-
-Thank you for your suggestion.
-
-% comment20
-\rcomment{
-\color{red} The manuscript’s language requires improvement, as there are multiple grammatical errors and unclear expressions. A thorough revision is suggested to enhance overall readability.
-}
-
-Thank you for your valuable feedback. We appreciate your comments regarding the grammatical errors and unclear expressions in the manuscript.
-
-In response, we have undertaken a comprehensive revision of the paper, with particular attention to correcting grammatical mistakes and improving the clarity of the text. We have also simplified complex expressions and enhanced the overall readability to ensure the content is more accessible and coherent.
 
 \newpage
 
