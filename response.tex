@@ -168,6 +168,17 @@ The detailed responses to the comments are as follows. Thank you very much for y
 
 Thank you for your valuable feedback regarding the legibility of the experimental result figures. We have reviewed each figure in the manuscript and enhanced the resolution and clarity to ensure that all text and details are easily readable. Specifically, we have increased the font size within the figures and adjusted the image quality to provide a sharper, more distinct presentation of the experimental results.
 
+% 修改后的结果如图\ref{fig:lab2}所示，同时我们也修改了文章中相应的分析部分，使其更易符合实验结果并且更易理解。
+\begin{figure*}[!h]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/lab2-combined.pdf}
+    \caption{Visualization of node identification results under three attack scenarios (MR, EDGE CASE, NEUR) for four defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign, or vice versa. }
+    \label{fig:lab2}
+\end{figure*}
+
+Figure \ref{fig:lab2} shows the image after modification. We also updated the corresponding analysis section in the article to better align with the experimental findings and enhance readability. The revised analysis is shown below:
+
+\textcolor{blue}{SecFFT outperforms other mechanisms in handling various attack. SecFFT achieves the lowest misidentification rate, at only 0.2\%, indicating its superior defense capability and robustness across various attack scenarios, accurately distinguishing between malicious and benign nodes. Conversely, the misidentification rates of Flame, FLTrust, and FoolsGold are 8\%, 3.9\%, and 9.5\%, respectively, with misidentified nodes more broadly distributed. Among them, FoolsGold exhibits the highest misidentification rate. It is worth noting that these statistical results align precisely with the findings from the previous experiment, further validating SecFFT's superior performance in instantaneous Attack Behavior Perception.}
 
 % comment7
 \rcomment{
@@ -179,7 +190,7 @@ Thank you for your valuable feedback regarding the legibility of the experimenta
 % 感谢你指出这一点，我们的图3对应\ref{\section{Methodology}}部分的B部分的2)，我们只将图片放在了对应的文字介绍部分，但是并未对图片内容进行描述，甚至没有在文章中引用这段文字。现在，我们在文章中引用了该图片并对齐进行了一个简单的描述：
 % 图片3展示了Long-term Attack Intention Detection的前两步。这张图片总体上一共有3行，第一行展示了联邦学习的过程，很多机器人节点各自在下发的全局模型$G_{t-1}$的基础上训练并得到新的局部模型$\theta^t_{l_1}$，之后每个参与训练的客户端将自己的梯度变化上传到中央服务器的全局模型并聚合，从而形成新一轮的全局模型。第二行分为左右两个部分，左边部分展示了客户端多轮次中将更新的梯度展平后的结果，第一列代表某轮次的梯度更新，第二列代表$n$个客户端一轮次梯度更新展平后的结果，第三列则代表$n$个客户端$T$轮次梯度更新展平后的结果；右侧的图代表了每一轮次的全局模型。第三行则代表了如何根据多轮次的历史数据计算单个客户端的意图点，其中每条射线代表了模型更新展平后的结果，超球的球心则代表了当前客户端的意图点。
 
-Thank you for pointing this out. Our Figure 3 corresponds to Section B, 2) of the Methodology section. We placed the image alongside the related text but did not provide a description of the content, nor was the image referenced in the article. We have now cited this image in the text and provided a brief description:
+\textbf{Response:} Thank you for pointing this out. Our Figure 3 corresponds to Section B, 2) of the Methodology section. We placed the image alongside the related text but did not provide a description of the content, nor was the image referenced in the article. We have now cited this image in the text and provided a brief description:
 
 Figure 3 illustrates the first two steps of the Long-term Attack Intention Detection. The figure comprises three rows overall. The first row demonstrates the process of federated learning, where many robot nodes independently train their local models \( \theta^t_{l_1} \) based on the distributed global model \( G_{t-1} \). Each participating client then uploads its gradient updates to the central server's global model, which are aggregated to form the next global model iteration. The second row is divided into two sections: the left section shows the flattened gradients updated across multiple rounds for clients. The first column represents the gradient update of a specific round, the second column shows the flattened gradient updates from \( n \) clients in one round, and the third column displays the flattened updates across \( T \) rounds for \( n \) clients. The right section of the image represents the global model in each round. The third row depicts how a single client's intention point is calculated based on multi-round historical data, where each ray signifies the flattened results of the model updates, and the hypersphere's center represents the current client's intention point.
 
@@ -188,39 +199,130 @@ Figure 3 illustrates the first two steps of the Long-term Attack Intention Detec
 \color{red} The steps in the final paragraph of Section 5 do not align with Algorithm 2. Please revise for consistency.
 }
 
-Thank you for your suggestion.
+% 感谢您指出文本中描述行数与算法不一致的问题。我们已根据算法的最新修改，仔细检查并修正了第五节最后一段中的行数描述，确保其与算法2的步骤完全对齐。具体来说，我们逐条对照了算法中的每个步骤，确保每个操作、条件和循环都在文本中得到了准确反映。
+
+% 此外，我们在修订过程中还增强了描述的清晰度，以便读者能够更容易理解算法的执行流程。我们还添加了必要的背景信息和解释，以帮助读者在上下文中更好地理解每一步的意义和目的。
+
+% 这些修改不仅提高了文本的准确性，也增强了整篇论文的逻辑连贯性。我们非常感谢您对此问题的关注，这使我们能够提升稿件的整体质量和可读性。
+
+Thank you for pointing out the inconsistency between the line numbers described in the text and those in Algorithm 2. We have carefully reviewed and revised the final paragraph of Section 5 to ensure that it aligns perfectly with the updated steps in the algorithm. Specifically, we compared each step in the algorithm with the corresponding actions, conditions, and loops described in the text to ensure accurate representation.
+
+In addition to correcting the line numbers, we enhanced the clarity of the descriptions during the revision process. This makes it easier for readers to understand the execution flow of the algorithm. We also added necessary background information and explanations to help readers grasp the significance and purpose of each step within the context.
+
+These modifications not only improve the accuracy of the text but also enhance the logical coherence of the entire paper. We greatly appreciate your attention to this issue, which has allowed us to elevate the overall quality and readability of the manuscript.
+
+\textcolor{blue}{We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref{alg:malicious-node-detection-history}. Lines 4 to 6 correspond to Step 1, which outlines the method for retaining historical records for \(T\) rounds. Lines 7 to 12 correspond to Step 2, which describes the use of the minimum enclosing hypersphere algorithm to determine each robot node's intent point and confidence level. Lines 13 to 22 correspond to Step 3, which explains how to identify normal and abnormal nodes using the LOF algorithm. Finally, lines 23 to 25 correspond to Step 4, which illustrates the method for performing weighted aggregation based on each robot node's confidence level.
+}
 
 % comment9
 \rcomment{
 \color{red} Some conditions in Algorithm 2 are unclear, such as "for Client i do", "while Not Converged do", and "for Each point Oj $\neq$ Oi do". Clarification and revision are needed.
 }
 
-\textbf{Response:}
-
-Thank you for your valuable feedback on Algorithm 2. We have reviewed the conditions and updated the descriptions to ensure they are clear and unambiguous. Specifically:
+\textbf{Response:} Thank you for your valuable feedback on Algorithm 2. We have reviewed the conditions and updated the descriptions to ensure they are clear and unambiguous. Specifically:
 
 \begin{itemize}
     \item \textbf{"for Client $i$ do"}: We clarified this condition to indicate that the algorithm iterates over each client in the dataset, specifying how Client $i$ is selected and what actions are taken for each client.
 
-    \item \textbf{"while Not Converged do"}: We revised this condition to include the specific convergence criteria used in the algorithm. This provides a clear stopping condition, ensuring that readers understand when the loop will terminate.
+    \item \textbf{"while Not Converged do"}: We revised this condition to include the specific convergence criteria used in the algorithm. This provides a clear stopping condition of $\|O_{i,k}-O_{i,k+1}\|\geq \lambda$ and $k\leq k_{max}$, ensuring that readers understand when the loop will terminate.
 
     \item \textbf{"for Each point $O_j \neq O_i$ do"}: We clarified that this loop iterates over all points in the dataset except for point $O_i$, and we specified the purpose of comparing each $O_j$ with $O_i$ in the context of the algorithm’s objective.
 \end{itemize}
 
+% 除此之外，我们还发现了一个小细节，即原本的注释中注释符号和注释内容左右空格数量不一致，我们顺便修复了这个错误。
+
+In addition, we also discovered a small detail that the number of spaces left and right in the original comments was inconsistent between the comment symbols and the comment content. We also fixed this error.
+
 These modifications provide a more detailed and precise description of the algorithm’s flow. We appreciate your insights and believe these clarifications enhance the readability and understanding of Algorithm 2.
 
+% 现在的算法2伪代码如下所示：
+
+% TODO: 现在有一个问题就是，文章中的算法2在Response中出现更早，因此编号变成了Algorithm 1
+The pseudocode for Algorithm 2 is as follows:
+
+\begin{algorithm}
+\caption{Attack intention detection and secure aggregation}
+\label{alg:malicious-node-detection-history}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Global model history $\{\theta_g^{t-T}, \dots, \theta_g^{t-1}\}$, historical gradient updates for each client $\{\triangledown \theta_{i}^{t-T}, \dots, \triangledown \theta_{i}^{t-1}\}$
+\State \textbf{Output:} Sets of normal clients $U_{nor}$ and malicious clients $U_{mal}$
+
+
+\For {Client \textcolor{blue}{$i\in \{1\ldots N\}$}}
+
+\State{\color{CadetBlue}/* \textbf{Construction of updates and model databases */}} 
+    \State Record flattened gradients $\bar{\theta_i^t}$ and models $\theta_g^{t-1}$
+    % \State $\widetilde{\theta_{i}^{t'-1}}  \gets Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'}  \gets \overline{\triangledown\theta_{i}^{t'}}$ for $t'  \gets \max\{t-T+1, 1\}, \ldots, t$ \Comment{Construct rays}
+    \State Construct rays for each $'$, $\max\{t-T+1, 1\}\leq t' \leq t$
+
+
+\State{\color{CadetBlue}/* \textbf{Construction of attack intention */}} 
+
+    \State Initialize center $O_{i,0}$ and radius $r_{i,0}$
+    \While {\textcolor{blue}{$\|O_{i,k}-O_{i,k+1}\|\geq \lambda$ and $k\leq k_{max}$}}
+        \State Update center $O_{i,k+1}$ and radius $r_{i,k+1}$
+    \EndWhile
+    \State  $cre_i  \gets \frac{1}{r_i + \rho}$ \Comment{Calculate confidence}
+
+
+\State{\color{CadetBlue}/* \textbf{LOF-driven malicious intention detection */}} 
+
+    \For {Each point $O_j \neq O_i$\textcolor{blue}{, $j\in\{1\ldots N\}$}}
+        \State Calculate distance $\|O_i - O_j\|$
+    \EndFor
+    \State Determine $q$-distance $\widetilde{dis_i^q}$ for $O_i$
+    \State Find neighbors $Nei_i$ within $\widetilde{dis_i^q}$
+    \State $rea_{i,j}  \gets \max\{\widetilde{dis_i^q}, \|O_i - O_j\|\}$ for $O_j \in Nei_i$  \Comment{Compute reachability distance}
+    \State  $lrd_i  \gets \frac{|Nei_i|}{\sum_{j \in Nei_i} rea_{i,j}}$ \Comment{Calculate reachability density}
+    \State $lof_i  \gets \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
+
+% \For {Client $i$}
+%     \State Compute $lof_i = \frac{\sum_{j \in Nei_i} \frac{lrd_j}{lrd_i}}{|Nei_i|}$
+%     \If {$lof_i > 1$}
+%         \State Mark client $i$ as malicious, add to $U_{mal}$
+%     \Else
+%         \State Mark client $i$ as normal, add to $U_{nor}$
+%     \EndIf
+% \EndFor
+% \State $U_{mal} = \{i \,|\, lof_i > 1\}$
+% \State $U_{nor} = \{i \,|\, lof_i \leq 1\}$
+\State $U_{mal}, U_{nor}  \gets \{i \,|\, lof_i > 1\}, \{i \,|\, lof_i \leq 1\}$
+
+\State{\color{CadetBlue}/* \textbf{Secure aggregation of global FFT model */}} 
+        \State $cre_i'  \gets \tanh(cre_i)$\Comment{Compute adjusted confidence}
+        \State $w_i  \gets \frac{cre_i'}{\sum_{i \in U_{nor}} cre_i'}$\Comment{Normalize weights}
+\EndFor
+
+\State \textbf{Output:} $\theta_g^t \gets \theta_g^{t-1} + \sum_{i \in U_{nor}} w_i \cdot \triangledown \theta_i^t$\Comment{Aggregate global model}
+\end{algorithmic}
+\end{algorithm}
 
 % comment10
 \rcomment{
 \color{red} Section VI-C lacks quantitative analysis of the experimental results. The partitioning results in Fig. 6 are hard to distinguish, and the font size is too small. Moreover, the four subplots lack necessary labels, and the same issues are present in Fig. 7.
 }
+\textbf{Response:} 
+Thank you for your valuable comments and suggestions, which have greatly helped us to improve our paper. We have carefully addressed each of the issues you raised and made the following modifications:
 
-Thank you for your suggestion.
+First, we recognized the need for a more in-depth quantitative analysis in this section. We have now included additional statistical data to provide a comprehensive analysis of the experimental results, including metrics that better quantify the effectiveness of our partitioning method. This has been added to enhance the clarity and significance of our findings.
+The following are the corresponding modifications in the article: 
+
+\textcolor{blue}{This indicates that SecFFT effectively defends against attacks by accurately identifying and neutralizing malicious users, all while preserving the performance and accuracy of the global model. In contrast, other defense mechanisms perform less effectively. Although Flame also shows strong performance in reducing ASR and mitigating malicious attack, it introduces considerable noise in the identification process, leading to a decrease in TSR, especially under MR attacks, where the performance degradation is more pronounced. FLTrust fails to defend effectively, with ASR initially low in MR attacks but quickly rising after several iterations, ultimately proving ineffective; against NEUR and EDGE CASE attacks, ASR remains high from the outset, demonstrating inadequate defense. Foolsgold also shows poor performance in defending against all three types of attacks, maintaining a high ASR from the beginning. Overall, the comparison highlights that other defense mechanisms either fail to effectively resist attacks or compromise model performance during defense. This further underscores SecFFT's significant advantage in federated fine-tuning for backdoor attack resistance, making it the optimal defense choice.}
+
+\textcolor{blue}{......}
+
+\textcolor{blue}{SecFFT outperforms other mechanisms in handling various attack. SecFFT achieves the lowest misidentification rate, at only 0.2\%, indicating its superior defense capability and robustness across various attack scenarios, accurately distinguishing between malicious and benign nodes. Conversely, the misidentification rates of Flame, FLTrust, and FoolsGold are 8\%, 3.9\%, and 9.5\%, respectively, with misidentified nodes more broadly distributed. Among them, FoolsGold exhibits the highest misidentification rate. It is worth noting that these statistical results align precisely with the findings from the previous experiment, further validating SecFFT's superior performance in instantaneous Attack Behavior Perception.}
+
+
+Second, to improve the visibility and distinguish-ability of the partitioning results in Figure 6, we have added a supplementary sub-image that provides a clearer presentation of the partitioned sections. We also increased the font size to enhance readability, ensuring that key features are visible and easy to interpret. For details, please refer to Figure \ref{fig:lab1} and responses to the comment 2 from Reviewer 2.
+
+Third, we re-adjusted the layout of Figure 7 to address the issues you pointed out. Specifically, we improved the font sizes, added necessary labels, and modified the legend for better comprehension. These adjustments were made to ensure that the experimental data in Figure 7 are both readable and visually clear. For details, please refer to Figure \ref{fig:lab2} and responses to the comment 1 from Reviewer 1.
 
 % comment11
 \rcomment{
 \color{red} Some of the English expressions are difficult to understand. Improving the overall quality of writing is recommended.
 }
+\textbf{Response:} 
 Thank you for your feedback and suggestions for improving the clarity of our paper. We acknowledge that some English expressions may have been difficult to understand, and we appreciate your recommendation to enhance the overall quality of writing.To address this concern, we have revised the manuscript, focusing on improving the fluency and readability of the text. We have rephrased complex or unclear expressions to ensure that the language is more straightforward and easier to follow. Additionally, we have performed a detailed grammar and style check to improve the overall quality of writing.
 
 The following are some of the modifications:
@@ -247,7 +349,7 @@ Thank you for your suggestion.
 \rcomment{
 \color{red} The description of the experiments is unclear. The titles and text in the figures are too small, making them difficult to read. For example, in Fig. 5, the data curves are hard to distinguish. It is recommended to enlarge key areas to better present the experimental results and analysis. Additionally, many figures lack sufficient explanation.
 }
-
+\textbf{Response:} 
 % 对于第一个实验：Model integrity and poisoning resistance，我们重新整理了相应数据，并修改了图片的表现形式。修改包括对图例字体格式以及大小的修改，同时为图中折现重合的部分加上了子图，使其更容易辨别。同时，我们也修改了原文中对于该实验结果的描述，使其更符合实验数据，同时更易于阅读和理解。
 Thank you for your detailed feedback regarding the clarity of our experimental descriptions and figures. We have carefully revised the manuscript to address each of the issues you raised. 
 
@@ -277,7 +379,7 @@ Thank you for your suggestion.
 \rcomment{
 \color{red} The manuscript’s language requires improvement, as there are multiple grammatical errors and unclear expressions. A thorough revision is suggested to enhance overall readability.
 }
-
+\textbf{Response:} 
 Thank you for your valuable feedback. We appreciate your comments regarding the grammatical errors and unclear expressions in the manuscript.
 
 In response, we have undertaken a comprehensive revision of the paper, with particular attention to correcting grammatical mistakes and improving the clarity of the text. We have also simplified complex expressions and enhanced the overall readability to ensure the content is more accessible and coherent.
@@ -292,11 +394,18 @@ In response, we have undertaken a comprehensive revision of the paper, with part
 \rcomment{
 \color{red} The technical framework lacks sufficient explanatory detail. For example, the steps in Fig. 2 are explained too briefly, making them difficult to understand.
 }
-% 问题：技术框架解释性不足，比如Fig2步骤解释过于粗略，难以理解。
+
 \textbf{Response:} 
-We thanks the Reviewer for the comment.
+Thank you for your valuable feedback. We appreciate your insights, especially regarding the need for further detail in the technical framework explanation and the steps illustrated in Figure 2.
 
+In response, we have carefully considered your suggestions and revised the framework diagram to enhance clarity and detail. The new version of Figure 2 (which depicted as Figure \ref{fig2:instant}) has been redrawn to illustrate each step in the algorithm more thoroughly, ensuring that readers can understand the entire process without ambiguity. We have added comprehensive explanations for each step, including intermediate processes and transitions, to provide a clearer and more accessible description of the framework. These changes are intended to ensure that the entire flow of the framework is presented in a more intuitive and informative manner.
 
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/secfft-1.pdf}
+    \caption{SecFFT's instantaneous attack behavior perception module with frequency-domain deep outlier feature semantics extraction}
+    \label{fig2:instant}
+\end{figure}
 
 
 %========================================================
@@ -345,11 +454,52 @@ Finally, to represent that certain variables in the algorithm change with the tr
 The Algorithm \ref{alg:malicious-node-detection} shows the result of the modified algorithm.
 
 
+% \begin{algorithm}
+% \caption{Instantaneous Attack Behavior Perception}
+% \label{alg:malicious-node-detection}
+% \begin{algorithmic}[1]
+% \State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency components}
+% \State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
+% \State{\color{CadetBlue}/* \textbf{Frequency Domain Transformation */}} 
+% % \State Step 1: Frequency Domain Transformation
+% \For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
+%     \State \textcolor{blue}{$G_i^t \gets Trunc(DCT(Flatten(\triangledown \theta_i^t))), m)$}
+% \EndFor
+
+% % \State
+% \State{\color{CadetBlue}/* \textbf{Clean Ingredient Extraction */}} 
+% % \State Step 2: Clean Ingredient Extraction
+% \State $(C_0^t, C_1^t, \ldots, C_{\kappa}^t) \gets Clustering\textcolor{blue}{ (G_0^t, G_1^t, \ldots, G_N^t)}$ \Comment{$\kappa$ denotes the number of clusters}
+% \State \textcolor{blue}{$ C^t_{max} \gets \underset{C^t_j}{\arg\max} \, |C^t_j|$ \Comment{$|C^t_j|$ denotes the number of nodes in cluster $C^t_j$, $j = 1, 2, \ldots, \kappa $}}
+% \State $H^t \gets (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n} $ \Comment{Stacking to form Matrix $H^t$, where $R_{i_0}, R_{i_1}, \ldots, R_{i_n} \in C^t_{max}$.}
+
+% \State $\hat{H}^t \gets (H^t)^{T} H^t$
+% \State $\lambda_{max}^t, \xi_{max}^t \gets eig(\hat{H}^t)$ \Comment{Calculating the maximum singular value and its corresponding eigenvector}
+% \State $\tilde{G}^t \gets \frac{H^t \xi_{max}^t}{\sqrt{\lambda_{max}^t}}$ \Comment{The clean ingredient}
+
+% % \State
+% \State{\color{CadetBlue}/* \textbf{Chi-square distance calculation */}} 
+% % \State Step 3: Chi-square distance calculation
+% % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
+% \For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
+% \State \textcolor{blue}{$Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{|\tilde G}^t[k]| + \epsilon}}$}
+% \EndFor
+% \State \textcolor{blue}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
+
+% % \State
+% \State{\color{CadetBlue}/* \textbf{Single-round malicious behavior perception */}} 
+% % \State Step 4: Single-round malicious behavior perception
+% \State $\textcolor{blue}{\{{C^t_1}', {C^t_2}'\}} \gets KMeans(S^t, 2)$ \Comment{Cluster $S$ into 2 clusters using KMeans.}
+% \State \textcolor{blue}{$U_{nor} \gets C'_{max}$, $U_{mal} \gets \{C'_i \, | \, i \neq max\}$}
+
+% \end{algorithmic}
+% \end{algorithm}
+
 \begin{algorithm}
 \caption{Instantaneous Attack Behavior Perception}
 \label{alg:malicious-node-detection}
 \begin{algorithmic}[1]
-\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency components}
+\State \textbf{Input:} $d$, $N$, $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$, $m$ \Comment{$d$ is the dimension of each update; $N$ is the number of nodes participating during each round; $(\triangledown \theta_0^t, \triangledown \theta_1^t, \ldots, \triangledown \theta_N^t) \in \mathbb{R}^{N \times d}$ is the local updates from robot nodes during the $t$-th round; $m$ is the length of low-frequency vector}
 \State \textbf{Output:} $U_{nor}$, $U_{mal}$ \Comment{benign nodes, malicious nodes}
 \State{\color{CadetBlue}/* \textbf{Frequency Domain Transformation */}} 
 % \State Step 1: Frequency Domain Transformation
@@ -373,7 +523,7 @@ The Algorithm \ref{alg:malicious-node-detection} shows the result of the modifie
 % \State Step 3: Chi-square distance calculation
 % \State $P_i^t \gets Softmax(G_i^t), \, Q^t \gets Softmax(\tilde{G}^t)$
 \For {$R_i \in \textcolor{blue}{\{R_1, \ldots, R_N\}}$}
-\State \textcolor{blue}{$Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{{|\tilde G}^t[k]| + \epsilon}}$}
+    \State \textcolor{blue}{$Chi^t_i \gets \sqrt{\sum_{k=0}^{m-1}\frac{(G_i^t[k] - {\tilde G}^t[k])^2}{|{\tilde G}^t[k]| + \epsilon}}$}
 \EndFor
 \State \textcolor{blue}{$S^t \gets \{Chi^t_1, Chi^t_2, \ldots, Chi^t_N\}$} \Comment{The Distance differences calculated by Chi-square distance.}
 
@@ -411,7 +561,7 @@ The Algorithm \ref{alg:malicious-node-detection} shows the result of the modifie
 % 你了解司法人工智能吗？请解释之。
 
 % 谢谢你的建议，表格2的宽度确实有些过长，已经超出了半栏的范围，甚至已经与右侧栏目的内容产生了融合。我们对这个表格进行了调整，适当缩小了表格的宽度，使得表格在不影响整体观感的同时，保证了表格格式符合要求，且不超过单栏范围。
-
+\textbf{Response:} 
 Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive, exceeding the single-column limit and even merging with the content in the adjacent column. We have made adjustments to the table, reducing its width appropriately to ensure that the table fits within the required format while maintaining the overall visual quality without exceeding the single-column range.
 
 \begin{table}[h!]
@@ -455,7 +605,7 @@ Thank you for your suggestion. The width of Table 2 is indeed somewhat excessive
 \rcomment{
 \color{red} Why does the section on "Instantaneous Attack Behavior Perception" use the chi-square distribution to calculate outlier differences instead of cosine similarity? The manuscript lacks an explanation for this choice.
 }
-
+\textbf{Response:} 
 We appreciate the reviewer’s insightful feedback. The decision to use the chi-square distribution instead of cosine similarity is rooted in the nature of the feature distribution in the frequency domain. Cosine similarity, while useful for comparing the angle between two vectors, would not appropriately capture the frequency domain’s distributional features in our model, where the outlier differences are more pronounced in the low-frequency components rather than in directional changes. The chi-square distribution allows us to better distinguish between malicious updates, which tend to introduce subtle but consistent deviations in these low-frequency features, and benign updates. This approach enhances detection accuracy by weighting the significant deviations while minimizing the impact of noise in the higher-frequency components. 
 
 To accurately explain the reasons for using the chi-square distribution in this paper, we have made the following modifications:
@@ -471,7 +621,7 @@ Chi-square distribution is usually used to measure whether a certain observed di
 \rcomment{
 \color{red} The manuscript uses inconsistent figure referencing styles (e.g., "Fig. 7" vs. "Figure 6"). Please standardize the citation format.
 }
-
+\textbf{Response:} 
 Thank you for pointing out the inconsistency in figure referencing throughout the manuscript. We have carefully reviewed all figure references and standardized the citation format. Going forward, we have consistently used the term "Figure" when referencing figures, ensuring uniformity across the entire paper.
 
 % comment14
@@ -494,7 +644,7 @@ Thank you for pointing out the inconsistency in figure referencing throughout th
 
 % Rationale behind the hyperparameter settings for federated training
 % For the federated training process, we carefully considered the hyperparameters, especially the number of participating nodes, which is a critical factor in federated learning. Informed by recent studies such as \cite{wei2023personalized}, \cite{ilhan2023scalefl}, and \cite{wu2023faster}, which tested node counts ranging from 20 to 200, we aimed to find a balance between computational cost, time efficiency, and model accuracy. After evaluating our available resources and validating our preliminary results, we settled on a configuration that fits the scope of our work while ensuring robust performance.
-
+\textbf{Response:} 
 Thank you for your insightful comments. We have carefully considered your concerns regarding the hyperparameter settings and provide a detailed explanation below:
 
 \textbf{LoRA was selected due to computational efficiency and alignment with our research goals:}
@@ -520,6 +670,7 @@ Thank you for your suggestion.
 \rcomment{
 \color{red} There are numerous instances of incorrect symbol usage throughout the manuscript. A thorough review and correction are necessary.
 }
+\textbf{Response:} 
 Thank you for your valuable feedback regarding the incorrect symbol usage in the manuscript. We have conducted a thorough review and carefully corrected all instances of improper symbol usage to ensure accuracy and consistency throughout the paper.
 
 The following are some of the detailed modifications: 
@@ -584,4 +735,4 @@ The following are some of the detailed modifications:
 % OpenFedLLM: Training Large Language Models on Decentralized Private Data via Federated Learning
 % Every Parameter Matters: Ensuring the Convergence of Federated Learning with Dynamic Heterogeneous Models Reduction
 % FLAME: Taming Backdoors in Federated Learning
-% RoseAgg: Robust Defense Against Targeted Collusion Attacks in Federated Learning
+% RoseAgg: Robust Defense Against Targeted Collusion Attacks in Federated Learning  

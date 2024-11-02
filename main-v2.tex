@@ -278,7 +278,7 @@ Our SecFFT method consists of two major modules: Instantaneous Attack Behavior P
 \subsection{Instantaneous Attack Behavior Perception}
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig2.png}
+    \includegraphics[width=1\linewidth]{figures/secfft-1.pdf}
     \caption{SecFFT's instantaneous attack behavior perception module with frequency-domain deep outlier feature semantics extraction}
     \label{fig2:instant}
 \end{figure}
@@ -602,7 +602,7 @@ After removing anomalous nodes, the gradients of benign nodes are aggregated wit
 
 % 我们将算法总结成了伪代码，如算法\ref{alg:malicious-node-detection-history}所示。其中第3-7行是步骤1，表示了保留T轮次历史记录的方法；第8-15行是步骤2，表示了使用最小覆盖超球算法求每个机器人节点意图点和置信度的方法；第16-27行是步骤3，表明了如何通过LOF算法求出正常节点和异常节点；第28-32行是步骤4，展示了依据每个机器人节点置信度进行加权聚合的方法。
 
-We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref{alg:malicious-node-detection-history}. Lines 3 to 7 correspond to Step 1, which outlines the method for retaining historical records for \(T\) rounds. Lines 8 to 15 correspond to Step 2, which describes the use of the minimum enclosing hypersphere algorithm to determine each robot node's intent point and confidence level. Lines 16 to 27 correspond to Step 3, which explains how to identify normal and abnormal nodes using the LOF algorithm. Finally, lines 28 to 32 correspond to Step 4, which illustrates the method for performing weighted aggregation based on each robot node's confidence level.
+We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref{alg:malicious-node-detection-history}. Lines \textcolor{red}{4 to 6} correspond to Step 1, which outlines the method for retaining historical records for \(T\) rounds. Lines \textcolor{red}{7 to 12} correspond to Step 2, which describes the use of the minimum enclosing hypersphere algorithm to determine each robot node's intent point and confidence level. Lines \textcolor{red}{13 to 22} correspond to Step 3, which explains how to identify normal and abnormal nodes using the LOF algorithm. Finally, lines \textcolor{red}{23 to 25} correspond to Step 4, which illustrates the method for performing weighted aggregation based on each robot node's confidence level.
 
 
 \begin{algorithm}
@@ -613,7 +613,8 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 \State \textbf{Output:} Sets of normal clients $U_{nor}$ and malicious clients $U_{mal}$
 
 
-% \For {Client $i$ \in 55}
+\For {Client \textcolor{red}{$i\in \{1\ldots N\}$}}
+
 \State{\color{CadetBlue}/* \textbf{Construction of updates and model databases */}} 
     \State Record flattened gradients $\bar{\theta_i^t}$ and models $\theta_g^{t-1}$
     % \State $\widetilde{\theta_{i}^{t'-1}}  \gets Flatten(\theta_g^{t'-1})$, ${v}_{i}^{t'}  \gets \overline{\triangledown\theta_{i}^{t'}}$ for $t'  \gets \max\{t-T+1, 1\}, \ldots, t$ \Comment{Construct rays}
@@ -623,15 +624,15 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 \State{\color{CadetBlue}/* \textbf{Construction of attack intention */}} 
 
     \State Initialize center $O_{i,0}$ and radius $r_{i,0}$
-    \While {Not Converged}
+    \While {\textcolor{red}{$\|O_{i,k}-O_{i,k+1}\|\geq \lambda$ and $k\leq k_{max}$}}
         \State Update center $O_{i,k+1}$ and radius $r_{i,k+1}$
     \EndWhile
     \State  $cre_i  \gets \frac{1}{r_i + \rho}$ \Comment{Calculate confidence}
 
 
-\State{\color{CadetBlue}/* \textbf{LOF-driven malicious intention detection*/}} 
+\State{\color{CadetBlue}/* \textbf{LOF-driven malicious intention detection */}} 
 
-    \For {Each point $O_j \neq O_i$}
+    \For {Each point $O_j \neq O_i$\textcolor{red}{, $j\in\{1\ldots N\}$}}
         \State Calculate distance $\|O_i - O_j\|$
     \EndFor
     \State Determine $q$-distance $\widetilde{dis_i^q}$ for $O_i$
@@ -652,7 +653,7 @@ We summarize the algorithm in the form of pseudocode, as shown in Algorithm \ref
 % \State $U_{nor} = \{i \,|\, lof_i \leq 1\}$
 \State $U_{mal}, U_{nor}  \gets \{i \,|\, lof_i > 1\}, \{i \,|\, lof_i \leq 1\}$
 
-\State{\color{CadetBlue}/* \textbf{Secure aggregation of global FFT model*/}} 
+\State{\color{CadetBlue}/* \textbf{Secure aggregation of global FFT model */}} 
         \State $cre_i'  \gets \tanh(cre_i)$\Comment{Compute adjusted confidence}
         \State $w_i  \gets \frac{cre_i'}{\sum_{i \in U_{nor}} cre_i'}$\Comment{Normalize weights}
 \EndFor
@@ -728,12 +729,12 @@ we compared four aggregation mechanisms: \textbf{FedAVG}\cite{FedAVG}, \textbf{F
 \textbf{Evaluation metrics:}
 % 就像其他文章中的评价指标一样，我们使用两个关键指标来评估投毒攻击与防御方法的效果，即ASR（攻击成功率）和 TSR（测试成功率）。ASR表示恶意节点成功诱导全局模型成功预测指定目标的概率。攻击者的目标是最大化ASR，而有效的防御措施则旨在防止ASR上升。TSR表示全局模型在测试集上的预测正确率。攻击者的目标是尽量维持模型的TSR不变，以避免被轻易检测到，而有效的防御措施则不应显著降低全局模型的TSR。
 % Similar to evaluation metrics used in other works\cite{tang2023port, jin2024learning, rong2023special}, we use two key metrics to assess the effectiveness of poisoning attacks and defense methods: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR represents the probability that malicious nodes successfully induce the global model to predict the specified target. The goal of the attacker is to maximize ASR, while effective defense measures aim to prevent an increase in ASR. TSR represents the accuracy of the global model on the test set. The attacker's goal is to maintain the TSR of the model as unchanged as possible to avoid easy detection, while effective defense measures should not significantly reduce the TSR.
-\textcolor{red}{For single round recognition,} similar to the evaluation metrics employed in other studies\cite{tang2023port, jin2024learning, rong2023special}, we utilize two key metrics to assess the effectiveness of poisoning attacks and defense mechanisms: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR denotes the probability that malicious nodes successfully manipulate the global model to predict a specified target. The attacker aims to maximize the ASR, whereas effective defense mechanisms strive to prevent an increase in ASR. TSR indicates the accuracy of the global model on the test set. The attacker aims to keep the TSR of the model as stable as possible to avoid easy detection, whereas effective defense mechanisms should not significantly degrade the TSR. \textcolor{red}{For multi round recognition, ``Acc" refers to accuracy, which measures the proportion of correct predictions;``Rec" stands for recall, representing the model's ability to correctly identify positive instances;``FPR" denotes the false positive rate, indicating the proportion of negative instances incorrectly predicted as positive;``FNR" refers to the false negative rate, which represents the proportion of positive instances incorrectly predicted as negative;``AUC" stands for the area under the curve, reflecting the model's overall ability to distinguish between positive and negative instances; and``MCC" represents the Matthews correlation coefficient, which provides a balanced evaluation of the model's predictions.}
+\textcolor{red}{For instantaneous attack behavior perception,} similar to the evaluation metrics employed in other studies\cite{tang2023port, jin2024learning, rong2023special}, we utilize two key metrics to assess the effectiveness of poisoning attacks and defense mechanisms: \textbf{ASR} (Attack Success Rate) and \textbf{TSR} (Test Success Rate). ASR denotes the probability that malicious nodes successfully manipulate the global model to predict a specified target. The attacker aims to maximize the ASR, whereas effective defense mechanisms strive to prevent an increase in ASR. TSR indicates the accuracy of the global model on the test set. The attacker aims to keep the TSR of the model as stable as possible to avoid easy detection, whereas effective defense mechanisms should not significantly degrade the TSR. \textcolor{red}{For long-term attack intention detection, ``Acc" refers to accuracy, which measures the proportion of correct predictions;``Rec" stands for recall, representing the model's ability to correctly identify positive instances;``FPR" denotes the false positive rate, indicating the proportion of negative instances incorrectly predicted as positive;``FNR" refers to the false negative rate, which represents the proportion of positive instances incorrectly predicted as negative;``AUC" stands for the area under the curve, reflecting the model's overall ability to distinguish between positive and negative instances; and``MCC" represents the Matthews correlation coefficient, which provides a balanced evaluation of the model's predictions.}
 
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=1\linewidth]{figures/lab2-combined.pdf}
-    \caption{Visualization of node identification results under three attack scenarios (MR, EDGE CASE, NEUR) for four defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE dimensionality reduction. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. }
+    \caption{Visualization of node identification results under three attack scenarios (MR, EDGE CASE, NEUR) for four defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign, or vice versa. }
     \label{fig:lab2}
 \end{figure*}
 
@@ -754,12 +755,12 @@ As depicted in the figure, in all attack scenarios, SecFFT consistently achieves
 \subsection{Performance of Attack Behavior Perception}
 % 为了验证我们所提方法在恶意用节点识别方面具有较高的准确度，我们总结了在三种攻击(MR, EDGE CASE, NEUR)下所有轮次中SecFFT对恶意节点的识别情况，并与FoolsGold, FLTrust, and Flame三种防御算法进行了对比。具体对比结果如图\ref{fig:lab2}所示，我们利用t-sne算法将所有轮次中节点的更新降维到了二维平面，图中红色点表示被错误识别的节点，包括恶意节点被识别成良性节点以及良性节点被错误识别成恶意节点。对于无法直接获得节点识别情况的Foolsgold防御算法，我们通过利用KMeans聚合算法将该防御算法过程中分配给每个用户的聚合权重聚成两类，并取最大类作为良性节点其余作为恶意节点的结果作为统计标准。
 % To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, EDGE CASE, NEUR) across all rounds and compared them with three defense mechanisms: FoolsGold, FLTrust, and Flame. The specific comparison results are shown in Figure \ref{fig:lab2}. We used the t-SNE algorithm to reduce the dimensionality of the nodes' updates from all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes incorrectly identified as benign and benign nodes incorrectly identified as malicious. For the Foolsgold defense algorithm, which does not directly provide node identification results, we used the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
-To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, EDGE CASE, NEUR) across all rounds and compared them with three defense mechanisms: FoolsGold, FLTrust, and Flame. The specific comparison results are illustrated in Figure \ref{fig:lab2}. We employed the t-SNE algorithm to reduce the dimensionality of the nodes' updates across all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes mistakenly identified as benign and benign nodes mistakenly identified as malicious. For the FoolsGold defense algorithm, which does not directly provide node identification results, we employed the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
+To validate the high accuracy of our proposed method in identifying malicious nodes, we summarized the detection results of SecFFT under three types of attacks (MR, EDGE CASE, NEUR) across all rounds and compared them with three defense mechanisms: FoolsGold, FLTrust, and Flame. The specific comparison results are illustrated in Figure \ref{fig:lab2}. We employed the t-SNE to reduce the dimensionality of the nodes' updates across all rounds to a two-dimensional plane. In the figure, red dots represent misidentified nodes, which include malicious nodes mistakenly identified as benign , or vice versa. For the FoolsGold defense algorithm, which does not directly provide node identification results, we employed the KMeans clustering algorithm to classify the aggregation weights assigned to each user during the defense process into two clusters, considering the larger cluster as benign nodes and the remaining as malicious nodes for evaluation purposes.
 
 
 % 如图所示，SecFFT 的错误识别率最低，仅为 3%，表明其在各种攻击模式下具有更强的防御能力和鲁棒性，能够准确区分恶意节点和良性节点。而 Flame、FLTrust 和 FoolsGold 的错误识别率分别为 12%、19.5% 和 37.5%，错误识别的节点分布较为广泛，尤其是 FoolsGold 的错误识别率最高，显示出其在应对复杂攻击场景时的防御效果较差。相比之下，SecFFT 在应对多种攻击类型时表现最为优异，能有效降低错误识别率，展示了更好的泛化能力和准确性。
 % As shown in the figure, SecFFT has the lowest misidentification rate, at only 3\%, indicating its stronger defense capability and robustness in various attack scenarios, accurately distinguishing between malicious and benign nodes. In contrast, the misidentification rates of Flame, FLTrust, and FoolsGold are 12\%, 19.5\%, and 37.5\%, respectively, with misidentified nodes more widely distributed. Notably, FoolsGold has the highest misidentification rate, demonstrating poor defense performance in handling complex attack scenarios. Comparatively, SecFFT performs the best in dealing with various attack types, effectively reducing the misidentification rate and showing better generalization ability and accuracy.
-As illustrated in the figure, comparatively, SecFFT outperforms other mechanisms in handling various attack. SecFFT achieves the lowest misidentification rate, at only 0.2\%, indicating its superior defense capability and robustness across various attack scenarios, accurately distinguishing between malicious and benign nodes. Conversely, the misidentification rates of Flame, FLTrust, and FoolsGold are 8\%, 3.9\%, and 9.5\%, respectively, with misidentified nodes more broadly distributed. Notably, FoolsGold exhibits the highest misidentification rate, demonstrating suboptimal defense performance in managing complex attack scenarios. 
+As illustrated in the Figure \ref{fig:lab2}, comparatively, \textcolor{red}{SecFFT outperforms other mechanisms in handling various attack. SecFFT achieves the lowest misidentification rate, at only 0.2\%, indicating its superior defense capability and robustness across various attack scenarios, accurately distinguishing between malicious and benign nodes. Conversely, the misidentification rates of Flame, FLTrust, and FoolsGold are 8\%, 3.9\%, and 9.5\%, respectively, with misidentified nodes more broadly distributed. Among them, FoolsGold exhibits the highest misidentification rate. It is worth noting that these statistical results align precisely with the findings from the previous experiment, further validating SecFFT's superior performance in instantaneous Attack Behavior Perception.}
 
 \vspace{-0.28cm}
 \subsection{Performance of Attack intention detection}
