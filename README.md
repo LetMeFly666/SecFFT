@@ -22,7 +22,7 @@ LLM的FL安全性相关实验。Changed from [RoseAgg](https://github.com/Sleepe
 
 ### 文件/目录
 
-+ `NormalRun`：代码主目录。运行方式可参考`NormalRun/run.bat`。数据等的下载/设置可参考`[RoseAgg](https://github.com/SleepedCat/RoseAgg)`。
++ `NormalRun`：代码主目录。运行方式可参考`NormalRun/run.bat`。数据等的下载/设置可参考[`RoseAgg`](https://github.com/SleepedCat/RoseAgg)。
 + `getResult`：最终获取实验结果的代码（实验三、实验四）。
 + `.gitignore`：略。
 + `README.md`：本说明文件。
