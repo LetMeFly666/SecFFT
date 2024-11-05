@@ -106,6 +106,7 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
 
     # 保存为pdf文件
     plt.savefig('detection_comparison_results_3x4.pdf', format='pdf')
+    # plt.savefig('detection_comparison_results_3x4.png', format='png')  # 再保存一份为png
 
 def generate_data_1dimension(num_clients, num_malicious):
     # 生成一维评分数组
