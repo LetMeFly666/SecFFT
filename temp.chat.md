@@ -1,11 +1,27 @@
-<!--
- * @Author: LetMeFly
- * @Date: 2024-09-19 10:38:45
- * @LastEditors: LetMeFly
- * @LastEditTime: 2024-09-19 10:40:30
--->
-同一个git仓库中有两个不相关的分支master和z.001.tip-adapter，现在我想要在Github上通过Pull Request合并两个分支，但是提示：
-```
-There isn’t anything to compare.
-master and z.001.tip-adapter are entirely different commit histories.
-```
+我是北京邮电大学红十字会的策划者，红十字会准备在学校举办一场关于“男性健康”的讲座，需要你帮忙写一下“活动主题”。 参考资料：上次普法讲座的主题是“普法育未来 学法助成长”
+
+
+Hello部长，我把时间修改成了11.13，地点先写成了西土城，策划书的“活动目的”改成了沙河校区主题宣讲讲座的“活动内容”，主题写成了“关注男性健康，助力幸福生活”
+
+部长看看还有什么需要修改的话我再改改[嘿哈]
+
+
+
+
+诶，是的是的
+
+
+嗷嗷好嘞！
+
+
+
+
+
+
+我有一个torch.Size([50])的tensor数组，如何生成一个二维数组cs，其中cs[i][j]是weights[i]和weights[j]的差的绝对值
+
+
+
+
+
+
