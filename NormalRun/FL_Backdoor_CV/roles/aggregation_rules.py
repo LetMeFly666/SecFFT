@@ -241,6 +241,12 @@ def foolsgold(model_updates):
     return global_update
 
 
+"""
+Parameters:
+    trained_params: [模型1展平后的结果, 模型2展平后的结果, ...]
+    current_model_param: 当前全局模型展平后的结果
+    param_updates: 
+"""
 def flame(trained_params, current_model_param, param_updates):
     # === clustering ===
     trained_params = torch.stack(trained_params).double()
