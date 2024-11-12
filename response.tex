@@ -235,13 +235,11 @@ These modifications not only improve the accuracy of the text but also enhance t
 
 \textbf{Response:} Thank you for your valuable feedback on Algorithm 2. We have reviewed the conditions and updated the descriptions to ensure they are clear and unambiguous. Specifically:
 
-\begin{itemize}
-    \item \textbf{"for Client $i$ do"}: We clarified this condition to indicate that the algorithm iterates over each client in the dataset, specifying how Client $i$ is selected and what actions are taken for each client.
+\textbf{"for Client $i$ do"}: We clarified this condition to indicate that the algorithm iterates over each client in the dataset, specifying how Client $i$ is selected and what actions are taken for each client.
 
-    \item \textbf{"while Not Converged do"}: We revised this condition to include the specific convergence criteria used in the algorithm. This provides a clear stopping condition of $\|O_{i,k}-O_{i,k+1}\|\geq \lambda$ and $k\leq k_{max}$, ensuring that readers understand when the loop will terminate.
+\textbf{"while Not Converged do"}: We revised this condition to include the specific convergence criteria used in the algorithm. This provides a clear stopping condition of $\|O_{i,k}-O_{i,k+1}\|\geq \lambda$ and $k\leq k_{max}$, ensuring that readers understand when the loop will terminate.
 
-    \item \textbf{"for Each point $O_j \neq O_i$ do"}: We clarified that this loop iterates over all points in the dataset except for point $O_i$, and we specified the purpose of comparing each $O_j$ with $O_i$ in the context of the algorithm’s objective.
-\end{itemize}
+\textbf{"for Each point $O_j \neq O_i$ do"}: We clarified that this loop iterates over all points in the dataset except for point $O_i$, and we specified the purpose of comparing each $O_j$ with $O_i$ in the context of the algorithm’s objective.
 
 % 除此之外，我们还发现了一个小细节，即原本的注释中注释符号和注释内容左右空格数量不一致，我们顺便修复了这个错误。
 
@@ -376,20 +374,17 @@ The following are some of the modifications:
 % 我们感谢您的反馈，这对我们改进这一部分内容有很大帮助。我们相信，这些增强将使读者对我们工作的核心思想——攻击者意图识别有更清晰、更全面的理解。
 
 \textbf{Response:}
-
 Thank you for your insightful comments regarding the concept of intent recognition in our manuscript. We recognize the importance of clearly defining and constructing the notion of attacker intent, as it is a pivotal innovation in our research.
 
 To address your concerns, we have elaborated on the definition of attacker intent in the revised manuscript. Specifically, we now include:
 
-\begin{enumerate}
-    \item \textbf{Clear Definition}: We provide a concise definition of attacker intent, explaining its relevance in the context of our study and its implications for threat assessment and response strategies.
+\textbf{Clear Definition}: We provide a concise definition of attacker intent, explaining its relevance in the context of our study and its implications for threat assessment and response strategies.
 
-    \item \textbf{Construction of Intent}: We detail how attacker intent is constructed within our framework, outlining the factors that contribute to its identification. This includes the behavioral patterns, contextual clues, and data-driven approaches used to infer intent.
+\textbf{Construction of Intent}: We detail how attacker intent is constructed within our framework, outlining the factors that contribute to its identification. This includes the behavioral patterns, contextual clues, and data-driven approaches used to infer intent.
 
-    \item \textbf{Examples and Scenarios}: We have added illustrative examples and scenarios that demonstrate how intent recognition can be applied in real-world situations, enhancing readers’ understanding of its practical applications.
+\textbf{Examples and Scenarios}: We have added illustrative examples and scenarios that demonstrate how intent recognition can be applied in real-world situations, enhancing readers’ understanding of its practical applications.
 
-    \item \textbf{Comparison with Existing Models}: To further clarify our approach, we compare our concept of intent recognition with existing models, highlighting the innovations and advantages of our framework.
-\end{enumerate}
+\textbf{Comparison with Existing Models}: To further clarify our approach, we compare our concept of intent recognition with existing models, highlighting the innovations and advantages of our framework.
 
 We appreciate your feedback, which has significantly contributed to the improvement of this section. We believe that these enhancements will provide readers with a clearer and more comprehensive understanding of the core idea of attacker intent recognition in our work.
 
@@ -401,7 +396,7 @@ Our explanation of the ``intention" is as follows:
 
 % comment18
 \rcomment{
-\textcolor{red} The description of the experiments is unclear. The titles and text in the figures are too small, making them difficult to read. For example, in Fig. 5, the data curves are hard to distinguish. It is recommended to enlarge key areas to better present the experimental results and analysis. Additionally, many figures lack sufficient explanation.
+\color{red} The description of the experiments is unclear. The titles and text in the figures are too small, making them difficult to read. For example, in Fig. 5, the data curves are hard to distinguish. It is recommended to enlarge key areas to better present the experimental results and analysis. Additionally, many figures lack sufficient explanation.
 }
 \textbf{Response:} 
 % 对于第一个实验：Model integrity and poisoning resistance，我们重新整理了相应数据，并修改了图片的表现形式。修改包括对图例字体格式以及大小的修改，同时为图中折现重合的部分加上了子图，使其更容易辨别。同时，我们也修改了原文中对于该实验结果的描述，使其更符合实验数据，同时更易于阅读和理解。
@@ -439,17 +434,31 @@ As depicted in the figure, in all attack scenarios, SecFFT consistently achieves
 
 % 这些修改增强了段落的清晰度和可理解性，确保读者能够跟随预期的逻辑，并理解每个步骤在该过程中的重要性。我们非常感谢您的反馈，这对改进手稿的这一部分起到了重要作用。
 
-Thank you for your observation regarding the mention of several "steps" in the third paragraph of the left column on page 9. We acknowledge that these steps were not adequately explained, which may lead to confusion for the reader. But in fact, these four steps correspond to the four steps of ong term attack intention detection.
+\textbf{Response:} Thank you for your valuable feedback regarding the third paragraph in the left column on page 9, where several "steps" were mentioned but not sufficiently explained. We acknowledge that the lack of detailed explanations may lead to confusion for readers.
+To address this issue, we have revised the paragraph to provide a thorough explanation of each of the four steps related to Long-term Attack Intention Detection. Specifically, we have made the following enhancements:
 
-To address this issue, we have revised the paragraph to provide a detailed explanation of each step mentioned. Specifically, we now:
+\textbf{Definition of Each Step:} We have clarified the content of each step, including its purpose and how it fits into the overall process discussed in the manuscript.
 
-Define Each Step: We clarify what each step entails, including its purpose and how it fits into the overall process discussed in the manuscript.
+\textbf{Providing Context:} We have added contextual information relevant to previous discussions, which helps readers understand the significance of these steps within a broader framework.
 
-Provide Context: We include contextual information that connects the steps to the preceding discussion, helping readers understand their significance within the broader framework.
+\textbf{Illustrative Examples:} Where applicable, we have included examples to illustrate how each step is executed, making it easier for readers to grasp the practical applications of the concepts presented.
 
-Illustrate with Examples: Where applicable, we have added examples to illustrate how each step is executed, making it easier for readers to grasp the practical application of the concepts presented.
+These modifications enhance the clarity and comprehensibility of the paragraph, ensuring that readers can follow the intended logic and appreciate the importance of each step in the overall process.
+% ---------------------------------------------------------
 
-These modifications enhance the clarity and comprehensibility of the paragraph, ensuring that readers can follow the intended logic and understand the importance of each step in the process. We appreciate your feedback, which has been instrumental in improving this section of the manuscript.
+% Thank you for your observation regarding the mention of several "steps" in the third paragraph of the left column on page 9. We acknowledge that these steps were not adequately explained, which may lead to confusion for the reader. But in fact, these four steps correspond to the four steps of ong term attack intention detection.
+
+% To address this issue, we have revised the paragraph to provide a detailed explanation of each step mentioned. Specifically, we now:
+
+% Define Each Step: We clarify what each step entails, including its purpose and how it fits into the overall process discussed in the manuscript.
+
+% Provide Context: We include contextual information that connects the steps to the preceding discussion, helping readers understand their significance within the broader framework.
+
+% Illustrate with Examples: Where applicable, we have added examples to illustrate how each step is executed, making it easier for readers to grasp the practical application of the concepts presented.
+
+% These modifications enhance the clarity and comprehensibility of the paragraph, ensuring that readers can follow the intended logic and understand the importance of each step in the process. We appreciate your feedback, which has been instrumental in improving this section of the manuscript.
+
+The relevant parts after modifications are as follows:
 
 \textcolor{blue}{We summarize the algorithm in the form of pseudocode, as shown in Algorithm 2. Lines 4 to 6 correspond to Step 1, which outlines the method for retaining historical records for \(T\) rounds. Lines 7 to 12 correspond to Step 2, which describes the use of the minimum enclosing hypersphere algorithm to determine each robot node's intent point and confidence level. Lines 13 to 22 correspond to Step 3, which explains how to identify normal and abnormal nodes using the LOF algorithm. Finally, lines 23 to 25 correspond to Step 4, which illustrates the method for performing weighted aggregation based on each robot node's confidence level.}
 
@@ -753,9 +762,7 @@ For the federated training aspect of our research, we relied on previous studies
 
 % 我们已修订手稿，以在第V.2节中对该条件提供更详细的解释，增强读者的理解。我们非常感谢您的反馈，这帮助我们提高了工作的可理解性。
 
-\textbf{Response:}
-
-Thank you for your insightful question regarding the condition \( \zeta T \) in the optimization problem presented in Section V.2. This condition plays a crucial role in the formulation of the optimization model, and we recognize the need for further clarification.
+\textbf{Response:} Thank you for your insightful question regarding the condition \( \zeta T \) in the optimization problem presented in Section V.2. This condition plays a crucial role in the formulation of the optimization model, and we recognize the need for further clarification.
 
 The condition \( \zeta T \) is set to ensure that the optimization framework operates within feasible limits for both performance and resource allocation. Specifically, it serves the following purposes:
 
@@ -771,7 +778,7 @@ We have revised the manuscript to provide a more detailed explanation of this co
 
 The changes are as followings:
 
-\textcolor{blue}{This problem can be abstracted as rays in a high-dimensional space with specific starting points. The starting point of a ray represents the global model from the previous round, and the direction of the ray represents the flattened update in the current round. The optimization goal of the problem is to find a minimum hypersphere that covers at least a $\zeta$ proportion of the rays. redAmong them, $\ zeta $is to avoid interference from excessively outlier rays.}
+\textcolor{blue}{This problem can be abstracted as rays in a high-dimensional space with specific starting points. The starting point of a ray represents the global model from the previous round, and the direction of the ray represents the flattened update in the current round. The optimization goal of the problem is to find a minimum hypersphere that covers at least a $\zeta$ proportion of the rays. redAmong them, $\ zeta$ is to avoid interference from excessively outlier rays.}
 
 % comment16
 \rcomment{
@@ -788,6 +795,7 @@ The following are some of the detailed modifications:
 
 \textcolor{blue}{Based on this observation, we select the largest cluster \(C^t_{max} = \{G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}\}\) as the primary subject for analysis. To further extract the main characteristics of this cluster, we perform singular value decomposition (SVD)[38] on the matrix $H^t = (G^t_{i_0}, G^t_{i_1}, \ldots, G^t_{i_n}) \in \mathbb{R}^{m \times n}$ formed by all nodes in this cluster. Since the left singular vectors of the SVD, denoted as \(\tilde{G}^t\), represent the principal directions of these vectors, \(\tilde{G}^t\) can be regarded as the principal component of benign nodes in the low-frequency domain.}
 
+\textcolor{blue}{......}
 
 
 \newpage
