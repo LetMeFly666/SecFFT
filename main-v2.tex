@@ -592,7 +592,7 @@ Thus, the secure aggregation formula for the model in the $t$-th round is:
 
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig4.jpg}
+    \includegraphics[width=\linewidth]{figures/fig4.pdf}
     \caption{Benign and Malicious Nodes Before Aggregation}
     \label{fig:before-agg}
 \end{figure}
@@ -736,7 +736,7 @@ we compared four aggregation mechanisms: \textbf{FedAVG}\cite{FedAVG}, \textbf{F
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/lab2-combined.pdf}
-    \caption{Visualization of node identification results under three attack scenarios (MR, EDGE CASE, NEUR) for four defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE. The red dots represent misidentified nodes, including both malicious nodes incorrectly identified as benign, or vice versa. }
+    \caption{Visualization of node identification results under three attack scenarios (MR, EDGE CASE, NEUR) for four defense mechanisms (SecFFT, Flame, FLTrust, FoolsGold) using t-SNE. The F represent mis-identification, including both malicious nodes incorrectly identified as benign, or vice versa. }
     \label{fig:lab2}
 \end{figure*}
 
@@ -770,13 +770,18 @@ As illustrated in the Figure \ref{fig:lab2}, comparatively, \textcolor{red}{SecF
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=\linewidth]{figures/lab3-combined.pdf}
-    \caption{Detection performance of different defense technologies against intelligent attackers with sophisticated multi-round strategies}
+    % \caption{攻击防御实验结果图。第一列到第四列分别代表防御方式Foolsgold、FLTrust、Flame和SecFFT，第一行到第三行分别代表攻击方式EdgeCase、限制大小的EdgeCase、限制大小和角度的EdgeCase。每个实验中有50个客户端，其中0-19号是恶意客户端，每个子图中颜色越红代表识别结果越相似，越蓝代表识别结果越不相似。第一列绘图依据是Foolsgold防御算法中基于余弦相似度计算出来的wv值，第二列绘图依据是FLTrust防御算法中依据余弦相似度和relu激活函数计算出来的聚合权重，第三列绘图依据是Flame算法聚类时所采用的HDBSCAN算法的评分，第四列绘图依据是我们提出的SecFFT算法依据意图点进行相似度计算得到的评分。虽然Flame算法看起来相同种类客户端之间分数较为类似，但实际上其聚类时有明显的聚类错误。}
+    \caption{\textcolor{red}{The experimental results of attack defense are illustrated in the figures. The first to fourth columns represent the defense methods \cite{foolsgold}, FLTrust\cite{FLTrust}, Flame\cite{FLAME}, and SecFFT, respectively, while the first to third rows represent the attack methods EdgeCase\cite{EDGE_CASE}, size-constrained EdgeCase, and EdgeCase constrained by both size and angle. Each experiment involves 50 clients, among which clients numbered 0–19 are malicious. In each subplot, the redder the color, the more similar the identification results, and the bluer the color, the less similar they are. The first column visualizes the results based on the wv values calculated using cosine similarity in the Foolsgold defense algorithm. The second column is based on the aggregation weights computed by the FLTrust defense algorithm using cosine similarity and the ReLU activation function. The third column visualizes scores obtained from the HDBSCAN algorithm used for clustering in the Flame defense method. The fourth column shows scores derived from the similarity calculation based on intent points in the proposed SecFFT algorithm. Although the Flame algorithm appears to produce more similar scores among the same type of clients, it exhibits evident clustering errors during its clustering process.}}
     \label{fig:lab3}
 \end{figure*}
 
 %为了验证SecFFT面对具有复杂攻击策略的高级隐蔽后门攻击时候的攻击意图构建和有效防御能力，我们在NEUR攻击的基础之上，分别加上了Size约束跟Angle约束等多轮次策略。如图\ref{fig:lab3}所示，通过对比Foolsgold、Fltrust、Flame等仅基于行为的典型防御机制可以看出，基于意图的SecFFT能够显著提升攻击识别能力。即便部分防御手段如Flame能够对一些高隐蔽攻击行为进行有效识别，在叠加了复杂的多轮次攻击策略后，防御机制的识别能力迅速被绕过。而与之相反，我们的方法即便在面对最复杂的“size+angle”策略时，虽然绝对值变小，但是差距依然显著，因而依旧能够区分出攻击者与正常节点之间意图的不同。
 %表\ref{tab:detect} 则详细列出了四种防御手段面对不同策略时的分类量化指标情况，可见，SecFFT不仅能够保持较好的抵御后门攻击的能力，同时也维持了相对最好的判别精度，误判率得到很好限缩，可靠性有保障。
 To validate the capability of SecFFT in constructing attack intent and effectively defending against advanced covert backdoor attacks employing complex strategies, we added Size and Angle constraints to the NEUR attack over multiple rounds. As shown in \textcolor{red}{Figure \ref{fig:lab3}}, by comparing with typical behavior-based defense mechanisms such as Foolsgold, FLTrust, and Flame, it is evident that the intent-based SecFFT significantly enhances attack detection capabilities. Even though certain defense methods like Flame can effectively identify some highly covert attack behaviors, their detection performance is quickly bypassed when more complex multi-round attack strategies are introduced. In contrast, our method, even when facing the most sophisticated "size+angle" strategy, maintains a notable difference, enabling the continued distinction between the attacker's intent and that of benign nodes, despite a decrease in absolute values.
+
+% 由图\ref{fig:lab3}可以明显看出，FoolsGold防御算法对EdgeCase攻击的防御效果较为一般，但是基本上能看出良性机器人节点之间的行为较为类似。限制大小对余弦相似度的计算结果不会产生影响，但是限制大小和角度后可以发现Foolsgold算法已经无法成功防御。对于FLTrust防御算法，其在EdgeCase攻击下的防御效果较FoolsGold略好，但恶意机器人节点和良性机器人节点之间仍有一定程度的相似性。限制大小对FLTrust的防御效果没有影响，但是限制大小和角度后，FLTrust算法的防御效果明显下降，已经无法做到准确识别。对于Flame防御算法，其识别依据是HDBSCAN的聚类方式。在聚类时，Flame算法对于相同类别的客户端所赋的分数十分接近（甚至相同），因此导致绘制出来的热力图效果看起来较为均匀明了。但实际上，Flame的聚类结果直接是错误的，例如图中的客户端25、46、47能够看到有不同颜色的条纹。虽然这些条纹颜色较浅，但实际上这些都是识别错误的机器人节点。对于SecFFT防御算法，其识别依据是基于意图点的相似度计算。在EdgeCase攻击下，SecFFT算法能够准确识别出恶意机器人节点，而良性机器人节点之间的相似性较低。限制大小对SecFFT的防御效果几乎没有影响，并且限制大小和角度后SecFFT算法仍然能够保持一个不错的相似度分类效果以及完美的正确率。
+
+\textcolor{red}{As shown in Figure \ref{fig:lab3}, the Foolsgold defense algorithm exhibits moderate performance against EdgeCase attacks. While it can generally identify similar behaviors among benign bot nodes, its effectiveness is limited. The size constraint does not affect the cosine similarity calculations, but with both size and angle constraints applied, Foolsgold fails to defend effectively. For the FLTrust defense algorithm, its performance against EdgeCase attacks slightly surpasses that of Foolsgold; however, a certain degree of similarity remains between malicious and benign bot nodes. The size constraint has no impact on FLTrust's defense, but the combined constraints of size and angle significantly weaken its effectiveness, rendering it unable to correctly identify malicious nodes. The Flame defense algorithm relies on the HDBSCAN clustering method for identification. During clustering, Flame assigns nearly identical (or even identical) scores to clients of the same category, resulting in heatmaps that appear uniform and visually clear. However, the clustering results are fundamentally flawed. For instance, in the figure, clients 25, 46, and 47 display streaks of different colors, which, although faint, indicate incorrectly classified bot nodes. In contrast, the SecFFT defense algorithm leverages similarity calculations based on intent points. Under EdgeCase attacks, SecFFT can accurately identify malicious bot nodes, while the similarity among benign bot nodes remains low. The size constraint has minimal impact on SecFFT's performance, and even with size and angle constraints applied, the algorithm maintains robust similarity classification and achieves perfect accuracy.}
 
 Table \ref{tab:detect} provides a detailed quantitative analysis of the classification metrics for the four defense mechanisms against different strategies. It is clear that SecFFT not only consistently preserves its strong backdoor attack mitigation capability but also achieves the best detection accuracy, with significantly reduced false positive rates, ensuring reliable and robust performance.
 
