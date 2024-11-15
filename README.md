@@ -22,7 +22,7 @@ LLM的FL安全性相关实验。Changed from [RoseAgg](https://github.com/Sleepe
 
 ### 文件/目录
 
-+ `NormalRun`：代码主目录。运行方式可参考`NormalRun/run.bat`。数据等的下载/设置可参考`[RoseAgg](https://github.com/SleepedCat/RoseAgg)`。
++ `NormalRun`：代码主目录。运行方式可参考`NormalRun/run.bat`。数据等的下载/设置可参考[`RoseAgg`](https://github.com/SleepedCat/RoseAgg)。
 + `getResult`：最终获取实验结果的代码（实验三、实验四）。
 + `.gitignore`：略。
 + `README.md`：本说明文件。
@@ -594,6 +594,19 @@ LOF是一种现有方法，使用置信度调整是ChatGPT想出来的。（置�
 
 和改
 和改
+
+### Log019 - 2024.10-2024.11.5(主要是11月以来)
+
++ Response1
++ 重绘实验图
+
+忽然发现，每次依据“用户上传的梯度”计算余弦相似度似乎也能一定程度上识别恶意攻击者。
+
+为何？
+
+较弱的防御已经面目全非了所以梯度很乱，较好的防御还跟原始数据一样？（bushi
+
+新的东西可能就是这么发现的。有精力的话又要成文了？
 
 ## End
 

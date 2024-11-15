@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 import numpy as np
+from typing import List
 
 def plot_detection_heatmaps_3x4(*heatmap_params):
     """
@@ -44,7 +45,7 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     first_column_min_val, first_column_max_val = float('inf'), float('-inf')
     other_columns_min_val, other_columns_max_val = float('inf'), float('-inf')
 
-    heatmap_arrays = []
+    heatmap_arrays: List[np.ndarray] = []
 
     for idx, heatmap_data in enumerate(heatmap_params):
         # 如果是二维 tensor，直接转换为 numpy
@@ -60,10 +61,14 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
             raise ValueError("参数必须是 1D 或 2D 的 torch.Tensor。")
         
         # 根据图的位置更新不同的全局最小值和最大值
+        # if idx % 4 in [0, 1]:  # 第一列的图 OR 第二列的图
         if idx % 4 == 0:  # 第一列的图
             first_column_min_val = min(first_column_min_val, heatmap_array.min())
             first_column_max_val = max(first_column_max_val, heatmap_array.max())
-        else:  # 其他列的图
+            # print(f'idx = {idx}')
+            # print(f'66666666 - {idx}: {first_column_min_val} - {first_column_max_val}')
+        # else:  # 其他列的图
+        elif idx % 4 != 1:  # 除了不是第一列，还不是第二列
             other_columns_min_val = min(other_columns_min_val, heatmap_array.min())
             other_columns_max_val = max(other_columns_max_val, heatmap_array.max())
         
@@ -73,7 +78,7 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
     fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(20, 15))
 
     # 标题和标签
-    attacks = ['Original NEUR', 'Size constrained attack', 'Angle and size constrained attack']
+    attacks = ['Original Edge', 'Size constrained attack', 'Angle and size constrained attack']
     methods = ['Foolsgold', 'FLTrust', 'Flame', 'SecFFT']
 
     # 生成热力图数据并绘制
@@ -83,7 +88,10 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
             heatmap_array = heatmap_arrays[i * 4 + j]  # 获取每个参数对应的数据
             
             # 确定 vmin 和 vmax
-            if j == 0:  # 第一列的图
+            if j == 1:  # 第二列，每个画自己单独的
+                vmin = heatmap_array.min()
+                vmax = heatmap_array.max()
+            elif j == 0:  # 第一列的图
                 vmin = first_column_min_val
                 vmax = first_column_max_val
             else:  # 其他列的图
@@ -106,6 +114,7 @@ def plot_detection_heatmaps_3x4(*heatmap_params):
 
     # 保存为pdf文件
     plt.savefig('detection_comparison_results_3x4.pdf', format='pdf')
+    # plt.savefig('detection_comparison_results_3x4.png', format='png')  # 再保存一份为png
 
 def generate_data_1dimension(num_clients, num_malicious):
     # 生成一维评分数组
