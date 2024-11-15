@@ -1,2 +1,0 @@
-scp -r BUPT426@2.zhou.narc.letmefly.xyz:C:/Users/BUPT426/Desktop/RoseAgg/RoseAgg_Latest/initial.pkl D:/Data-R1/2024-10-02_09-11-28-flame-fmnist_EDGE_CASE/SpecialForGlobalModelDir
-scp -r BUPT426@2.zhou.narc.letmefly.xyz:C:/Users/BUPT426/Desktop/RoseAgg/RoseAgg_Latest/restore.ipynb D:/Data-R1/2024-10-02_09-11-28-flame-fmnist_EDGE_CASE/SpecialForGlobalModelDir
