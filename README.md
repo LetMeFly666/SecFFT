@@ -1,8 +1,8 @@
 <!--
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
- * @LastEditors: LetMeFly
- * @LastEditTime: 2024-09-19 15:54:13
+ * @LastEditors: LetMeFly.xyz
+ * @LastEditTime: 2024-11-29 10:49:30
 -->
 # SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
 
@@ -14,11 +14,10 @@ LLM的FL安全性相关实验。Changed from [RoseAgg](https://github.com/Sleepe
 
 ### 分支
 
-+ [master](https://github.com/LetMeFly666/SecFFT/tree/master): 仓库主分支，最终版本的代码将会发布在这里
++ [master](https://github.com/LetMeFly666/SecFFT/tree/master): 仓库主分支，最终版本的代码将会发布在这里（对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)的分支[f](https://github.com/Pesuking/SecFFT/tree/f)）
 + [paper](https://github.com/LetMeFly666/SecFFT/tree/paper): 论文分支，论文的latex源码，论文中所需的一些图片最终也会添加到这里
 + [z.001.tip-adapter](https://github.com/LetMeFly666/SecFFT/tree/z.001.tip-adapter): 先[使用Tip-Adapter](https://github.com/LetMeFly666/SecFFT/blob/d2b385e040117cdc776e856a2f899c711cce9b78/README.md?plain=1#L329-L331)，并融入了联邦学习框架
 + [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/Pesuking)使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)。（`git push Let main:wb.001.lora`）
-+ [wb.002.clip_lora](https://github.com/LetMeFly666/SecFFT/tree/wb.002.clip_lora): wb使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)的分支[f](https://github.com/Pesuking/SecFFT/tree/f)。（`git push Let f:wb.002.clip_lora`）。这个分支后续将会与master分支几乎保持同步。
 
 ### 文件/目录
 
