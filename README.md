@@ -2,22 +2,36 @@
  * @Author: LetMeFly
  * @Date: 2024-08-11 10:29:13
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2024-11-29 10:49:30
+ * @LastEditTime: 2025-01-08 17:02:23
 -->
-# SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
+# SecFFT
+
+SecFFT: Safeguarding Federated Fine-tuning for Large Vision Language Models against Stealthy Poisoning Attacks in IoRT Networks
+
+## Preface
+
+This is paper published on [IOTJ](https://ieee-iotj.org/) on 04 December 2024.
+
+The main page is [ieee/10776777](https://ieeexplore.ieee.org/document/10776777) and the DOI is: [10.1109/JIOT.2024.3510695](https://doi.org/10.1109/JIOT.2024.3510695).
+
+The repository retains all the exploration records and experimental results from the process of writing the paper about the part II.
+
+# Original
 
 ## 前言
 
 LLM的FL安全性相关实验。Changed from [RoseAgg](https://github.com/SleepedCat/RoseAgg).
 
+主要包含实验三和实验四的代码（实验一和实验二的代码的历史某版本在[bo-wang-bob@SecFFT](https://github.com/bo-wang-bob/SecFFT)，后续未持续更新远端仓库）。
+
 ## 介绍
 
 ### 分支
 
-+ [master](https://github.com/LetMeFly666/SecFFT/tree/master): 仓库主分支，最终版本的代码将会发布在这里（对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)的分支[f](https://github.com/Pesuking/SecFFT/tree/f)）
++ [master](https://github.com/LetMeFly666/SecFFT/tree/master): 仓库主分支，最终版本的代码将会发布在这里（对应Private仓库[bo-wang-bob@SecFFT](https://github.com/bo-wang-bob/SecFFT)的分支[f](https://github.com/bo-wang-bob/SecFFT/tree/f)）。（`git push wb master:f`）
 + [paper](https://github.com/LetMeFly666/SecFFT/tree/paper): 论文分支，论文的latex源码，论文中所需的一些图片最终也会添加到这里
 + [z.001.tip-adapter](https://github.com/LetMeFly666/SecFFT/tree/z.001.tip-adapter): 先[使用Tip-Adapter](https://github.com/LetMeFly666/SecFFT/blob/d2b385e040117cdc776e856a2f899c711cce9b78/README.md?plain=1#L329-L331)，并融入了联邦学习框架
-+ [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/Pesuking)使用lora进行的尝试，对应仓库[Pesuking@SecFFT](https://github.com/Pesuking/SecFFT)。（`git push Let main:wb.001.lora`）
++ [wb.001.lora](https://github.com/LetMeFly666/SecFFT/tree/wb.001.lora): [wb](https://github.com/bo-wang-bob)使用lora进行的尝试，对应仓库[bo-wang-bob@SecFFT](https://github.com/bo-wang-bob/SecFFT)。（`git push Let main:wb.001.lora`）
 
 ### 文件/目录
 
